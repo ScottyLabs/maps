@@ -3,18 +3,18 @@ import type Konva from "konva";
 
 import { Layer, Stage } from "react-konva";
 
-import useCursorTracker from "../../hooks/useCursorTracker";
-import useKeyboardShortcuts from "../../hooks/useKeyboardShortcuts";
-import useStageClickHandler from "../../hooks/useStageClickHandler";
-import useValidatedFloorParams from "../../hooks/useValidatedFloorParams";
-import { LIVE_CURSORS_ENABLED } from "../../settings";
-import { useAppSelector } from "../../store/hooks";
-import LiveCursors from "../live-cursors/LiveCursors";
-import EdgesDisplay from "./EdgesDisplay";
-import LabelsDisplay from "./LabelsDisplay";
-import NodesDisplay from "./NodesDisplay";
-import PolygonsDisplay from "./PolygonsDisplay";
-import SelectedPolygonDisplay from "./SelectedPolygonDisplay";
+import useCursorTracker from "../../hooks/useCursorTracker.ts";
+import useKeyboardShortcuts from "../../hooks/useKeyboardShortcuts.ts";
+import useStageClickHandler from "../../hooks/useStageClickHandler.ts";
+import useValidatedFloorParams from "../../hooks/useValidatedFloorParams.ts";
+import { LIVE_CURSORS_ENABLED } from "../../settings.ts";
+import { useAppSelector } from "../../store/hooks.ts";
+import LiveCursors from "../live-cursors/LiveCursors.tsx";
+import EdgesDisplay from "./EdgesDisplay.tsx";
+import LabelsDisplay from "./LabelsDisplay.tsx";
+import NodesDisplay from "./NodesDisplay.tsx";
+import PolygonsDisplay from "./PolygonsDisplay.tsx";
+import SelectedPolygonDisplay from "./SelectedPolygonDisplay.tsx";
 
 interface Props {
   floorCode: string;

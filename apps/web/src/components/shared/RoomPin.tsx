@@ -2,8 +2,8 @@ import type { GeoRoom } from "@cmumaps/common";
 import { getRoomTypeDetails } from "@cmumaps/common";
 import pinIcon from "@/assets/icons/search_results/pin.svg";
 import { useLocationParams } from "@/hooks/useLocationParams.ts";
-import type { Document } from "@/types/searchTypes";
-import { getIcon } from "@/utils/iconUtils";
+import type { Document } from "@/types/searchTypes.ts";
+import { getIcon } from "@/utils/iconUtils.ts";
 
 interface Props {
   room: (GeoRoom & { name: string }) | Document;

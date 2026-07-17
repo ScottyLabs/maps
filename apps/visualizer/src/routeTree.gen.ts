@@ -46,7 +46,7 @@ export interface FileRoutesByFullPath {
   '/buildings/$buildingCode': typeof BuildingsBuildingCodeRoute
   '/floors/$floorCode': typeof FloorsFloorCodeRoute
   '/map/$floorCode': typeof MapFloorCodeRoute
-  '/map': typeof MapIndexRoute
+  '/map/': typeof MapIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,7 +70,7 @@ export interface FileRouteTypes {
     | '/buildings/$buildingCode'
     | '/floors/$floorCode'
     | '/map/$floorCode'
-    | '/map'
+    | '/map/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -107,7 +107,7 @@ declare module '@tanstack/react-router' {
     '/map/': {
       id: '/map/'
       path: '/map'
-      fullPath: '/map'
+      fullPath: '/map/'
       preLoaderRoute: typeof MapIndexRouteImport
       parentRoute: typeof rootRouteImport
     }

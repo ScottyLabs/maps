@@ -1,14 +1,14 @@
 import type { Floor, GeoRoom } from "@cmumaps/common";
 import { getRoomTypeDetails } from "@cmumaps/common";
 import { Annotation, Polygon } from "mapkit-react";
-import { $api } from "@/api/client";
+import { $api } from "@/api/client.ts";
 import { RoomPin } from "@/components/shared/RoomPin.tsx";
 import { useLocationParams } from "@/hooks/useLocationParams.ts";
-import { useNavigateLocationParams } from "@/hooks/useNavigateLocationParams";
+import { useNavigateLocationParams } from "@/hooks/useNavigateLocationParams.ts";
 import { useNavPaths } from "@/hooks/useNavigationParams.ts";
-import { CardStates } from "@/store/cardSlice";
+import { CardStates } from "@/store/cardSlice.ts";
 import { useBoundStore } from "@/store/index.ts";
-import { getFloorCode, getFloorLevelFromRoomName } from "@/utils/floorUtils";
+import { getFloorCode, getFloorLevelFromRoomName } from "@/utils/floorUtils.ts";
 
 interface Props {
   floor: Floor;

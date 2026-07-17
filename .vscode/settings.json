@@ -39,5 +39,6 @@
   },
   "[opentofu]": {
     "editor.defaultFormatter": "opentofu.vscode-opentofu"
-  }
+  },
+  "discord.enabled": true
 }

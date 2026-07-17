@@ -4,17 +4,17 @@ import { useEffect } from "react";
 import { GiArrowCursor } from "react-icons/gi";
 import { Path } from "react-konva";
 
-import { CURSOR_UPDATE_RATE } from "../../hooks/useCursorTracker";
+import { CURSOR_UPDATE_RATE } from "../../hooks/useCursorTracker.ts";
 import {
   selectCursorInfos,
   setCursorInfos,
-} from "../../store/features/liveCursor/liveCursorSlice";
+} from "../../store/features/liveCursor/liveCursorSlice.ts";
 import {
   moveNodeWithCursor,
   moveVertexWithCursor,
-} from "../../store/features/liveCursor/liveCursorThunks";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import CursorNameRect from "./LiveCursorRect";
+} from "../../store/features/liveCursor/liveCursorThunks.ts";
+import { useAppDispatch, useAppSelector } from "../../store/hooks.ts";
+import CursorNameRect from "./LiveCursorRect.tsx";
 
 interface LiveCursorProps {
   floorCode: string;

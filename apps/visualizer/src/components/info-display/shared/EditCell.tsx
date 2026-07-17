@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { FaCheck, FaPencilAlt } from "react-icons/fa";
 
-import { setShortcutsDisabled } from "../../../store/features/statusSlice";
-import { useAppDispatch } from "../../../store/hooks";
+import { setShortcutsDisabled } from "../../../store/features/statusSlice.ts";
+import { useAppDispatch } from "../../../store/hooks.ts";
 
 interface Props {
   property: string;

@@ -11,7 +11,7 @@ The [CMU Maps web](https://cmumaps.com) is a web application that provides a map
 Run the web with the server by running the following command in the root directory:
 
 ```zsh
-bun run dev:web
+deno task dev:web
 ```
 
 ### Developing by viewing on a Mobile Device
@@ -19,7 +19,7 @@ bun run dev:web
 To develop by viewing on a mobile device, run the following command in the root directory:
 
 ```zsh
-bun run dev:web:host
+deno task dev:web:host
 ```
 
 Then, open the web application on your mobile device by navigating to the Network URL listed in the terminal.

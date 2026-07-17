@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import Select, { type SingleValue } from "react-select";
 
-import { setShortcutsDisabled } from "../../../store/features/statusSlice";
-import { useAppDispatch } from "../../../store/hooks";
+import { setShortcutsDisabled } from "../../../store/features/statusSlice.ts";
+import { useAppDispatch } from "../../../store/hooks.ts";
 
 interface Props {
   value: string | undefined;

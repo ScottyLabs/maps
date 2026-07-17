@@ -3,22 +3,22 @@ import type {
   CreateEdgeArg,
   DeleteEdgeAcrossFloorsArg,
   DeleteEdgeArg,
-} from "../../api/edgeApiSlice";
+} from "../../api/edgeApiSlice.ts";
 import type {
   CreateNodeArg,
   DeleteNodeArg,
   UpdateNodeArg,
-} from "../../api/nodeApiSlice";
+} from "../../api/nodeApiSlice.ts";
 import type {
   CreatePoiArg,
   DeletePoiArg,
   UpdatePoiArg,
-} from "../../api/poiApiSlice";
+} from "../../api/poiApiSlice.ts";
 import type {
   CreateRoomArg,
   DeleteRoomArg,
   UpdateRoomArg,
-} from "../../api/roomApiSlice";
+} from "../../api/roomApiSlice.ts";
 
 interface CreateNodeEdit {
   endpoint: "createNode";

@@ -1,0 +1,10 @@
+{
+  "name": "@cmumaps/websocket",
+  "version": "0.0.0",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "imports": {
+    "@types/node": "npm:@types/node@^24.9.2"
+  }
+}

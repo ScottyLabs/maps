@@ -8,7 +8,7 @@ import foodIcon from "@/assets/icons/search_results/food.svg";
 import pinIcon from "@/assets/icons/search_results/pin.svg";
 import stairsIcon from "@/assets/icons/search_results/stairs.svg";
 import studyIcon from "@/assets/icons/search_results/study.svg";
-import type { Document } from "@/types/searchTypes";
+import type { Document } from "@/types/searchTypes.ts";
 
 const icons: Partial<Record<RoomType, string>> = {
   Elevator: elevatorIcon,

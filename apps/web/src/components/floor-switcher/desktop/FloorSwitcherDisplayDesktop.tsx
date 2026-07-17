@@ -1,9 +1,9 @@
 import type { Building, Floor } from "@cmumaps/common";
 import { useState } from "react";
-import { DefaultView } from "@/components/floor-switcher/desktop/DefaultView";
-import { FloorPicker } from "@/components/floor-switcher/desktop/FloorPicker";
-import { LockedView } from "@/components/floor-switcher/desktop/LockedView";
-import { RoundelButton } from "@/components/floor-switcher/desktop/RoundelButton";
+import { DefaultView } from "@/components/floor-switcher/desktop/DefaultView.tsx";
+import { FloorPicker } from "@/components/floor-switcher/desktop/FloorPicker.tsx";
+import { LockedView } from "@/components/floor-switcher/desktop/LockedView.tsx";
+import { RoundelButton } from "@/components/floor-switcher/desktop/RoundelButton.tsx";
 
 interface Props {
   building: Building;

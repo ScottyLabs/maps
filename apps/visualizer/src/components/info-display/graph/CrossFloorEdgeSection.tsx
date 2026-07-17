@@ -4,11 +4,11 @@ import { useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
-import { useGetBuildingFloorsQuery } from "../../../store/api/buildingApiSlice";
-import { useCreateEdgeAcrossFloorsMutation } from "../../../store/api/edgeApiSlice";
-import { setShortcutsDisabled } from "../../../store/features/statusSlice";
-import { useAppDispatch } from "../../../store/hooks";
-import InfoDisplayButton from "../shared/InfoDisplayButton";
+import { useGetBuildingFloorsQuery } from "../../../store/api/buildingApiSlice.ts";
+import { useCreateEdgeAcrossFloorsMutation } from "../../../store/api/edgeApiSlice.ts";
+import { setShortcutsDisabled } from "../../../store/features/statusSlice.ts";
+import { useAppDispatch } from "../../../store/hooks.ts";
+import InfoDisplayButton from "../shared/InfoDisplayButton.tsx";
 
 interface Props {
   floorCode: string;

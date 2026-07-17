@@ -1,6 +1,6 @@
 import type { Building } from "@cmumaps/common";
 import { Annotation } from "mapkit-react";
-import Roundel from "@/components/map-view/building-display/Roundel";
+import Roundel from "@/components/map-view/building-display/Roundel.tsx";
 
 interface Props {
   building: Building;

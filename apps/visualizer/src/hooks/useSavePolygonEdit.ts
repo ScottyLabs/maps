@@ -1,7 +1,7 @@
 import type { Polygon, RoomInfo } from "@cmumaps/common";
 import { v4 as uuidv4 } from "uuid";
 
-import { useUpdateRoomMutation } from "../store/api/roomApiSlice";
+import { useUpdateRoomMutation } from "../store/api/roomApiSlice.ts";
 
 const useSavePolygonEdit = (floorCode: string, roomId?: string | null) => {
   const [updateRoom] = useUpdateRoomMutation();

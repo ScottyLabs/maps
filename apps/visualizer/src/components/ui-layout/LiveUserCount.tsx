@@ -1,6 +1,6 @@
 import { CiUser } from "react-icons/ci";
 
-import { useAppSelector } from "../../store/hooks";
+import { useAppSelector } from "../../store/hooks.ts";
 
 const LiveUserCount = () => {
   const users = useAppSelector((state) => state.liveCursor.liveUsers);

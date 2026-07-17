@@ -1,7 +1,7 @@
 import { useQueryState } from "nuqs";
 import { useEffect, useRef } from "react";
 import { useLocation } from "react-router";
-import { $api } from "@/api/client";
+import { $api } from "@/api/client.ts";
 import { useBoundStore } from "@/store/index.ts";
 
 const useFocusedFloorParam = () => {

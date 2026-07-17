@@ -9,9 +9,9 @@ import { v4 as uuidv4 } from "uuid";
 import {
   useGetFloorGraphQuery,
   useGetFloorPlacementQuery,
-} from "../../../store/api/floorDataApiSlice";
-import { useCreatePoiMutation } from "../../../store/api/poiApiSlice";
-import InfoDisplayButton from "../shared/InfoDisplayButton";
+} from "../../../store/api/floorDataApiSlice.ts";
+import { useCreatePoiMutation } from "../../../store/api/poiApiSlice.ts";
+import InfoDisplayButton from "../shared/InfoDisplayButton.tsx";
 
 interface Props {
   floorCode: string;

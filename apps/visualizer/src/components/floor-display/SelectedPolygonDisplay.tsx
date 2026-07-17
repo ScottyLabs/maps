@@ -2,9 +2,9 @@ import type { PdfCoordinate, Polygon } from "@cmumaps/common";
 
 import { Line } from "react-konva";
 
-import { selectEditPolygon } from "../../store/features/modeSlice";
-import { useAppSelector } from "../../store/hooks";
-import PolygonEditor from "./PolygonEditor";
+import { selectEditPolygon } from "../../store/features/modeSlice.ts";
+import { useAppSelector } from "../../store/hooks.ts";
+import PolygonEditor from "./PolygonEditor.tsx";
 
 interface Props {
   floorCode: string;

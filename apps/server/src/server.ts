@@ -2,13 +2,14 @@ import fs from "node:fs";
 import http from "node:http";
 import path from "node:path";
 import process from "node:process";
+import { fileURLToPath } from "node:url";
 import { toNodeHandler } from "better-auth/node";
-import { YAML } from "bun";
 import cors, { type CorsOptions } from "cors";
 import type { ErrorRequestHandler } from "express";
 import express from "express";
 import { Server } from "socket.io";
 import swaggerUi, { type JsonObject } from "swagger-ui-express";
+import { parse as parseYaml } from "npm:yaml";
 import { RegisterRoutes } from "../build/routes.ts";
 import { prisma } from "../prisma/index.ts";
 import { env } from "./env.ts";
@@ -47,11 +48,12 @@ app.all("/api/auth/*splat", toNodeHandler(auth));
 
 // Swagger and OpenAPI JSON
 const swaggerYaml = fs.readFileSync("./build/swagger.yaml", "utf8");
-const swaggerJson = YAML.parse(swaggerYaml) as JsonObject;
+const swaggerJson = parseYaml(swaggerYaml) as JsonObject;
+const serverDir = path.dirname(fileURLToPath(import.meta.url));
 app.use(
   "/swagger",
   express.static(
-    path.join(import.meta.dirname, "../node_modules/swagger-ui-dist"),
+    path.join(serverDir, "../node_modules/swagger-ui-dist"),
     {
       index: false,
     },

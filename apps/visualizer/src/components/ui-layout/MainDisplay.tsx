@@ -1,18 +1,18 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
-import useValidatedFloorParams from "../../hooks/useValidatedFloorParams";
-import useWebSocket from "../../hooks/useWebSocket";
+import useValidatedFloorParams from "../../hooks/useValidatedFloorParams.ts";
+import useWebSocket from "../../hooks/useWebSocket.ts";
 import {
   useGetFloorGraphQuery,
   useGetFloorPoisQuery,
   useGetFloorRoomsQuery,
-} from "../../store/api/floorDataApiSlice";
-import InfoDisplay from "../info-display/InfoDisplay";
-import ErrorDisplay from "../shared/ErrorDisplay";
-import Loader from "../shared/Loader";
-import SidePanel from "../side-panel/SidePanel";
-import ZoomPanWrapper from "../zoom-pan/ZoomPanWrapper";
+} from "../../store/api/floorDataApiSlice.ts";
+import InfoDisplay from "../info-display/InfoDisplay.tsx";
+import ErrorDisplay from "../shared/ErrorDisplay.tsx";
+import Loader from "../shared/Loader.tsx";
+import SidePanel from "../side-panel/SidePanel.tsx";
+import ZoomPanWrapper from "../zoom-pan/ZoomPanWrapper.tsx";
 
 interface Props {
   floorCode: string;

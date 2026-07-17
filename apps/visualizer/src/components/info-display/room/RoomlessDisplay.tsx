@@ -1,8 +1,8 @@
 import type { Graph, RoomInfo } from "@cmumaps/common";
 import { v4 as uuidv4 } from "uuid";
 
-import { useCreateRoomMutation } from "../../../store/api/roomApiSlice";
-import InfoDisplayButton from "../shared/InfoDisplayButton";
+import { useCreateRoomMutation } from "../../../store/api/roomApiSlice.ts";
+import InfoDisplayButton from "../shared/InfoDisplayButton.tsx";
 
 interface Props {
   floorCode: string;

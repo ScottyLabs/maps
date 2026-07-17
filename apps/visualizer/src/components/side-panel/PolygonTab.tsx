@@ -3,18 +3,18 @@ import { simplify } from "@turf/simplify";
 
 import { toast } from "react-toastify";
 
-import useSavePolygonEdit from "../../hooks/useSavePolygonEdit";
-import useValidatedFloorParams from "../../hooks/useValidatedFloorParams";
+import useSavePolygonEdit from "../../hooks/useSavePolygonEdit.ts";
+import useValidatedFloorParams from "../../hooks/useValidatedFloorParams.ts";
 import {
   POLYGON_ADD_VERTEX,
   POLYGON_DELETE_VERTEX,
   setMode,
-} from "../../store/features/modeSlice";
-import { setRingIndex } from "../../store/features/polygonSlice";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { RED_BUTTON_STYLE } from "../info-display/shared/TableCell";
-import SidePanelButton from "./SidePanelButton";
-import NodeSizeSlider from "./SizeSlider";
+} from "../../store/features/modeSlice.ts";
+import { setRingIndex } from "../../store/features/polygonSlice.ts";
+import { useAppDispatch, useAppSelector } from "../../store/hooks.ts";
+import { RED_BUTTON_STYLE } from "../info-display/shared/TableCell.tsx";
+import SidePanelButton from "./SidePanelButton.tsx";
+import NodeSizeSlider from "./SizeSlider.tsx";
 
 interface Props {
   floorCode: string;

@@ -5,7 +5,7 @@ import { useLocationParams } from "@/hooks/useLocationParams.ts";
 import { useNavigateLocationParams } from "@/hooks/useNavigateLocationParams.ts";
 import { useNavPaths } from "@/hooks/useNavigationParams.ts";
 import { useBoundStore } from "@/store/index.ts";
-import { zoomOnPoint } from "@/utils/zoomUtils";
+import { zoomOnPoint } from "@/utils/zoomUtils.ts";
 
 interface Props {
   map: mapkit.Map | null;

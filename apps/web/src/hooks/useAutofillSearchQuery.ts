@@ -1,8 +1,8 @@
 import { useCallback, useEffect } from "react";
 
-import { $api } from "@/api/client";
+import { $api } from "@/api/client.ts";
 import { useLocationParams } from "@/hooks/useLocationParams.ts";
-import { buildFloorCode } from "@/utils/floorUtils";
+import { buildFloorCode } from "@/utils/floorUtils.ts";
 
 const useAutofillSearchQuery = (setSearchQuery: (query: string) => void) => {
   const { buildingCode, roomName, floor } = useLocationParams();

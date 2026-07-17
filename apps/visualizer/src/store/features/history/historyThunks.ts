@@ -1,13 +1,13 @@
 import { toast } from "react-toastify";
 
-import { edgeApiSlice } from "../../api/edgeApiSlice";
-import { nodeApiSlice } from "../../api/nodeApiSlice";
-import { poiApiSlice } from "../../api/poiApiSlice";
-import { roomApiSlice } from "../../api/roomApiSlice";
-import type { AppDispatch } from "../../store";
-import { createAppAsyncThunk } from "../../withTypes";
-import { setEditIndex } from "./historySlice";
-import type { Edit } from "./historyTypes";
+import { edgeApiSlice } from "../../api/edgeApiSlice.ts";
+import { nodeApiSlice } from "../../api/nodeApiSlice.ts";
+import { poiApiSlice } from "../../api/poiApiSlice.ts";
+import { roomApiSlice } from "../../api/roomApiSlice.ts";
+import type { AppDispatch } from "../../store.ts";
+import { createAppAsyncThunk } from "../../withTypes.ts";
+import { setEditIndex } from "./historySlice.ts";
+import type { Edit } from "./historyTypes.ts";
 
 const applyEdit = async (
   edit: Edit,

@@ -2,7 +2,7 @@ import type { CoordinateRegion } from "mapkit-react";
 import { parseAsFloat, useQueryStates } from "nuqs";
 import { type RefObject, useEffect } from "react";
 import { useLocation } from "react-router";
-import { prefersReducedMotion } from "@/utils/prefersReducedMotion";
+import { prefersReducedMotion } from "@/utils/prefersReducedMotion.ts";
 
 const DECIMALS = 6;
 const EPSILON = 10 ** -DECIMALS;

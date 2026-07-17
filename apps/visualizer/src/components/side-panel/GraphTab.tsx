@@ -4,17 +4,17 @@ import { useNavigate } from "@tanstack/react-router";
 import { BiHide } from "react-icons/bi";
 import { toast } from "react-toastify";
 
-import { setMst } from "../../store/features/dataSlice";
+import { setMst } from "../../store/features/dataSlice.ts";
 import {
   ADD_DOOR_NODE,
   ADD_NODE,
   setMode,
-} from "../../store/features/modeSlice";
-import { useAppDispatch } from "../../store/hooks";
-import { calcMst } from "../../utils/graphUtils";
-import QuestionCircle from "../shared/QuestionCircle";
-import SidePanelButton from "./SidePanelButton";
-import NodeSizeSlider from "./SizeSlider";
+} from "../../store/features/modeSlice.ts";
+import { useAppDispatch } from "../../store/hooks.ts";
+import { calcMst } from "../../utils/graphUtils.ts";
+import QuestionCircle from "../shared/QuestionCircle.tsx";
+import SidePanelButton from "./SidePanelButton.tsx";
+import NodeSizeSlider from "./SizeSlider.tsx";
 
 interface Props {
   floorCode: string;

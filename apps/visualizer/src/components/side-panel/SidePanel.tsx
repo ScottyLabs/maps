@@ -1,11 +1,11 @@
 import type { Graph, Rooms } from "@cmumaps/common";
 
-import { selectEditPolygon } from "../../store/features/modeSlice";
-import { setSidePanelActiveTabIndex } from "../../store/features/uiSlice";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import GraphTab from "./GraphTab";
-import PolygonTab from "./PolygonTab";
-import VisibilityTab from "./VisibilityTab";
+import { selectEditPolygon } from "../../store/features/modeSlice.ts";
+import { setSidePanelActiveTabIndex } from "../../store/features/uiSlice.ts";
+import { useAppDispatch, useAppSelector } from "../../store/hooks.ts";
+import GraphTab from "./GraphTab.tsx";
+import PolygonTab from "./PolygonTab.tsx";
+import VisibilityTab from "./VisibilityTab.tsx";
 
 interface Props {
   floorCode: string;

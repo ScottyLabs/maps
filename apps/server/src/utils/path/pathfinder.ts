@@ -5,8 +5,8 @@ import type {
   PreciseRoute,
   Route,
   WayPoint,
-} from "@cmumaps/common";
-import { dist, geoNodeToNavPathNode } from "@cmumaps/common";
+} from "../../../../../packages/common/src/index.ts";
+import { dist, geoNodeToNavPathNode } from "../../../../../packages/common/src/index.ts";
 import TinyQueue from "tinyqueue";
 import type { Buildings } from "../../services/pathService.ts";
 import { generateInstructions } from "./instructions.ts";

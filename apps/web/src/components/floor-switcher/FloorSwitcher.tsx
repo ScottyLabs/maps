@@ -1,11 +1,11 @@
-import { $api } from "@/api/client";
-import { FloorSwitcherDisplayDesktop } from "@/components/floor-switcher/desktop/FloorSwitcherDisplayDesktop";
-import { FloorSwitcherDisplayMobile } from "@/components/floor-switcher/mobile/FloorSwitcherDisplayMobile";
+import { $api } from "@/api/client.ts";
+import { FloorSwitcherDisplayDesktop } from "@/components/floor-switcher/desktop/FloorSwitcherDisplayDesktop.tsx";
+import { FloorSwitcherDisplayMobile } from "@/components/floor-switcher/mobile/FloorSwitcherDisplayMobile.tsx";
 import { useIsMobile } from "@/hooks/useIsMobile.ts";
 import { useUser } from "@/hooks/useUser.ts";
-import { CardStates } from "@/store/cardSlice";
+import { CardStates } from "@/store/cardSlice.ts";
 import { useBoundStore } from "@/store/index.ts";
-import { isPublicBuilding } from "@/utils/authUtils";
+import { isPublicBuilding } from "@/utils/authUtils.ts";
 
 /**
  * This component determines if the floor switcher should be shown.

@@ -1,8 +1,8 @@
 import type { Floor } from "@cmumaps/common";
 import { Annotation } from "mapkit-react";
-import { $api } from "@/api/client";
-import { getFloorCode } from "@/utils/floorUtils";
-import { getPoiTypeStyle } from "./poiTypeStyles";
+import { $api } from "@/api/client.ts";
+import { getFloorCode } from "@/utils/floorUtils.ts";
+import { getPoiTypeStyle } from "./poiTypeStyles.tsx";
 
 interface Props {
   floor: Floor;

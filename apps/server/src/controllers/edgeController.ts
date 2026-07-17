@@ -1,4 +1,4 @@
-import { extractBuildingCode, extractFloorLevel } from "@cmumaps/common";
+import { extractBuildingCode, extractFloorLevel } from "../../../../packages/common/src/index.ts";
 import type { Request as ExpressRequest } from "express";
 import {
   Body,

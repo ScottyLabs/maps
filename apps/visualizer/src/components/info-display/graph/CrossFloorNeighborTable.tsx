@@ -1,8 +1,8 @@
 import type { EdgeInfo } from "@cmumaps/common";
 import { Link } from "@tanstack/react-router";
 import { v4 as uuidv4 } from "uuid";
-import { useDeleteEdgeAcrossFloorsMutation } from "../../../store/api/edgeApiSlice";
-import TableCell from "../shared/TableCell";
+import { useDeleteEdgeAcrossFloorsMutation } from "../../../store/api/edgeApiSlice.ts";
+import TableCell from "../shared/TableCell.tsx";
 
 interface Props {
   floorCode: string;

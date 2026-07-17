@@ -3,10 +3,10 @@ import type Konva from "konva";
 
 import { useRef, useState } from "react";
 
-import { LOADED } from "../../store/features/statusSlice";
-import { useAppSelector } from "../../store/hooks";
-import FloorDisplay from "../floor-display/FloorDisplay";
-import LoadingText from "../ui-layout/LoadingText";
+import { LOADED } from "../../store/features/statusSlice.ts";
+import { useAppSelector } from "../../store/hooks.ts";
+import FloorDisplay from "../floor-display/FloorDisplay.tsx";
+import LoadingText from "../ui-layout/LoadingText.tsx";
 
 interface Props {
   floorCode: string;

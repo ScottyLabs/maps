@@ -1,6 +1,6 @@
 /** biome-ignore-all lint/style/useNamingConvention: TODO: use right naming convention */
 import { useMemo } from "react";
-import { $api } from "@/api/client";
+import { $api } from "@/api/client.ts";
 import buildingIcon from "@/assets/icons/search_results/building.svg";
 import classroomIcon from "@/assets/icons/search_results/classroom.svg";
 import defaultIcon from "@/assets/icons/search_results/default.svg";
@@ -12,11 +12,11 @@ import { useNavigateLocationParams } from "@/hooks/useNavigateLocationParams.ts"
 import { useNavPaths } from "@/hooks/useNavigationParams.ts";
 import { useUser } from "@/hooks/useUser.ts";
 import { setPostLoginCallbackUrl } from "@/lib/authClient.ts";
-import { CardStates } from "@/store/cardSlice";
+import { CardStates } from "@/store/cardSlice.ts";
 import { useBoundStore } from "@/store/index.ts";
-import { isPublicBuilding } from "@/utils/authUtils";
-import { getFloorLevelFromRoomName } from "@/utils/floorUtils";
-import { zoomOnObject, zoomOnPoint } from "@/utils/zoomUtils";
+import { isPublicBuilding } from "@/utils/authUtils.ts";
+import { getFloorLevelFromRoomName } from "@/utils/floorUtils.ts";
+import { zoomOnObject, zoomOnPoint } from "@/utils/zoomUtils.ts";
 
 interface SearchResultProps {
   id: string;

@@ -1,5 +1,5 @@
-import { setNodeSize } from "../../store/features/uiSlice";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { setNodeSize } from "../../store/features/uiSlice.ts";
+import { useAppDispatch, useAppSelector } from "../../store/hooks.ts";
 
 interface Props {
   text: string;

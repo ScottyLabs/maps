@@ -1,7 +1,7 @@
 import { getRoomTypeDetails, type Polygon, type Rooms } from "@cmumaps/common";
 import { useNavigate } from "@tanstack/react-router";
 import { Path } from "react-konva";
-import { useAppSelector } from "../../store/hooks";
+import { useAppSelector } from "../../store/hooks.ts";
 
 interface Props {
   rooms: Rooms;

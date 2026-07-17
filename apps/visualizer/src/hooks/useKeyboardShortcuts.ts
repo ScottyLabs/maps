@@ -3,9 +3,9 @@ import { useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
-import { useInvalidateCacheMutation } from "../store/api/floorDataApiSlice";
-import { useDeleteNodeMutation } from "../store/api/nodeApiSlice";
-import { redo, undo } from "../store/features/history/historyThunks";
+import { useInvalidateCacheMutation } from "../store/api/floorDataApiSlice.ts";
+import { useDeleteNodeMutation } from "../store/api/nodeApiSlice.ts";
+import { redo, undo } from "../store/features/history/historyThunks.ts";
 import {
   ADD_DOOR_NODE,
   ADD_EDGE,
@@ -16,7 +16,7 @@ import {
   POLYGON_DELETE_VERTEX,
   selectEditPolygon,
   setMode,
-} from "../store/features/modeSlice";
+} from "../store/features/modeSlice.ts";
 import {
   toggleShowEdges,
   toggleShowLabels,
@@ -24,10 +24,10 @@ import {
   toggleShowOutline,
   toggleShowPdf,
   toggleShowPolygons,
-} from "../store/features/visibilitySlice";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { calcMst } from "../utils/graphUtils";
-import useValidatedFloorParams from "./useValidatedFloorParams";
+} from "../store/features/visibilitySlice.ts";
+import { useAppDispatch, useAppSelector } from "../store/hooks.ts";
+import { calcMst } from "../utils/graphUtils.ts";
+import useValidatedFloorParams from "./useValidatedFloorParams.ts";
 
 const useKeyboardShortcuts = (
   floorCode: string,

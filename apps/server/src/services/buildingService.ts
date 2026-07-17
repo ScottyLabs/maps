@@ -3,8 +3,8 @@ import type {
   BuildingMetadata,
   Buildings,
   GeoCoordinate,
-} from "@cmumaps/common";
-import { ERROR_CODES } from "@cmumaps/common";
+} from "../../../../packages/common/src/index.ts";
+import { ERROR_CODES } from "../../../../packages/common/src/index.ts";
 import { prisma } from "../../prisma/index.ts";
 import { BuildingError } from "../errors/error.ts";
 

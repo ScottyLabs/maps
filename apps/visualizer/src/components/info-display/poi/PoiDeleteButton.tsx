@@ -1,8 +1,8 @@
 import { v4 as uuidv4 } from "uuid";
 
-import { useDeletePoiMutation } from "../../../store/api/poiApiSlice";
-import InfoDisplayButton from "../shared/InfoDisplayButton";
-import { RED_BUTTON_STYLE } from "../shared/TableCell";
+import { useDeletePoiMutation } from "../../../store/api/poiApiSlice.ts";
+import InfoDisplayButton from "../shared/InfoDisplayButton.tsx";
+import { RED_BUTTON_STYLE } from "../shared/TableCell.tsx";
 
 interface Props {
   floorCode: string;

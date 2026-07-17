@@ -1,6 +1,6 @@
 import type { Buildings } from "@cmumaps/common";
-import { BuildingRoundel } from "@/components/map-display/buildings-display/BuildingRoundel";
-import { BuildingShape } from "@/components/map-display/buildings-display/BuildingShape";
+import { BuildingRoundel } from "@/components/map-display/buildings-display/BuildingRoundel.tsx";
+import { BuildingShape } from "@/components/map-display/buildings-display/BuildingShape.tsx";
 
 interface Props {
   map: mapkit.Map | null;

@@ -1,6 +1,6 @@
 import type { GeoNodes, Graph, Placement, Pois, Rooms } from "@cmumaps/common";
-import { handleQueryError } from "@/store/api/errorHandler";
-import { apiSlice } from "./apiSlice";
+import { handleQueryError } from "@/store/api/errorHandler.ts";
+import { apiSlice } from "./apiSlice.ts";
 
 export const floorDataApiSlice = apiSlice.injectEndpoints({
   overrideExisting: true,

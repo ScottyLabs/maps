@@ -12,10 +12,10 @@ import "./index.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import ReactDOM from "react-dom/client";
-import env from "./env";
-import { routeTree } from "./routeTree.gen";
-import { USE_STRICT_MODE } from "./settings";
-import { store } from "./store/store";
+import env from "./env.ts";
+import { routeTree } from "./routeTree.gen.ts";
+import { USE_STRICT_MODE } from "./settings.ts";
+import { store } from "./store/store.ts";
 
 // https://clerk.com/docs/components/control/clerk-loaded
 declare global {

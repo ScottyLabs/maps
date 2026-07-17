@@ -1,5 +1,5 @@
 import { env } from "@/env.ts";
-import { useSession } from "@/lib/authClient";
+import { useSession } from "@/lib/authClient.ts";
 
 const useUser = () => {
   const { data } = useSession();

@@ -2,7 +2,7 @@ import type { Building } from "@cmumaps/common";
 import { animate, motion, useMotionValue } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { MdLock } from "react-icons/md";
-import { $api } from "@/api/client";
+import { $api } from "@/api/client.ts";
 import { useBoundStore } from "@/store/index.ts";
 import { FloorSwitcherCarouselMobile } from "./FloorSwitcherCarouselMobile.tsx";
 

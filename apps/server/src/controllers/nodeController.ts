@@ -1,4 +1,4 @@
-import type { NodeInfo } from "@cmumaps/common";
+import type { NodeInfo } from "../../../../packages/common/src/index.ts";
 import type { Request as ExpressRequest } from "express";
 import {
   Body,

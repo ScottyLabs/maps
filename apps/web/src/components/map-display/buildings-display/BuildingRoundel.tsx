@@ -5,9 +5,9 @@ import { useQueryState } from "nuqs";
 import { useLocation } from "react-router";
 import { Roundel } from "@/components/shared/Roundel.tsx";
 import { useNavigateLocationParams } from "@/hooks/useNavigateLocationParams.ts";
-import { CardStates } from "@/store/cardSlice";
+import { CardStates } from "@/store/cardSlice.ts";
 import { useBoundStore } from "@/store/index.ts";
-import { zoomOnObject } from "@/utils/zoomUtils";
+import { zoomOnObject } from "@/utils/zoomUtils.ts";
 
 interface Props {
   map: mapkit.Map | null;

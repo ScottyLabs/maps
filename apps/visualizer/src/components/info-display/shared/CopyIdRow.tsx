@@ -1,6 +1,6 @@
 import { toast } from "react-toastify";
 
-import TableCell from "./TableCell";
+import TableCell from "./TableCell.tsx";
 
 interface Props {
   text: string;

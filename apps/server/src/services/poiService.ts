@@ -1,4 +1,4 @@
-import type { PoiInfo, PoiType } from "@cmumaps/common";
+import type { PoiInfo, PoiType } from "../../../../packages/common/src/index.ts";
 
 import { prisma } from "../../prisma/index.ts";
 

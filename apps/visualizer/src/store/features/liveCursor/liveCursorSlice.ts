@@ -1,8 +1,8 @@
 import type { LiveUser } from "@cmumaps/websocket";
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-import { getSocketId } from "../../middleware/webSocketMiddleware";
-import type { CursorInfo } from "./liveCursorTypes";
+import { getSocketId } from "../../middleware/webSocketMiddleware.ts";
+import type { CursorInfo } from "./liveCursorTypes.ts";
 
 interface LiveCursorState {
   liveUsers: Record<string, LiveUser>;

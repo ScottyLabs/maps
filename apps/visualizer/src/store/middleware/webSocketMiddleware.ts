@@ -6,22 +6,22 @@ import {
 } from "@cmumaps/websocket";
 import type { Action, Middleware } from "@reduxjs/toolkit";
 import { io, type Socket } from "socket.io-client";
-import env from "../../env";
-import { getClerkToken } from "../api/apiSlice";
+import env from "../../env.ts";
+import { getClerkToken } from "../api/apiSlice.ts";
 import {
   createEdge,
   createEdgeAcrossFloors,
   deleteEdge,
   deleteEdgeAcrossFloors,
-} from "../api/edgeApiSlice";
-import { createNode, deleteNode, updateNode } from "../api/nodeApiSlice";
-import { createPoi, deletePoi, updatePoi } from "../api/poiApiSlice";
-import { createRoom, deleteRoom, updateRoom } from "../api/roomApiSlice";
+} from "../api/edgeApiSlice.ts";
+import { createNode, deleteNode, updateNode } from "../api/nodeApiSlice.ts";
+import { createPoi, deletePoi, updatePoi } from "../api/poiApiSlice.ts";
+import { createRoom, deleteRoom, updateRoom } from "../api/roomApiSlice.ts";
 import {
   setCursorInfos,
   setLiveUsers,
-} from "../features/liveCursor/liveCursorSlice";
-import type { AppDispatch } from "../store";
+} from "../features/liveCursor/liveCursorSlice.ts";
+import type { AppDispatch } from "../store.ts";
 import {
   type BroadcastMessage,
   type BroadcastWebSocketAction,
@@ -30,7 +30,7 @@ import {
   WEBSOCKET_BROADCAST,
   WEBSOCKET_JOIN,
   WEBSOCKET_LEAVE,
-} from "./webSocketActions";
+} from "./webSocketActions.ts";
 
 // Socket instance
 let socket: Socket | null = null;

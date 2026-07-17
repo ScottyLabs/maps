@@ -5,25 +5,25 @@ import { throttle } from "lodash";
 import { useMemo } from "react";
 import { Circle, Line } from "react-konva";
 
-import { CURSOR_UPDATE_RATE } from "../../hooks/useCursorTracker";
-import useSavePolygonEdit from "../../hooks/useSavePolygonEdit";
-import { pushCursorInfo } from "../../store/features/liveCursor/liveCursorSlice";
-import type { CursorInfoOnDragVertex } from "../../store/features/liveCursor/liveCursorTypes";
+import { CURSOR_UPDATE_RATE } from "../../hooks/useCursorTracker.ts";
+import useSavePolygonEdit from "../../hooks/useSavePolygonEdit.ts";
+import { pushCursorInfo } from "../../store/features/liveCursor/liveCursorSlice.ts";
+import type { CursorInfoOnDragVertex } from "../../store/features/liveCursor/liveCursorTypes.ts";
 import {
   POLYGON_DELETE_VERTEX,
   POLYGON_SELECT,
   setMode,
-} from "../../store/features/modeSlice";
+} from "../../store/features/modeSlice.ts";
 import {
   releaseVertex,
   setDragVertexInfo,
-} from "../../store/features/mouseEventSlice";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
+} from "../../store/features/mouseEventSlice.ts";
+import { useAppDispatch, useAppSelector } from "../../store/hooks.ts";
 import {
   getCursorPos,
   getDragObjectPos,
   setCursor,
-} from "../../utils/canvasUtils";
+} from "../../utils/canvasUtils.ts";
 
 interface Props {
   floorCode: string;

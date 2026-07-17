@@ -1,5 +1,5 @@
 /** biome-ignore-all lint/style/useNamingConvention: TODO: use the right naming convention */
-import type { GeoNodes, PreciseRoute } from "@cmumaps/common";
+import type { GeoNodes, PreciseRoute } from "../../../../packages/common/src/index.ts";
 import { prisma } from "../../prisma/index.ts";
 import {
   getRoute,

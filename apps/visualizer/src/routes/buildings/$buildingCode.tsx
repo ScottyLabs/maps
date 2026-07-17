@@ -1,8 +1,8 @@
 import type { ErrorCode } from "@cmumaps/common";
 import { createFileRoute, Navigate } from "@tanstack/react-router";
-import ErrorHandler from "../../components/shared/ErrorHandler";
-import Loader from "../../components/shared/Loader";
-import { useGetDefaultFloorQuery } from "../../store/api/buildingApiSlice";
+import ErrorHandler from "../../components/shared/ErrorHandler.tsx";
+import Loader from "../../components/shared/Loader.tsx";
+import { useGetDefaultFloorQuery } from "../../store/api/buildingApiSlice.ts";
 
 export const Route = createFileRoute("/buildings/$buildingCode")({
   component: Building,

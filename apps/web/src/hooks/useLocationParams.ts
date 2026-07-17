@@ -2,8 +2,8 @@
 import { useQueryState } from "nuqs";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
-import { $api } from "@/api/client";
-import { buildFloorCode, getFloorLevelFromRoomName } from "@/utils/floorUtils";
+import { $api } from "@/api/client.ts";
+import { buildFloorCode, getFloorLevelFromRoomName } from "@/utils/floorUtils.ts";
 
 interface Params {
   buildingCode?: string;

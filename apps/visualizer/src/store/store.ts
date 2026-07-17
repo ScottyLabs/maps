@@ -1,19 +1,19 @@
 import { configureStore } from "@reduxjs/toolkit";
 
-import { apiSlice } from "./api/apiSlice";
-import dataSlice from "./features/dataSlice";
-import floorSlice from "./features/floorSlice";
-import historySlice from "./features/history/historySlice";
-import liveCursorSlice from "./features/liveCursor/liveCursorSlice";
-import modeSlice from "./features/modeSlice";
-import mouseEventSlice from "./features/mouseEventSlice";
-import polygonSlice from "./features/polygonSlice";
-import statusSlice from "./features/statusSlice";
-import uiSlice from "./features/uiSlice";
+import { apiSlice } from "./api/apiSlice.ts";
+import dataSlice from "./features/dataSlice.ts";
+import floorSlice from "./features/floorSlice.ts";
+import historySlice from "./features/history/historySlice.ts";
+import liveCursorSlice from "./features/liveCursor/liveCursorSlice.ts";
+import modeSlice from "./features/modeSlice.ts";
+import mouseEventSlice from "./features/mouseEventSlice.ts";
+import polygonSlice from "./features/polygonSlice.ts";
+import statusSlice from "./features/statusSlice.ts";
+import uiSlice from "./features/uiSlice.ts";
 // import usersSlice from './features/usersSlice';
-import visibilitySlice from "./features/visibilitySlice";
-import { listenerMiddleware } from "./middleware/listenerMiddleware";
-import { webSocketMiddleware } from "./middleware/webSocketMiddleware";
+import visibilitySlice from "./features/visibilitySlice.ts";
+import { listenerMiddleware } from "./middleware/listenerMiddleware.ts";
+import { webSocketMiddleware } from "./middleware/webSocketMiddleware.ts";
 
 export const store = configureStore({
   reducer: {

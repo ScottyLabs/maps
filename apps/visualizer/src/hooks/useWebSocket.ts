@@ -2,12 +2,12 @@ import { useUser } from "@clerk/clerk-react";
 
 import { useEffect, useRef } from "react";
 
-import { USE_STRICT_MODE } from "../settings";
-import { useAppDispatch } from "../store/hooks";
+import { USE_STRICT_MODE } from "../settings.ts";
+import { useAppDispatch } from "../store/hooks.ts";
 import {
   joinWebSocket,
   leaveWebSocket,
-} from "../store/middleware/webSocketActions";
+} from "../store/middleware/webSocketActions.ts";
 
 const getRandomColor = (): string => {
   return `#${Math.floor(Math.random() * 16777215)

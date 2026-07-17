@@ -12,13 +12,13 @@ import {
   buildCreateEdgeEditPair,
   buildDeleteEdgeAcrossFloorsEditPair,
   buildDeleteEdgeEditPair,
-} from "../features/history/historyGraphUtils";
-import { addEditToHistory } from "../features/history/historySlice";
-import { getSocketId } from "../middleware/webSocketMiddleware";
-import type { AppDispatch } from "../store";
-import { apiSlice, type BaseMutationArg } from "./apiSlice";
-import { handleQueryError } from "./errorHandler";
-import { floorDataApiSlice } from "./floorDataApiSlice";
+} from "../features/history/historyGraphUtils.ts";
+import { addEditToHistory } from "../features/history/historySlice.ts";
+import { getSocketId } from "../middleware/webSocketMiddleware.ts";
+import type { AppDispatch } from "../store.ts";
+import { apiSlice, type BaseMutationArg } from "./apiSlice.ts";
+import { handleQueryError } from "./errorHandler.ts";
+import { floorDataApiSlice } from "./floorDataApiSlice.ts";
 
 export type CreateEdgeArg = BaseMutationArg & CreateEdgePayload;
 export type DeleteEdgeArg = BaseMutationArg & DeleteEdgePayload;

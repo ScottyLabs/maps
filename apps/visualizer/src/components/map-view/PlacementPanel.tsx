@@ -1,6 +1,6 @@
 import type { Placement } from "@cmumaps/common";
 import { toast } from "react-toastify";
-import { useUpdateFloorPlacementMutation } from "@/store/api/floorDataApiSlice";
+import { useUpdateFloorPlacementMutation } from "@/store/api/floorDataApiSlice.ts";
 
 interface Props {
   floorCode: string;

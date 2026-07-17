@@ -1,6 +1,6 @@
 import { extractBuildingCode } from "@cmumaps/common";
 import { Link } from "@tanstack/react-router";
-import { useGetBuildingNameQuery } from "../../store/api/buildingApiSlice";
+import { useGetBuildingNameQuery } from "../../store/api/buildingApiSlice.ts";
 
 interface Props {
   floorCode: string;

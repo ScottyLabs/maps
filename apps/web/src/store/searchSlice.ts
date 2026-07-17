@@ -1,5 +1,5 @@
 import type { StateCreator } from "zustand";
-import type { SearchTarget } from "@/types/searchTypes";
+import type { SearchTarget } from "@/types/searchTypes.ts";
 
 export interface SearchSlice {
   isSearchOpen: boolean;

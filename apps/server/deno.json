@@ -1,0 +1,46 @@
+{
+  "imports": {
+    "@clerk/express": "npm:@clerk/express@^1.7.43",
+    "@prisma/client": "npm:@prisma/client@^6.18.0",
+    "@tsoa/runtime": "npm:@tsoa/runtime@^6.6.0",
+    "@types/cors": "npm:@types/cors@^2.8.19",
+    "@types/express": "npm:@types/express@^5.0.5",
+    "@types/express-serve-static-core": "npm:@types/express-serve-static-core@5.1.0",
+    "@types/jsonwebtoken": "npm:@types/jsonwebtoken@^9.0.10",
+    "@types/node": "npm:@types/node@^24.9.2",
+    "@types/swagger-ui-express": "npm:@types/swagger-ui-express@^4.1.8",
+    "better-auth": "npm:better-auth@^1.4.18",
+    "cors": "npm:cors@^2.8.5",
+    "express": "npm:express@^5.1.0",
+    "jsonwebtoken": "npm:jsonwebtoken@^9.0.2",
+    "jwks-rsa": "npm:jwks-rsa@^3.2.0",
+    "socket.io": "npm:socket.io@^4.8.1",
+    "swagger-ui-dist": "npm:swagger-ui-dist@^5.31.0",
+    "swagger-ui-express": "npm:swagger-ui-express@^5.0.1",
+    "tinyqueue": "npm:tinyqueue@^3.0.0",
+    "tsoa": "npm:tsoa@^6.6.0",
+    "zod": "npm:zod@^4.1.12"
+  },
+  "compilerOptions": {
+    "lib": [
+      "ESNext",
+      "deno.window"
+    ],
+    "types": [
+      "npm:@types/node@^24.9.2"
+    ],
+    "module": "Preserve",
+    "moduleResolution": "bundler",
+    "verbatimModuleSyntax": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": false,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": false,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    "checkJs": true,
+    "experimentalDecorators": true
+  }
+}

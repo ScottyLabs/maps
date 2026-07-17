@@ -1,6 +1,6 @@
-import { BuildingRoundel } from "@/components/map-view/building-display/BuildingRoundel";
-import BuildingShape from "@/components/map-view/building-display/BuildingShape";
-import { useGetBuildingsQuery } from "@/store/api/buildingApiSlice";
+import { BuildingRoundel } from "@/components/map-view/building-display/BuildingRoundel.tsx";
+import BuildingShape from "@/components/map-view/building-display/BuildingShape.tsx";
+import { useGetBuildingsQuery } from "@/store/api/buildingApiSlice.ts";
 
 const BuildingsDisplay = () => {
   const { data: buildings } = useGetBuildingsQuery();

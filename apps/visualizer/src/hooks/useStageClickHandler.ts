@@ -3,8 +3,8 @@ import { useNavigate } from "@tanstack/react-router";
 import type Konva from "konva";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
-import { useCreateEdgeMutation } from "../store/api/edgeApiSlice";
-import { useCreateNodeMutation } from "../store/api/nodeApiSlice";
+import { useCreateEdgeMutation } from "../store/api/edgeApiSlice.ts";
+import { useCreateNodeMutation } from "../store/api/nodeApiSlice.ts";
 import {
   ADD_EDGE,
   ADD_NODE,
@@ -13,17 +13,17 @@ import {
   POLYGON_ADD_VERTEX,
   POLYGON_SELECT,
   setMode,
-} from "../store/features/modeSlice";
+} from "../store/features/modeSlice.ts";
 import {
   setEditRoomLabel,
   setShowRoomSpecific,
-} from "../store/features/uiSlice";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { getCursorPos } from "../utils/canvasUtils";
-import { distPointToLine } from "../utils/geometryUtils";
-import { posToRoomId } from "../utils/roomUtils";
-import useSavePolygonEdit from "./useSavePolygonEdit";
-import useValidatedFloorParams from "./useValidatedFloorParams";
+} from "../store/features/uiSlice.ts";
+import { useAppDispatch, useAppSelector } from "../store/hooks.ts";
+import { getCursorPos } from "../utils/canvasUtils.ts";
+import { distPointToLine } from "../utils/geometryUtils.ts";
+import { posToRoomId } from "../utils/roomUtils.ts";
+import useSavePolygonEdit from "./useSavePolygonEdit.ts";
+import useValidatedFloorParams from "./useValidatedFloorParams.ts";
 
 const useStageClickHandler = (
   floorCode: string,

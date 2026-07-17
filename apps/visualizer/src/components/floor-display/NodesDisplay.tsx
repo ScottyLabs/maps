@@ -13,15 +13,15 @@ import { Circle } from "react-konva";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
-import { CURSOR_UPDATE_RATE } from "../../hooks/useCursorTracker";
-import useValidatedFloorParams from "../../hooks/useValidatedFloorParams";
+import { CURSOR_UPDATE_RATE } from "../../hooks/useCursorTracker.ts";
+import useValidatedFloorParams from "../../hooks/useValidatedFloorParams.ts";
 import {
   useCreateEdgeMutation,
   useDeleteEdgeMutation,
-} from "../../store/api/edgeApiSlice";
-import { useUpdateNodeMutation } from "../../store/api/nodeApiSlice";
-import { pushCursorInfo } from "../../store/features/liveCursor/liveCursorSlice";
-import type { CursorInfoOnDragNode } from "../../store/features/liveCursor/liveCursorTypes";
+} from "../../store/api/edgeApiSlice.ts";
+import { useUpdateNodeMutation } from "../../store/api/nodeApiSlice.ts";
+import { pushCursorInfo } from "../../store/features/liveCursor/liveCursorSlice.ts";
+import type { CursorInfoOnDragNode } from "../../store/features/liveCursor/liveCursorTypes.ts";
 import {
   ADD_DOOR_NODE,
   ADD_EDGE,
@@ -29,19 +29,19 @@ import {
   GRAPH_SELECT,
   selectEditPolygon,
   setMode,
-} from "../../store/features/modeSlice";
+} from "../../store/features/modeSlice.ts";
 import {
   dragNode,
   releaseNode,
   setDragNodePos,
-} from "../../store/features/mouseEventSlice";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
+} from "../../store/features/mouseEventSlice.ts";
+import { useAppDispatch, useAppSelector } from "../../store/hooks.ts";
 import {
   getCursorPos,
   getDragObjectPos,
   setCursor,
-} from "../../utils/canvasUtils";
-import { posToRoomId } from "../../utils/roomUtils";
+} from "../../utils/canvasUtils.ts";
+import { posToRoomId } from "../../utils/roomUtils.ts";
 
 interface Props {
   floorCode: string;

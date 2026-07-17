@@ -5,15 +5,15 @@ import type {
   CreateEdgeArg,
   DeleteEdgeAcrossFloorsArg,
   DeleteEdgeArg,
-} from "../../api/edgeApiSlice";
-import { floorDataApiSlice } from "../../api/floorDataApiSlice";
+} from "../../api/edgeApiSlice.ts";
+import { floorDataApiSlice } from "../../api/floorDataApiSlice.ts";
 import type {
   CreateNodeArg,
   DeleteNodeArg,
   UpdateNodeArg,
-} from "../../api/nodeApiSlice";
-import type { AppDispatch, RootState } from "../../store";
-import type { Edit, EditPair } from "./historyTypes";
+} from "../../api/nodeApiSlice.ts";
+import type { AppDispatch, RootState } from "../../store.ts";
+import type { Edit, EditPair } from "./historyTypes.ts";
 
 const getGraph = async (
   floorCode: string,

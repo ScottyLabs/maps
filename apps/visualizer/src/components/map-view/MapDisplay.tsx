@@ -7,11 +7,11 @@ import {
   MapType,
 } from "mapkit-react";
 import { useRef, useState } from "react";
-import BuildingShape from "@/components/map-view/building-display/BuildingShape";
-import CenterPin from "@/components/map-view/CenterPin";
-import FloorplanOverlay from "@/components/map-view/FloorplanOverlay";
-import { zoomOnBuilding } from "@/components/map-view/zoomUtils";
-import env from "@/env";
+import BuildingShape from "@/components/map-view/building-display/BuildingShape.tsx";
+import CenterPin from "@/components/map-view/CenterPin.tsx";
+import FloorplanOverlay from "@/components/map-view/FloorplanOverlay.tsx";
+import { zoomOnBuilding } from "@/components/map-view/zoomUtils.ts";
+import env from "@/env.ts";
 
 interface Props {
   floorCode: string;

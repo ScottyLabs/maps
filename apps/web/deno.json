@@ -1,0 +1,57 @@
+{
+  "imports": {
+    "@/": "./src/",
+    "@deno/vite-plugin": "npm:@deno/vite-plugin@^2.0.2",
+    "@scottylabs/corgi": "npm:@scottylabs/corgi@^0.2.11",
+    "@tailwindcss/vite": "npm:@tailwindcss/vite@^4.1.11",
+    "@tanstack/react-query": "npm:@tanstack/react-query@^5.83.0",
+    "@types/apple-mapkit-js-browser": "npm:@types/apple-mapkit-js-browser@^5.78.1",
+    "@types/lodash": "npm:@types/lodash@^4.17.16",
+    "@types/node": "npm:@types/node@^24.9.2",
+    "@types/react": "npm:@types/react@^19.1.8",
+    "@types/react-dom": "npm:@types/react-dom@^19.2.2",
+    "@vitejs/plugin-react": "npm:@vitejs/plugin-react@^5.1.1",
+    "babel-plugin-react-compiler": "npm:babel-plugin-react-compiler@^1.0.0",
+    "better-auth": "npm:better-auth@^1.4.18",
+    "lodash": "npm:lodash@^4.17.21",
+    "mapkit-react": "npm:mapkit-react@^1.16.1",
+    "motion": "npm:motion@^12.23.6",
+    "nuqs": "npm:nuqs@^2.4.3",
+    "openapi-fetch": "npm:openapi-fetch@^0.14.0",
+    "openapi-react-query": "npm:openapi-react-query@^0.5.0",
+    "posthog-js": "npm:posthog-js@^1.336.4",
+    "react": "npm:react@^19.1.0",
+    "react-device-detect": "npm:react-device-detect@^2.2.3",
+    "react-dom": "npm:react-dom@^19.1.0",
+    "react-icons": "npm:react-icons@^5.5.0",
+    "react-multi-carousel": "npm:react-multi-carousel@^2.8.6",
+    "react-router": "npm:react-router@^7.7.0",
+    "react-toastify": "npm:react-toastify@^11.0.5",
+    "tailwindcss": "npm:tailwindcss@^4.1.11",
+    "vite": "npm:vite@^7.0.4",
+    "zod": "npm:zod@^4.1.12",
+    "zustand": "npm:zustand@^5.0.6"
+  },
+  "compilerOptions": {
+    "lib": [
+      "ESNext",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "types": [
+      "@types/apple-mapkit-js-browser"
+    ],
+    "jsx": "react-jsx",
+    "module": "Preserve",
+    "moduleResolution": "bundler",
+    "verbatimModuleSyntax": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    "checkJs": true
+  }
+}

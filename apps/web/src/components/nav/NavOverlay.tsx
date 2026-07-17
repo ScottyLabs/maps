@@ -4,8 +4,8 @@ import { useIsMobile } from "@/hooks/useIsMobile.ts";
 import { useNavPaths } from "@/hooks/useNavigationParams.ts";
 import { useUser } from "@/hooks/useUser.ts";
 import { useBoundStore } from "@/store/index.ts";
-import type { Node } from "@/types/navTypes";
-import { isPublicBuilding } from "@/utils/authUtils";
+import type { Node } from "@/types/navTypes.ts";
+import { isPublicBuilding } from "@/utils/authUtils.ts";
 
 const NavOverlay = ({
   mapRef,

@@ -1,11 +1,11 @@
 import { useQueryState } from "nuqs";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
-import { $api } from "@/api/client";
-import { useUser } from "@/hooks/useUser";
-import { useBoundStore } from "@/store";
-import type { NavPaths, NavWaypointType } from "@/types/navTypes";
-import { buildFloorCode, getFloorLevelFromRoomName } from "@/utils/floorUtils";
+import { $api } from "@/api/client.ts";
+import { useUser } from "@/hooks/useUser.ts";
+import { useBoundStore } from "@/store/index.ts";
+import type { NavPaths, NavWaypointType } from "@/types/navTypes.ts";
+import { buildFloorCode, getFloorLevelFromRoomName } from "@/utils/floorUtils.ts";
 
 interface Params {
   navPaths?: NavPaths;

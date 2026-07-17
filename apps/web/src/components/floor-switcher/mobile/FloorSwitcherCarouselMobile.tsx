@@ -3,7 +3,7 @@ import type { Building } from "@cmumaps/common";
 import type { MotionValue } from "motion/react";
 import { animate, motion, useTransform } from "motion/react";
 import { useEffect } from "react";
-import { $api } from "@/api/client";
+import { $api } from "@/api/client.ts";
 import { useBoundStore } from "@/store/index.ts";
 
 interface FloorSwitcherButtonProps {

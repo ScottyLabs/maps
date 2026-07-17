@@ -10,7 +10,7 @@ import type {
   PoiType,
   Rooms,
   RoomType,
-} from "@cmumaps/common";
+} from "../../../../packages/common/src/index.ts";
 import {
   extractBuildingCode,
   extractFloorLevel,
@@ -18,7 +18,7 @@ import {
   geoPolygonToPdfPolygon,
   pdfCoordsToGeoCoords,
   pdfPolygonToGeoPolygon,
-} from "@cmumaps/common";
+} from "../../../../packages/common/src/index.ts";
 import type { InputJsonValue } from "@prisma/client/runtime/library";
 import { prisma } from "../../prisma/index.ts";
 

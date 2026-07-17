@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-bunx commitlint --edit "$1"
+deno run -A npm:@commitlint/cli --edit "$1"

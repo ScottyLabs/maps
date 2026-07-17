@@ -1,0 +1,61 @@
+{
+  "$schema": "https://deno.land/x/deno/cli/schemas/config-file.v1.json",
+  "nodeModulesDir": "auto",
+  "workspace": [
+    "./packages/common",
+    "./packages/ui",
+    "./packages/websocket",
+    "./apps/server",
+    "./apps/web",
+    "./apps/visualizer"
+  ],
+  "compilerOptions": {
+    "lib": [
+      "ESNext"
+    ],
+    "module": "Preserve",
+    "moduleResolution": "bundler",
+    "verbatimModuleSyntax": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    "checkJs": true
+  },
+  "tasks": {
+    "build": "deno task build:web && deno task build:visualizer",
+    "build:web": "cd apps/web && deno run -A npm:vite@^7.0.4 build",
+    "build:visualizer": "cd apps/visualizer && deno run -A npm:vite@^7.0.4 build",
+    "check": "deno check packages/common/src packages/ui/src packages/websocket/src apps/server/src apps/web/src apps/visualizer/src",
+    "tsc": "deno task check",
+    "db-generate": "cd apps/server && deno run -A npm:prisma@^6.18.0 generate",
+    "dev": "deno task dev:prepare:noauth && IGNORE_LOGIN=true VITE_IGNORE_LOGIN=true deno run -A npm:mprocs@^0.9.1 --config mprocs.yaml",
+    "dev:auth": "deno task dev:prepare && deno run -A npm:mprocs@^0.9.1 --config mprocs.yaml",
+    "dev:panel:db": "cd apps/server && deno run -A npm:prisma@^6.18.0 studio",
+    "dev:panel:server": "cd apps/server && deno run -A --watch --env-file=.env src/server.ts",
+    "dev:panel:visualizer": "cd apps/visualizer && deno run -A npm:vite@^7.0.4 --host",
+    "dev:panel:web": "cd apps/web && deno run -A npm:vite@^7.0.4 --host",
+    "dev:prepare": "deno run -A ./scripts/dev/prepare.ts",
+    "dev:prepare:noauth": "deno run -A ./scripts/dev/prepare.ts --profile web-noauth",
+    "dev:prepare:visualizer": "deno run -A ./scripts/dev/prepare.ts --profile visualizer",
+    "dev:server": "deno run -A npm:concurrently@^9.2.1 \"deno task dev:panel:server\" \"deno task tsoa:watch\" \"deno task openapi:watch\"",
+    "dev:ui:visualizer": "deno task dev:prepare:visualizer && deno run -A npm:mprocs@^0.9.1 --config mprocs.visualizer.yaml",
+    "dev:visualizer": "deno run -A npm:concurrently@^9.2.1 \"deno task dev:server\" \"deno task dev:panel:visualizer\"",
+    "dev:web": "deno run -A npm:concurrently@^9.2.1 \"deno task dev:server\" \"deno task dev:panel:web\"",
+    "dev:web:host": "deno task dev:web",
+    "dev:web:noauth": "deno task dev:prepare:noauth && IGNORE_LOGIN=true VITE_IGNORE_LOGIN=true deno task dev:web",
+    "openapi": "cd apps/server && deno run -A npm:openapi-typescript@^7.10.1 ./build/swagger.yaml -o ./build/swagger.d.ts",
+    "openapi:watch": "cd apps/server && deno run -A npm:onchange@^7.1.0 './build/swagger.yaml' -- deno task openapi",
+    "secrets:pull": "PROJECT=cmumaps APPS='web server visualizer dataflow' ENVS='applicants local dev staging prod' ./scripts/secrets/multi/pull.sh",
+    "secrets:push": "PROJECT=cmumaps APPS='web server visualizer dataflow' ENVS='applicants local dev staging prod' ./scripts/secrets/multi/push.sh",
+    "secrets:setup": "./scripts/secrets/setup.sh",
+    "server": "cd apps/server && deno run -A --watch --env-file=.env src/server.ts",
+    "start": "cd apps/server && deno run -A --env-file=.env src/server.ts",
+    "sync": "deno task db-generate && deno task tsoa && deno task openapi",
+    "tsoa": "cd apps/server && deno run -A npm:tsoa@^6.6.0 spec-and-routes",
+    "tsoa:watch": "cd apps/server && deno run -A npm:onchange@^7.1.0 'src/controllers/*.ts' 'tsoa.json' -- deno task tsoa"
+  }
+}

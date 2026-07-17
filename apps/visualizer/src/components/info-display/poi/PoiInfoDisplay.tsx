@@ -1,9 +1,9 @@
 import type { Pois } from "@cmumaps/common";
 
-import CopyIdRow from "../shared/CopyIdRow";
-import TableLayout from "../shared/TableLayout";
-import PoiDeleteButton from "./PoiDeleteButton";
-import PoiEditTypeRow from "./PoiEditTypeRow";
+import CopyIdRow from "../shared/CopyIdRow.tsx";
+import TableLayout from "../shared/TableLayout.tsx";
+import PoiDeleteButton from "./PoiDeleteButton.tsx";
+import PoiEditTypeRow from "./PoiEditTypeRow.tsx";
 
 interface Props {
   floorCode: string;

@@ -1,5 +1,5 @@
 import type { Building, BuildingMetadata, Buildings } from "@cmumaps/common";
-import { apiSlice } from "./apiSlice";
+import { apiSlice } from "./apiSlice.ts";
 
 export const buildingApiSlice = apiSlice.injectEndpoints({
   overrideExisting: true,

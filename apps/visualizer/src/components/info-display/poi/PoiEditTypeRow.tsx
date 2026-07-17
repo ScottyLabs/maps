@@ -2,8 +2,8 @@ import { type PoiInfo, type PoiType, PoiTypes } from "@cmumaps/common";
 import type { SingleValue } from "react-select";
 import { v4 as uuidv4 } from "uuid";
 
-import { useUpdatePoiMutation } from "../../../store/api/poiApiSlice";
-import SelectTypeCell from "../shared/SelectTypeCell";
+import { useUpdatePoiMutation } from "../../../store/api/poiApiSlice.ts";
+import SelectTypeCell from "../shared/SelectTypeCell.tsx";
 
 interface Props {
   floorCode: string;

@@ -1,5 +1,5 @@
 import type { StateCreator } from "zustand";
-import type { Instruction, NavPaths, NavPathType } from "@/types/navTypes";
+import type { Instruction, NavPaths, NavPathType } from "@/types/navTypes.ts";
 
 export interface NavSlice {
   isNavigating: boolean;

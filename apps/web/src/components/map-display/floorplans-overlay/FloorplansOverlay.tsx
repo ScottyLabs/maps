@@ -1,7 +1,7 @@
 import { FloorplanOverlay } from "@/components/map-display/floorplans-overlay/FloorplanOverlay.tsx";
 import { useUser } from "@/hooks/useUser.ts";
 import { useBoundStore } from "@/store/index.ts";
-import { isPublicBuilding } from "@/utils/authUtils";
+import { isPublicBuilding } from "@/utils/authUtils.ts";
 
 const FloorplansOverlay = () => {
   const user = useUser();

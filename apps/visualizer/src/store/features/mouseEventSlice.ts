@@ -1,7 +1,7 @@
 import type { PdfCoordinate } from "@cmumaps/common";
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-import type { DragVertexInfo } from "./liveCursor/liveCursorTypes";
+import type { DragVertexInfo } from "./liveCursor/liveCursorTypes.ts";
 
 interface MouseEventState {
   dragNodeId: string | null;

@@ -1,5 +1,5 @@
-import { GRAPH_SELECT, setMode } from "../../store/features/modeSlice";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { GRAPH_SELECT, setMode } from "../../store/features/modeSlice.ts";
+import { useAppDispatch, useAppSelector } from "../../store/hooks.ts";
 
 const ModeDisplay = () => {
   const dispatch = useAppDispatch();

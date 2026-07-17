@@ -1,6 +1,6 @@
 export type SearchIndex = Record<string, [string, number][]>;
 
-import type { Floor, GeoCoordinate, RoomType } from "@cmumaps/common";
+import type { Floor, GeoCoordinate, RoomType } from "../../../../../packages/common/src/index.ts";
 
 export interface Document {
   id: string;

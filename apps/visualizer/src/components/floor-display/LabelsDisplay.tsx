@@ -5,10 +5,10 @@ import { useMemo } from "react";
 import { TfiLocationPin } from "react-icons/tfi";
 import { Group, Path, Rect, Text } from "react-konva";
 import { v4 as uuidv4 } from "uuid";
-import useValidatedFloorParams from "../../hooks/useValidatedFloorParams";
-import { useUpdateRoomMutation } from "../../store/api/roomApiSlice";
-import { useAppSelector } from "../../store/hooks";
-import { setCursor } from "../../utils/canvasUtils";
+import useValidatedFloorParams from "../../hooks/useValidatedFloorParams.ts";
+import { useUpdateRoomMutation } from "../../store/api/roomApiSlice.ts";
+import { useAppSelector } from "../../store/hooks.ts";
+import { setCursor } from "../../utils/canvasUtils.ts";
 
 interface Props {
   floorCode: string;

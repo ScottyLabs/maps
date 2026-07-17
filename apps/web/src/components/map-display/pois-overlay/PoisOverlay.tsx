@@ -1,7 +1,7 @@
 import { PoiOverlay } from "@/components/map-display/pois-overlay/PoiOverlay.tsx";
 import { useUser } from "@/hooks/useUser.ts";
 import { useBoundStore } from "@/store/index.ts";
-import { isPublicBuilding } from "@/utils/authUtils";
+import { isPublicBuilding } from "@/utils/authUtils.ts";
 
 const PoisOverlay = () => {
   const user = useUser();

@@ -4,7 +4,7 @@ import {
   pdfPolygonToGeoPolygon,
 } from "@cmumaps/common";
 import { Polygon } from "mapkit-react";
-import { useGetFloorRoomsQuery } from "../../store/api/floorDataApiSlice";
+import { useGetFloorRoomsQuery } from "../../store/api/floorDataApiSlice.ts";
 
 interface Props {
   floorCode: string;

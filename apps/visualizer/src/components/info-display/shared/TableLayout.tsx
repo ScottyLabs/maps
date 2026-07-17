@@ -1,4 +1,4 @@
-import TableCell from "./TableCell";
+import TableCell from "./TableCell.tsx";
 
 // table layout for RoomInfoDisplay and PoiInfoDisplay
 const TableLayout = (props: { children: React.ReactNode }) => {

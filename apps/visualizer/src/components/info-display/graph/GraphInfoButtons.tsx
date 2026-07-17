@@ -1,15 +1,15 @@
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
-import { useDeleteNodeMutation } from "../../../store/api/nodeApiSlice";
+import { useDeleteNodeMutation } from "../../../store/api/nodeApiSlice.ts";
 import {
   ADD_EDGE,
   DELETE_EDGE,
   setMode,
-} from "../../../store/features/modeSlice";
-import { useAppDispatch } from "../../../store/hooks";
-import InfoDisplayButton from "../shared/InfoDisplayButton";
-import { RED_BUTTON_STYLE } from "../shared/TableCell";
+} from "../../../store/features/modeSlice.ts";
+import { useAppDispatch } from "../../../store/hooks.ts";
+import InfoDisplayButton from "../shared/InfoDisplayButton.tsx";
+import { RED_BUTTON_STYLE } from "../shared/TableCell.tsx";
 
 interface Props {
   floorCode: string;

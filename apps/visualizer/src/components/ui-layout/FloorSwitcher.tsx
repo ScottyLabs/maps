@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
-import useFloorInfo from "../../hooks/useFloorInfo";
-import { useGetBuildingFloorsQuery } from "../../store/api/buildingApiSlice";
+import useFloorInfo from "../../hooks/useFloorInfo.ts";
+import { useGetBuildingFloorsQuery } from "../../store/api/buildingApiSlice.ts";
 
 interface Props {
   floorCode: string;

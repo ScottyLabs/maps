@@ -3,7 +3,7 @@ import { useLocationParams } from "@/hooks/useLocationParams.ts";
 import { useNavPaths } from "@/hooks/useNavigationParams.ts";
 import { useUser } from "@/hooks/useUser.ts";
 import { signIn, signOut } from "@/lib/authClient.ts";
-import { useBoundStore } from "@/store";
+import { useBoundStore } from "@/store/index.ts";
 
 const IconsDisplayMobile = () => {
   const isSearchOpen = useBoundStore((state) => state.isSearchOpen);

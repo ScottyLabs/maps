@@ -1,4 +1,4 @@
-import type { PreciseRoute } from "@cmumaps/common";
+import type { PreciseRoute } from "../../../../packages/common/src/index.ts";
 import { Get, Query, Route, Security } from "tsoa";
 import { BEARER_AUTH, OIDC_AUTH } from "../lib/authentication.ts";
 import { pathService } from "../services/pathService.ts";

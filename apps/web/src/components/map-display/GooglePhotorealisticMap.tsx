@@ -4,7 +4,7 @@ import { getRoomTypeDetails } from "@cmumaps/common";
 import { CAMERA_BOUNDARY, INITIAL_REGION } from "@cmumaps/ui";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import { $api } from "@/api/client";
+import { $api } from "@/api/client.ts";
 import { env } from "@/env.ts";
 import { useLocationParams } from "@/hooks/useLocationParams.ts";
 import { useNavigateLocationParams } from "@/hooks/useNavigateLocationParams.ts";
@@ -15,9 +15,9 @@ import { CardStates } from "@/store/cardSlice.ts";
 import { useBoundStore } from "@/store/index.ts";
 import type { MapCoordinate } from "@/store/mapSlice.ts";
 import type { Node } from "@/types/navTypes.ts";
-import { isPublicBuilding } from "@/utils/authUtils";
-import { getBuildingShapeFillColor } from "@/utils/buildingColorUtils";
-import { buildFloorCode, getFloorLevelFromRoomName } from "@/utils/floorUtils";
+import { isPublicBuilding } from "@/utils/authUtils.ts";
+import { getBuildingShapeFillColor } from "@/utils/buildingColorUtils.ts";
+import { buildFloorCode, getFloorLevelFromRoomName } from "@/utils/floorUtils.ts";
 import { prefersReducedMotion } from "@/utils/prefersReducedMotion.ts";
 
 interface GoogleLatLngAltitude {

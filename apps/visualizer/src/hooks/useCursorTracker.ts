@@ -4,10 +4,10 @@ import { throttle } from "lodash";
 
 import { useEffect } from "react";
 
-import { pushCursorInfo } from "../store/features/liveCursor/liveCursorSlice";
-import { syncCursors } from "../store/features/liveCursor/liveCursorThunks";
-import { useAppDispatch } from "../store/hooks";
-import { getCursorPos } from "../utils/canvasUtils";
+import { pushCursorInfo } from "../store/features/liveCursor/liveCursorSlice.ts";
+import { syncCursors } from "../store/features/liveCursor/liveCursorThunks.ts";
+import { useAppDispatch } from "../store/hooks.ts";
+import { getCursorPos } from "../utils/canvasUtils.ts";
 
 export const CURSOR_UPDATE_RATE = 20;
 const CURSOR_SYNC_INTERVAL = 500;

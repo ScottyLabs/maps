@@ -26,26 +26,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: DavidAnson/markdownlint-cli2-action@v22
 
-  syncpack:
-    name: Syncpack Lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Deno
-        uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.x
-
-      # To resolve: ✗ Node.js v22.6.0 or higher is needed for a TypeScript config file
-      - name: Install Node
-        uses: actions/setup-node@v6
-        with:
-          node-version: 22.x
-
-      - name: Run Syncpack
-        run: deno task syncpack
-
   deno-check:
     name: Deno Check
     runs-on: ubuntu-latest

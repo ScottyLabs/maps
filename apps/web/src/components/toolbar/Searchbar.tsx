@@ -3,10 +3,10 @@ import { IoIosClose } from "react-icons/io";
 import searchIcon from "@/assets/icons/search.svg";
 import { SearchResults } from "@/components/toolbar/SearchResults.tsx";
 import { useAutofillSearchQuery } from "@/hooks/useAutofillSearchQuery.ts";
-import { useNavigateLocationParams } from "@/hooks/useNavigateLocationParams";
+import { useNavigateLocationParams } from "@/hooks/useNavigateLocationParams.ts";
 import { useNavPaths } from "@/hooks/useNavigationParams.ts";
 import { useBoundStore } from "@/store/index.ts";
-import type { SearchTarget } from "@/types/searchTypes";
+import type { SearchTarget } from "@/types/searchTypes.ts";
 
 interface Props {
   mapRef: React.RefObject<mapkit.Map | null>;

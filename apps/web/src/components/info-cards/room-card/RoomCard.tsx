@@ -1,5 +1,5 @@
-import { $api } from "@/api/client";
-import { ButtonsRow } from "@/components/info-cards/shared/buttons-row/ButtonsRow";
+import { $api } from "@/api/client.ts";
+import { ButtonsRow } from "@/components/info-cards/shared/buttons-row/ButtonsRow.tsx";
 import { InfoCardImage } from "@/components/info-cards/shared/media/InfoCardImage.tsx";
 import { useIsMobile } from "@/hooks/useIsMobile.ts";
 import { useLocationParams } from "@/hooks/useLocationParams.ts";

@@ -2,9 +2,9 @@ import type { EdgeInfo, Graph } from "@cmumaps/common";
 
 import { useMemo } from "react";
 
-import CrossFloorEdgeSection from "./CrossFloorEdgeSection";
-import CrossFloorNeighborTable from "./CrossFloorNeighborTable";
-import GraphInfoButtons from "./GraphInfoButtons";
+import CrossFloorEdgeSection from "./CrossFloorEdgeSection.tsx";
+import CrossFloorNeighborTable from "./CrossFloorNeighborTable.tsx";
+import GraphInfoButtons from "./GraphInfoButtons.tsx";
 
 interface Props {
   floorCode: string;

@@ -1,4 +1,4 @@
-import type { Placement } from "@cmumaps/common";
+import type { Placement } from "../../../../packages/common/src/index.ts";
 import { Body, Get, Path, Put, Route, Security } from "tsoa";
 import { BEARER_AUTH, MEMBER_SCOPE, OIDC_AUTH } from "../lib/authentication.ts";
 import { floorService } from "../services/floorService.ts";

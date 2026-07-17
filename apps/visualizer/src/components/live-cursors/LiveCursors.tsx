@@ -1,6 +1,6 @@
-import { useAppSelector } from "../../store/hooks";
-import { getSocketId } from "../../store/middleware/webSocketMiddleware";
-import LiveCursor from "./LiveCursor";
+import { useAppSelector } from "../../store/hooks.ts";
+import { getSocketId } from "../../store/middleware/webSocketMiddleware.ts";
+import LiveCursor from "./LiveCursor.tsx";
 
 interface LiveCursorsProps {
   floorCode: string;

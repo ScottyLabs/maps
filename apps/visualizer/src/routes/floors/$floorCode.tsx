@@ -1,14 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import MyToastContainer from "../../components/shared/MyToastContainer";
-import FloorSwitcher from "../../components/ui-layout/FloorSwitcher";
-import HelpInfo from "../../components/ui-layout/HelpInfo";
-import LiveUserCount from "../../components/ui-layout/LiveUserCount";
-import MainDisplay from "../../components/ui-layout/MainDisplay";
-import ModeDisplay from "../../components/ui-layout/ModeDisplay";
-import NavBar from "../../components/ui-layout/NavBar";
-import ViewSwitch from "../../components/ui-layout/ViewSwitch";
+import MyToastContainer from "../../components/shared/MyToastContainer.tsx";
+import FloorSwitcher from "../../components/ui-layout/FloorSwitcher.tsx";
+import HelpInfo from "../../components/ui-layout/HelpInfo.tsx";
+import LiveUserCount from "../../components/ui-layout/LiveUserCount.tsx";
+import MainDisplay from "../../components/ui-layout/MainDisplay.tsx";
+import ModeDisplay from "../../components/ui-layout/ModeDisplay.tsx";
+import NavBar from "../../components/ui-layout/NavBar.tsx";
+import ViewSwitch from "../../components/ui-layout/ViewSwitch.tsx";
 
 const floorSearchSchema = z.object({
   nodeId: z.string().optional(),

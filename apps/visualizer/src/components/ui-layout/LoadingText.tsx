@@ -1,6 +1,6 @@
-import { FAILED_LOAD, LOADING } from "../../store/features/statusSlice";
-import { useAppSelector } from "../../store/hooks";
-import Loader from "../shared/Loader";
+import { FAILED_LOAD, LOADING } from "../../store/features/statusSlice.ts";
+import { useAppSelector } from "../../store/hooks.ts";
+import Loader from "../shared/Loader.tsx";
 
 const LoadingText = () => {
   const loadingStatus = useAppSelector((state) => state.status.loadingStatus);

@@ -10,13 +10,13 @@ import {
   buildCreatePoiEditPair,
   buildDeletePoiEditPair,
   buildUpdatePoiEditPair,
-} from "../features/history/historyPoiUtils";
-import { addEditToHistory } from "../features/history/historySlice";
-import { getSocketId } from "../middleware/webSocketMiddleware";
-import type { AppDispatch, RootState } from "../store";
-import { apiSlice, type BaseMutationArg } from "./apiSlice";
-import { handleQueryError } from "./errorHandler";
-import { floorDataApiSlice } from "./floorDataApiSlice";
+} from "../features/history/historyPoiUtils.ts";
+import { addEditToHistory } from "../features/history/historySlice.ts";
+import { getSocketId } from "../middleware/webSocketMiddleware.ts";
+import type { AppDispatch, RootState } from "../store.ts";
+import { apiSlice, type BaseMutationArg } from "./apiSlice.ts";
+import { handleQueryError } from "./errorHandler.ts";
+import { floorDataApiSlice } from "./floorDataApiSlice.ts";
 
 export type CreatePoiArg = BaseMutationArg & CreatePoiPayload;
 export type DeletePoiArg = BaseMutationArg & DeletePoiPayload;

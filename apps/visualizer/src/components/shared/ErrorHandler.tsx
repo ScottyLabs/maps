@@ -1,6 +1,6 @@
 import type { SerializedError } from "@reduxjs/toolkit";
 import type { FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
-import ErrorDisplay from "./ErrorDisplay";
+import ErrorDisplay from "./ErrorDisplay.tsx";
 
 interface Props {
   error: FetchBaseQueryError | SerializedError;

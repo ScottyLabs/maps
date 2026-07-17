@@ -4,13 +4,13 @@ import { zodValidator } from "@tanstack/zod-adapter";
 import { FeatureVisibility, Map as MapkitMap, MapType } from "mapkit-react";
 import { useEffect, useRef } from "react";
 import z from "zod";
-import BuildingsDisplay from "@/components/map-view/building-display/BuildingsDisplay";
-import OutsideNodes from "@/components/map-view/OutsideNodes";
-import { zoomOnPoint } from "@/components/map-view/zoomUtils";
-import MyToastContainer from "@/components/shared/MyToastContainer";
-import NavBar from "@/components/ui-layout/NavBar";
-import env from "@/env";
-import { useGetFloorNodesQuery } from "@/store/api/floorDataApiSlice";
+import BuildingsDisplay from "@/components/map-view/building-display/BuildingsDisplay.tsx";
+import OutsideNodes from "@/components/map-view/OutsideNodes.tsx";
+import { zoomOnPoint } from "@/components/map-view/zoomUtils.ts";
+import MyToastContainer from "@/components/shared/MyToastContainer.tsx";
+import NavBar from "@/components/ui-layout/NavBar.tsx";
+import env from "@/env.ts";
+import { useGetFloorNodesQuery } from "@/store/api/floorDataApiSlice.ts";
 
 const mapSearchSchema = z.object({
   nodeId: z.string().optional(),

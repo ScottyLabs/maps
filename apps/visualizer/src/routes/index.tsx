@@ -3,11 +3,11 @@ import { ERROR_CODES } from "@cmumaps/common";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import ErrorDisplay from "../components/shared/ErrorDisplay";
-import Loader from "../components/shared/Loader";
-import MyToastContainer from "../components/shared/MyToastContainer";
-import useWebSocket from "../hooks/useWebSocket";
-import { useGetBuildingsMetadataQuery } from "../store/api/buildingApiSlice";
+import ErrorDisplay from "../components/shared/ErrorDisplay.tsx";
+import Loader from "../components/shared/Loader.tsx";
+import MyToastContainer from "../components/shared/MyToastContainer.tsx";
+import useWebSocket from "../hooks/useWebSocket.ts";
+import { useGetBuildingsMetadataQuery } from "../store/api/buildingApiSlice.ts";
 
 const indexSearchSchema = z.object({
   errorCode: z.nativeEnum(ERROR_CODES).optional(),

@@ -1,7 +1,7 @@
 import { addListener, createListenerMiddleware } from "@reduxjs/toolkit";
 
-import { setModeListener } from "../features/modeSlice";
-import type { AppDispatch, RootState } from "../store";
+import { setModeListener } from "../features/modeSlice.ts";
+import type { AppDispatch, RootState } from "../store.ts";
 
 export const listenerMiddleware = createListenerMiddleware();
 

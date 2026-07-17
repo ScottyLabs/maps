@@ -1,5 +1,5 @@
-import type { GeoNode, Instruction } from "@cmumaps/common";
-import { calculateAngle } from "@cmumaps/common";
+import type { GeoNode, Instruction } from "../../../../../packages/common/src/index.ts";
+import { calculateAngle } from "../../../../../packages/common/src/index.ts";
 
 export const PLACEHOLDER_INSTRUCTION_DISTANCE = 42;
 

@@ -11,23 +11,23 @@ import { v4 as uuidv4 } from "uuid";
 import {
   useDeleteRoomMutation,
   useUpdateRoomMutation,
-} from "../../../store/api/roomApiSlice";
+} from "../../../store/api/roomApiSlice.ts";
 import {
   selectEditPolygon,
   toggleEditPolygon,
-} from "../../../store/features/modeSlice";
+} from "../../../store/features/modeSlice.ts";
 import {
   SidePanelTabIndex,
   setSidePanelActiveTabIndex,
   toggleEditRoomLabel,
-} from "../../../store/features/uiSlice";
-import { useAppSelector } from "../../../store/hooks";
-import CopyIdRow from "../shared/CopyIdRow";
-import EditCell from "../shared/EditCell";
-import InfoDisplayButton from "../shared/InfoDisplayButton";
-import SelectTypeCell from "../shared/SelectTypeCell";
-import TableCell, { RED_BUTTON_STYLE } from "../shared/TableCell";
-import TableLayout from "../shared/TableLayout";
+} from "../../../store/features/uiSlice.ts";
+import { useAppSelector } from "../../../store/hooks.ts";
+import CopyIdRow from "../shared/CopyIdRow.tsx";
+import EditCell from "../shared/EditCell.tsx";
+import InfoDisplayButton from "../shared/InfoDisplayButton.tsx";
+import SelectTypeCell from "../shared/SelectTypeCell.tsx";
+import TableCell, { RED_BUTTON_STYLE } from "../shared/TableCell.tsx";
+import TableLayout from "../shared/TableLayout.tsx";
 
 interface Props {
   floorCode: string;

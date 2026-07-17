@@ -1,13 +1,13 @@
 import type { Pois } from "@cmumaps/common";
 
-import { floorDataApiSlice } from "../../api/floorDataApiSlice";
+import { floorDataApiSlice } from "../../api/floorDataApiSlice.ts";
 import type {
   CreatePoiArg,
   DeletePoiArg,
   UpdatePoiArg,
-} from "../../api/poiApiSlice";
-import type { AppDispatch, RootState } from "../../store";
-import type { Edit, EditPair } from "./historyTypes";
+} from "../../api/poiApiSlice.ts";
+import type { AppDispatch, RootState } from "../../store.ts";
+import type { Edit, EditPair } from "./historyTypes.ts";
 
 const getPois = async (
   floorCode: string,

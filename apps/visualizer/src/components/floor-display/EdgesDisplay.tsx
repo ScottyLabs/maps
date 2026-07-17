@@ -3,9 +3,9 @@ import type { Graph } from "@cmumaps/common";
 import { useMemo } from "react";
 import { Line } from "react-konva";
 
-import useValidatedFloorParams from "../../hooks/useValidatedFloorParams";
-import { selectEditPolygon } from "../../store/features/modeSlice";
-import { useAppSelector } from "../../store/hooks";
+import useValidatedFloorParams from "../../hooks/useValidatedFloorParams.ts";
+import { selectEditPolygon } from "../../store/features/modeSlice.ts";
+import { useAppSelector } from "../../store/hooks.ts";
 
 interface Props {
   floorCode: string;

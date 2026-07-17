@@ -1,4 +1,4 @@
-import type { Buildings, GeoCoordinate, RoomType } from "@cmumaps/common";
+import type { Buildings, GeoCoordinate, RoomType } from "../../../../../packages/common/src/index.ts";
 import { prisma } from "../../../prisma/index.ts";
 import { buildingService } from "../../services/buildingService.ts";
 import { parseQuery } from "./parse.ts";

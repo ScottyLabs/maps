@@ -1,5 +1,5 @@
-import type { LiveUser, WebSocketPayloads } from "@cmumaps/websocket";
-import { WebSocketEvents } from "@cmumaps/websocket";
+import type { LiveUser, WebSocketPayloads } from "../../../../packages/websocket/src/index.ts";
+import { WebSocketEvents } from "../../../../packages/websocket/src/index.ts";
 import type { Server } from "socket.io";
 
 export class WebSocketService {

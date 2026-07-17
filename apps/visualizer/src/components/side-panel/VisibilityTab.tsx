@@ -5,9 +5,9 @@ import {
   toggleShowOutline,
   toggleShowPdf,
   toggleShowPolygons,
-} from "../../store/features/visibilitySlice";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import ToggleSwitch from "../shared/ToggleSwitch";
+} from "../../store/features/visibilitySlice.ts";
+import { useAppDispatch, useAppSelector } from "../../store/hooks.ts";
+import ToggleSwitch from "../shared/ToggleSwitch.tsx";
 
 const VisibilityTab = () => {
   const dispatch = useAppDispatch();

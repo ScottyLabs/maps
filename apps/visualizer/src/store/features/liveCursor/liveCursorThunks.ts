@@ -1,12 +1,12 @@
-import { floorDataApiSlice } from "../../api/floorDataApiSlice";
-import { broadcastWebSocket } from "../../middleware/webSocketActions";
-import { getSocketId } from "../../middleware/webSocketMiddleware";
-import { createAppAsyncThunk } from "../../withTypes";
-import { setCursorInfos } from "./liveCursorSlice";
+import { floorDataApiSlice } from "../../api/floorDataApiSlice.ts";
+import { broadcastWebSocket } from "../../middleware/webSocketActions.ts";
+import { getSocketId } from "../../middleware/webSocketMiddleware.ts";
+import { createAppAsyncThunk } from "../../withTypes.ts";
+import { setCursorInfos } from "./liveCursorSlice.ts";
 import type {
   CursorInfoOnDragNode,
   CursorInfoOnDragVertex,
-} from "./liveCursorTypes";
+} from "./liveCursorTypes.ts";
 
 export const syncCursors = createAppAsyncThunk(
   "liveCursor/syncCursors",

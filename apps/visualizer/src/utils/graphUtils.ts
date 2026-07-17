@@ -2,9 +2,9 @@ import type { Graph, Mst, Rooms } from "@cmumaps/common";
 import { PriorityQueue } from "@datastructures-js/priority-queue";
 import type { useNavigate } from "@tanstack/react-router";
 import { toast } from "react-toastify";
-import { setMst } from "../store/features/dataSlice";
-import type { AppDispatch } from "../store/store";
-import { dist } from "./geometryUtils";
+import { setMst } from "../store/features/dataSlice.ts";
+import type { AppDispatch } from "../store/store.ts";
+import { dist } from "./geometryUtils.ts";
 
 // calculate mst for each connected components of the graph
 export const calcMst = (

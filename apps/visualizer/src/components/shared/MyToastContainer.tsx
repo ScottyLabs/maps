@@ -1,7 +1,7 @@
 import type { ErrorCode } from "@cmumaps/common";
 import { Slide, ToastContainer } from "react-toastify";
 
-import useErrorToast from "../../hooks/useErrorToast";
+import useErrorToast from "../../hooks/useErrorToast.ts";
 
 interface Props {
   errorCode?: ErrorCode;

@@ -1,4 +1,4 @@
-import type { GeoCoordinate } from "@cmumaps/common";
+import type { GeoCoordinate } from "../../../../packages/common/src/index.ts";
 import { getSearchContext } from "../utils/search/build.ts";
 import { parseQuery } from "../utils/search/parse.ts";
 import { BM25Term, distanceWeightedScore, topN } from "../utils/search/rank.ts";

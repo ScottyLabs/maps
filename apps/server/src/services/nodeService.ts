@@ -1,9 +1,9 @@
-import type { NodeInfo, Placement } from "@cmumaps/common";
+import type { NodeInfo, Placement } from "../../../../packages/common/src/index.ts";
 import {
   extractBuildingCode,
   extractFloorLevel,
   pdfCoordsToGeoCoords,
-} from "@cmumaps/common";
+} from "../../../../packages/common/src/index.ts";
 import { prisma } from "../../prisma/index.ts";
 
 export const nodeService = {

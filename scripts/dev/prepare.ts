@@ -1,10 +1,10 @@
-#!/usr/bin/env bun
+#!/usr/bin/env -S deno run -A
 
 import { constants } from "node:fs";
 import { access, readdir, stat } from "node:fs/promises";
 import net from "node:net";
 import path from "node:path";
-import process from "node:process";
+import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 
 type Profile = "default" | "visualizer" | "web-noauth";
@@ -22,9 +22,10 @@ type EnvValidation = {
 };
 
 const textDecoder = new TextDecoder();
-const repoRoot = path.resolve(import.meta.dir, "../..");
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const serverDir = path.join(repoRoot, "apps/server");
 const composeFile = path.join(repoRoot, "compose.dev.yml");
+const commandEnv = Deno.env.toObject();
 
 const envFilesByProfile: Record<Profile, EnvFileSpec[]> = {
   default: [
@@ -97,7 +98,7 @@ const envFilesByProfile: Record<Profile, EnvFileSpec[]> = {
 };
 
 const { values } = parseArgs({
-  args: process.argv.slice(2),
+  args: Deno.args,
   options: {
     help: { type: "boolean" },
     profile: { type: "string" },
@@ -106,7 +107,7 @@ const { values } = parseArgs({
 });
 
 if (values.help) {
-  console.log(`Usage: bun ./scripts/dev/prepare.ts [--profile default|web-noauth|visualizer]
+  console.log(`Usage: deno run -A ./scripts/dev/prepare.ts [--profile default|web-noauth|visualizer]
 
 Preflight steps:
   1. Validate the selected env files
@@ -130,8 +131,8 @@ try {
 async function main() {
   console.log(`Preparing local dev profile: ${profile}`);
 
-  logTool(`Bun ${Bun.version}`);
-  assertCommand(["bunx", "mprocs", "--version"], "bunx mprocs");
+  logTool(`Deno ${Deno.version.deno}`);
+  assertCommand(["deno", "run", "-A", "npm:mprocs", "--version"], "deno run -A npm:mprocs");
 
   const dockerAvailable = canRun(["docker", "compose", "version"]);
   if (dockerAvailable) {
@@ -169,7 +170,35 @@ async function ensureEnvFiles(profile: Profile) {
   const validations = await Promise.all(
     envFilesByProfile[profile].map(validateEnvFile),
   );
+  printEnvIssues(validations);
+  try {
+    await runCommand(["deno", "task", "secrets:setup"], repoRoot, commandEnv);
+  } catch (error) {
+    throw new Error(
+      "Environment sync is required, but the repo secrets bootstrap could not run. Ensure the checked-out repo includes the expected scripts under scripts/secrets/ and that local Vault access is configured.",
+      {
+        cause: error,
+      },
+    );
+  }
 
+  try {
+    await runCommand(
+      ["deno", "task", "secrets:pull", "all", vaultEnv],
+      repoRoot,
+      commandEnv,
+    );
+    await promotePulledEnvFiles(specs, vaultEnv);
+  } catch (error) {
+    throw new Error(
+      `Environment sync failed after running the repo secrets flow. ${toError(error).message}`,
+      {
+        cause: error,
+      },
+    );
+  }
+
+  validations = await Promise.all(specs.map(validateEnvFile));
   if (validations.some((validation) => validation.issues.length > 0)) {
     printEnvIssues(validations);
     throw new Error(
@@ -179,6 +208,57 @@ async function ensureEnvFiles(profile: Profile) {
 
   log("Environment files are present and valid for this profile.");
   return getServerEnv(validations);
+}
+
+async function promotePulledEnvFiles(
+  specs: EnvFileSpec[],
+  vaultEnv: VaultEnv,
+) {
+  for (const spec of specs) {
+    const sourcePath = getVaultEnvFilePath(spec.path, vaultEnv);
+
+    try {
+      await access(sourcePath, constants.F_OK);
+    } catch {
+      throw new Error(
+        `Expected ${path.relative(repoRoot, sourcePath)} to exist after pulling Vault env "${vaultEnv}".`,
+      );
+    }
+
+    log(
+      `Syncing ${path.relative(repoRoot, spec.path)} from ${path.relative(repoRoot, sourcePath)}.`,
+    );
+    const sourceText = await Deno.readTextFile(sourcePath);
+    const targetText = transformPulledEnvFile(spec.path, sourceText, vaultEnv);
+    await Deno.writeTextFile(spec.path, targetText);
+  }
+}
+
+function getVaultEnvFilePath(envFilePath: string, vaultEnv: VaultEnv) {
+  return `${envFilePath}.${vaultEnv}`;
+}
+
+function transformPulledEnvFile(
+  envFilePath: string,
+  sourceText: string,
+  vaultEnv: VaultEnv,
+) {
+  if (
+    vaultEnv === "local" &&
+    envFilePath === path.join(repoRoot, "apps/server/.env")
+  ) {
+    const values = parseDotEnv(sourceText);
+    const normalizedDatabaseUrl = normalizeLocalDatabaseUrl(values.DATABASE_URL);
+
+    if (values.DATABASE_URL !== normalizedDatabaseUrl) {
+      log("Rewriting apps/server/.env DATABASE_URL for local Postgres.");
+    }
+
+    values.DATABASE_URL = normalizedDatabaseUrl;
+    return serializeDotEnv(values);
+  }
+
+  return sourceText;
 }
 
 async function validateEnvFile(spec: EnvFileSpec): Promise<EnvValidation> {
@@ -194,7 +274,7 @@ async function validateEnvFile(spec: EnvFileSpec): Promise<EnvValidation> {
     };
   }
 
-  const values = parseDotEnv(await Bun.file(spec.path).text());
+  const values = parseDotEnv(await Deno.readTextFile(spec.path));
   const missingKeys = spec.requiredKeys.filter((key) => !values[key]?.trim());
 
   if (missingKeys.length > 0) {
@@ -338,13 +418,13 @@ async function ensureServerArtifacts() {
   log(
     `Refreshing generated server artifacts: ${staleOutputs.join(", ")}`,
   );
-  await runCommand(["bun", "run", "sync"], repoRoot, process.env);
+  await runCommand(["deno", "task", "sync"], repoRoot, commandEnv);
 
   for (const output of outputs) {
     const exists = await getFileMtimeMs(output);
     if (exists === null) {
       throw new Error(
-        `Expected ${path.relative(repoRoot, output)} to exist after bun run sync.`,
+        `Expected ${path.relative(repoRoot, output)} to exist after deno task sync.`,
       );
     }
   }
@@ -403,10 +483,10 @@ function getDatabaseTarget(databaseUrl: string) {
 async function applyDatabaseMigrations(databaseUrl: string) {
   log("Pushing the Prisma schema to the local database.");
   await runCommand(
-    ["bunx", "prisma", "db", "push", "--skip-generate"],
+    ["deno", "run", "-A", "npm:prisma", "db", "push", "--skip-generate"],
     serverDir,
     {
-      ...process.env,
+      ...commandEnv,
       DATABASE_URL: databaseUrl,
     },
   );
@@ -445,32 +525,45 @@ async function waitForPort(host: string, port: number, timeoutMs: number) {
       return true;
     }
 
-    await Bun.sleep(1_000);
+    await new Promise((resolve) => setTimeout(resolve, 1_000));
   }
 
   return false;
 }
 
 function canRun(command: string[]) {
-  const result = Bun.spawnSync(command, {
-    cwd: repoRoot,
-    env: process.env,
-    stderr: "pipe",
-    stdout: "pipe",
-  });
+  try {
+    const result = new Deno.Command(command[0], {
+      args: command.slice(1),
+      cwd: repoRoot,
+      env: commandEnv,
+      stderr: "piped",
+      stdout: "piped",
+    }).outputSync();
 
-  return result.exitCode === 0;
+    return result.code === 0;
+  } catch {
+    return false;
+  }
 }
 
 function assertCommand(command: string[], label: string) {
-  const result = Bun.spawnSync(command, {
-    cwd: repoRoot,
-    env: process.env,
-    stderr: "pipe",
-    stdout: "pipe",
-  });
+  let result;
+  try {
+    result = new Deno.Command(command[0], {
+      args: command.slice(1),
+      cwd: repoRoot,
+      env: commandEnv,
+      stderr: "piped",
+      stdout: "piped",
+    }).outputSync();
+  } catch (error) {
+    throw new Error(
+      `${label} is required for this dev flow but could not be executed. ${toError(error).message}`,
+    );
+  }
 
-  if (result.exitCode !== 0) {
+  if (result.code !== 0) {
     const stderr = textDecoder.decode(result.stderr).trim();
     throw new Error(
       `${label} is required for this dev flow but could not be executed.${stderr ? ` ${stderr}` : ""}`,
@@ -484,21 +577,22 @@ function assertCommand(command: string[], label: string) {
 async function runCommand(
   command: readonly string[],
   cwd: string,
-  env: NodeJS.ProcessEnv,
+  env: Record<string, string>,
 ) {
   log(`$ ${command.join(" ")}`);
 
-  const proc = Bun.spawn(command, {
+  const proc = new Deno.Command(command[0], {
+    args: command.slice(1),
     cwd,
     env,
     stdin: "inherit",
     stdout: "inherit",
     stderr: "inherit",
-  });
-  const exitCode = await proc.exited;
+  }).spawn();
+  const { code } = await proc.status;
 
-  if (exitCode !== 0) {
-    throw new Error(`Command failed (${exitCode}): ${command.join(" ")}`);
+  if (code !== 0) {
+    throw new Error(`Command failed (${code}): ${command.join(" ")}`);
   }
 }
 

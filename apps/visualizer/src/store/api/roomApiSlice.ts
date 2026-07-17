@@ -6,18 +6,18 @@ import type {
 
 import { toast } from "react-toastify";
 
-import { getNodesInRoom } from "../features/history/historyGraphUtils";
+import { getNodesInRoom } from "../features/history/historyGraphUtils.ts";
 import {
   buildCreateRoomEditPair,
   buildDeleteRoomEditPair,
   buildUpdateRoomEditPair,
-} from "../features/history/historyRoomUtils";
-import { addEditToHistory } from "../features/history/historySlice";
-import { getSocketId } from "../middleware/webSocketMiddleware";
-import type { AppDispatch, RootState } from "../store";
-import { apiSlice, type BaseMutationArg } from "./apiSlice";
-import { handleQueryError } from "./errorHandler";
-import { floorDataApiSlice } from "./floorDataApiSlice";
+} from "../features/history/historyRoomUtils.ts";
+import { addEditToHistory } from "../features/history/historySlice.ts";
+import { getSocketId } from "../middleware/webSocketMiddleware.ts";
+import type { AppDispatch, RootState } from "../store.ts";
+import { apiSlice, type BaseMutationArg } from "./apiSlice.ts";
+import { handleQueryError } from "./errorHandler.ts";
+import { floorDataApiSlice } from "./floorDataApiSlice.ts";
 
 export type CreateRoomArg = BaseMutationArg & CreateRoomPayload;
 export type DeleteRoomArg = BaseMutationArg & DeleteRoomPayload;

@@ -11,8 +11,8 @@ import startIcon from "@/assets/icons/nav/path/pathStart.svg";
 import startIconCompleted from "@/assets/icons/nav/path/pathStart-completed.svg";
 import { useNavPaths } from "@/hooks/useNavigationParams.ts";
 import { useBoundStore } from "@/store/index.ts";
-import type { Node } from "@/types/navTypes";
-import { zoomOnPoint } from "@/utils/zoomUtils";
+import type { Node } from "@/types/navTypes.ts";
+import { zoomOnPoint } from "@/utils/zoomUtils.ts";
 
 interface IconInfo {
   coordinate: Coordinate;

@@ -2,18 +2,18 @@ import type { Graph, Pois, Rooms } from "@cmumaps/common";
 
 import React from "react";
 
-import useValidatedFloorParams from "../../hooks/useValidatedFloorParams";
-import { GRAPH_SELECT, setMode } from "../../store/features/modeSlice";
+import useValidatedFloorParams from "../../hooks/useValidatedFloorParams.ts";
+import { GRAPH_SELECT, setMode } from "../../store/features/modeSlice.ts";
 import {
   setEditRoomLabel,
   setInfoDisplayActiveTabIndex,
-} from "../../store/features/uiSlice";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import GraphInfoDisplay from "./graph/GraphInfoDisplay";
-import PoiInfoDisplay from "./poi/PoiInfoDisplay";
-import PoilessDisplay from "./poi/PoilessDisplay";
-import RoomInfoDisplay from "./room/RoomInfoDisplay";
-import RoomlessDisplay from "./room/RoomlessDisplay";
+} from "../../store/features/uiSlice.ts";
+import { useAppDispatch, useAppSelector } from "../../store/hooks.ts";
+import GraphInfoDisplay from "./graph/GraphInfoDisplay.tsx";
+import PoiInfoDisplay from "./poi/PoiInfoDisplay.tsx";
+import PoilessDisplay from "./poi/PoilessDisplay.tsx";
+import RoomInfoDisplay from "./room/RoomInfoDisplay.tsx";
+import RoomlessDisplay from "./room/RoomlessDisplay.tsx";
 
 interface Props {
   floorCode: string;

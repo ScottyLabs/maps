@@ -1,5 +1,5 @@
 import type { LiveUser } from "@cmumaps/websocket";
-import type { CursorInfo } from "../features/liveCursor/liveCursorTypes";
+import type { CursorInfo } from "../features/liveCursor/liveCursorTypes.ts";
 
 // Action types
 export const WEBSOCKET_JOIN = "WEBSOCKET_JOIN";

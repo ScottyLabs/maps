@@ -3,20 +3,20 @@ import { INITIAL_REGION } from "@cmumaps/ui";
 import type { CoordinateRegion } from "mapkit-react";
 import type { RefObject } from "react";
 import { useState } from "react";
-import { $api } from "@/api/client";
+import { $api } from "@/api/client.ts";
 import {
   THRESHOLD_DENSITY_TO_SHOW_FLOORS,
   THRESHOLD_DENSITY_TO_SHOW_ROOMS,
-} from "@/components/map-display/mapConstants";
+} from "@/components/map-display/mapConstants.ts";
 import { useMapPosition } from "@/hooks/useMapPosition.ts";
-import { useBoundStore } from "@/store";
-import { isPublicBuilding } from "@/utils/authUtils";
+import { useBoundStore } from "@/store/index.ts";
+import { isPublicBuilding } from "@/utils/authUtils.ts";
 import {
   getFloorByOrdinal,
   getFloorLevelFromRoomName,
   getFloorOrdinal,
-} from "@/utils/floorUtils";
-import { isInPolygon } from "@/utils/geometry";
+} from "@/utils/floorUtils.ts";
+import { isInPolygon } from "@/utils/geometry.ts";
 import { useNavPaths } from "./useNavigationParams.ts";
 import { useUser } from "./useUser.ts";
 
