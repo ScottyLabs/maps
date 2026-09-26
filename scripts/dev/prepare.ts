@@ -21,8 +21,6 @@ type EnvValidation = {
   values: Record<string, string> | null;
 };
 
-type VaultEnv = "local";
-
 const textDecoder = new TextDecoder();
 const repoRoot = path.resolve(import.meta.dir, "../..");
 const serverDir = path.join(repoRoot, "apps/server");
@@ -42,13 +40,12 @@ const envFilesByProfile: Record<Profile, EnvFileSpec[]> = {
         "DATABASE_URL",
         "SERVER_URL",
       ],
-      mismatchChecks: (env) =>
-        [
-          ...(env.IGNORE_LOGIN === "true"
-            ? ["expected login-enabled server profile but IGNORE_LOGIN=true"]
-            : []),
-          ...getLocalDatabaseUrlIssues(env),
-        ],
+      mismatchChecks: (env) => [
+        ...(env.IGNORE_LOGIN === "true"
+          ? ["expected login-enabled server profile but IGNORE_LOGIN=true"]
+          : []),
+        ...getLocalDatabaseUrlIssues(env),
+      ],
     },
     {
       path: path.join(repoRoot, "apps/web/.env"),
@@ -62,7 +59,16 @@ const envFilesByProfile: Record<Profile, EnvFileSpec[]> = {
   "web-noauth": [
     {
       path: path.join(repoRoot, "apps/server/.env"),
-      requiredKeys: ["ALLOWED_ORIGINS_REGEX", "DATABASE_URL", "SERVER_URL"],
+      requiredKeys: [
+        "ALLOWED_ORIGINS_REGEX",
+        "AUTH_CLIENT_ID",
+        "AUTH_CLIENT_SECRET",
+        "AUTH_ISSUER",
+        "AUTH_JWKS_URI",
+        "BETTER_AUTH_URL",
+        "DATABASE_URL",
+        "SERVER_URL",
+      ],
       mismatchChecks: (env) => getLocalDatabaseUrlIssues(env),
     },
     {
@@ -83,25 +89,18 @@ const envFilesByProfile: Record<Profile, EnvFileSpec[]> = {
         "DATABASE_URL",
         "SERVER_URL",
       ],
-      mismatchChecks: (env) =>
-        [
-          ...(env.IGNORE_LOGIN === "true"
-            ? ["expected login-enabled server profile but IGNORE_LOGIN=true"]
-            : []),
-          ...getLocalDatabaseUrlIssues(env),
-        ],
+      mismatchChecks: (env) => [
+        ...(env.IGNORE_LOGIN === "true"
+          ? ["expected login-enabled server profile but IGNORE_LOGIN=true"]
+          : []),
+        ...getLocalDatabaseUrlIssues(env),
+      ],
     },
     {
       path: path.join(repoRoot, "apps/visualizer/.env"),
       requiredKeys: ["VITE_CLERK_PUBLISHABLE_KEY", "VITE_SERVER_URL"],
     },
   ],
-};
-
-const vaultEnvByProfile: Record<Profile, VaultEnv> = {
-  default: "local",
-  "web-noauth": "local",
-  visualizer: "local",
 };
 
 const { values } = parseArgs({
@@ -118,10 +117,10 @@ if (values.help) {
 
 Preflight steps:
   1. Validate the selected env files
-  2. Run the repo secrets flow only when env files are missing or invalid
-  3. Start local Postgres from compose.dev.yml when it is not already reachable
-  4. Regenerate stale server build artifacts
-  5. Apply Drizzle migrations to the local database
+  2. Report missing or invalid configuration with OpenBao setup instructions
+  3. Regenerate stale server build artifacts
+  4. Start local Postgres from compose.dev.yml when it is not already reachable
+  5. Push the Prisma schema to the local database
 `);
   process.exit(0);
 }
@@ -175,107 +174,21 @@ function parseProfile(input: string | undefined): Profile {
 }
 
 async function ensureEnvFiles(profile: Profile) {
-  const specs = envFilesByProfile[profile];
-  const vaultEnv = vaultEnvByProfile[profile];
-  let validations = await Promise.all(specs.map(validateEnvFile));
-
-  if (validations.every((validation) => validation.issues.length === 0)) {
-    log("Environment files are present and valid for this profile.");
-    return getServerEnv(validations);
-  }
-
-  log(
-    `Environment files are missing or invalid. Running secrets sync for Vault env "${vaultEnv}".`,
+  const validations = await Promise.all(
+    envFilesByProfile[profile].map(validateEnvFile),
   );
-  printEnvIssues(validations);
-  try {
-    await runCommand(["bun", "run", "secrets:setup"], repoRoot, process.env);
-  } catch (error) {
-    throw new Error(
-      "Environment sync is required, but the repo secrets bootstrap could not run. Ensure the checked-out repo includes the expected scripts under scripts/secrets/ and that local Vault access is configured.",
-      {
-        cause: error,
-      },
-    );
-  }
-
-  try {
-    await runCommand(
-      ["bun", "run", "secrets:pull", "all", vaultEnv],
-      repoRoot,
-      process.env,
-    );
-    await promotePulledEnvFiles(specs, vaultEnv);
-  } catch (error) {
-    throw new Error(
-      `Environment sync failed after running the repo secrets flow. ${toError(error).message}`,
-      {
-        cause: error,
-      },
-    );
-  }
-
-  validations = await Promise.all(specs.map(validateEnvFile));
   if (validations.some((validation) => validation.issues.length > 0)) {
     printEnvIssues(validations);
+    const authFlag = profile === "web-noauth" ? "" : " --auth";
     throw new Error(
-      "Environment sync finished, but the active env files are still missing required values.",
+      `Environment files need attention. Run bun run secrets:setup${authFlag} to create missing files or refresh OpenBao-managed values. Invalid local settings must be corrected explicitly. ` +
+        (profile === "visualizer"
+          ? "The visualizer also needs a separately supplied VITE_CLERK_PUBLISHABLE_KEY and VITE_SERVER_URL; these cannot be generated from the current OpenBao dev secrets."
+          : "See scripts/dev/README.md for OpenBao setup and refresh instructions."),
     );
   }
-
-  log("Environment files synced successfully.");
+  log("Environment files are present and valid for this profile.");
   return getServerEnv(validations);
-}
-
-async function promotePulledEnvFiles(
-  specs: EnvFileSpec[],
-  vaultEnv: VaultEnv,
-) {
-  for (const spec of specs) {
-    const sourcePath = getVaultEnvFilePath(spec.path, vaultEnv);
-
-    try {
-      await access(sourcePath, constants.F_OK);
-    } catch {
-      throw new Error(
-        `Expected ${path.relative(repoRoot, sourcePath)} to exist after pulling Vault env "${vaultEnv}".`,
-      );
-    }
-
-    log(
-      `Syncing ${path.relative(repoRoot, spec.path)} from ${path.relative(repoRoot, sourcePath)}.`,
-    );
-    const sourceText = await Bun.file(sourcePath).text();
-    const targetText = transformPulledEnvFile(spec.path, sourceText, vaultEnv);
-    await Bun.write(spec.path, targetText);
-  }
-}
-
-function getVaultEnvFilePath(envFilePath: string, vaultEnv: VaultEnv) {
-  return `${envFilePath}.${vaultEnv}`;
-}
-
-function transformPulledEnvFile(
-  envFilePath: string,
-  sourceText: string,
-  vaultEnv: VaultEnv,
-) {
-  if (
-    vaultEnv === "local" &&
-    envFilePath === path.join(repoRoot, "apps/server/.env")
-  ) {
-    const values = parseDotEnv(sourceText);
-    const normalizedDatabaseUrl = normalizeLocalDatabaseUrl(values.DATABASE_URL);
-
-    if (values.DATABASE_URL !== normalizedDatabaseUrl) {
-      log("Rewriting apps/server/.env DATABASE_URL for local Postgres.");
-    }
-
-    values.DATABASE_URL = normalizedDatabaseUrl;
-    return serializeDotEnv(values);
-  }
-
-  return sourceText;
 }
 
 async function validateEnvFile(spec: EnvFileSpec): Promise<EnvValidation> {
@@ -292,6 +205,14 @@ async function validateEnvFile(spec: EnvFileSpec): Promise<EnvValidation> {
   }
 
   const values = parseDotEnv(await Bun.file(spec.path).text());
+  if (
+    spec.path === path.join(repoRoot, "apps/server/.env") &&
+    "SERVER_PORT" in values
+  ) {
+    issues.push(
+      "remove SERVER_PORT; the server requires a numeric value and defaults to port 80",
+    );
+  }
   const missingKeys = spec.requiredKeys.filter((key) => !values[key]?.trim());
 
   if (missingKeys.length > 0) {
@@ -350,19 +271,6 @@ function parseDotEnv(text: string) {
   return values;
 }
 
-function serializeDotEnv(values: Record<string, string>) {
-  return `${Object.entries(values)
-    .map(([key, value]) => `${key}="${escapeDotEnvDoubleQuotedValue(value)}"`)
-    .join("\n")}\n`;
-}
-
-function escapeDotEnvDoubleQuotedValue(value: string) {
-  return value
-    .replaceAll('"', '\\"')
-    .replaceAll("\r", "\\r")
-    .replaceAll("\n", "\\n");
-}
-
 function getLocalDatabaseUrlIssues(env: Record<string, string>) {
   const databaseUrl = env.DATABASE_URL?.trim();
   if (!databaseUrl) {
@@ -390,31 +298,6 @@ function getLocalDatabaseUrlIssues(env: Record<string, string>) {
   }
 
   return issues;
-}
-
-function normalizeLocalDatabaseUrl(databaseUrl: string | undefined) {
-  const defaultDatabaseUrl =
-    "postgresql://postgres:donotuseinprod@localhost:5432/cmumaps";
-
-  if (!databaseUrl?.trim() || databaseUrl.includes("${{")) {
-    return defaultDatabaseUrl;
-  }
-
-  let parsed: URL;
-  try {
-    parsed = new URL(databaseUrl);
-  } catch {
-    return defaultDatabaseUrl;
-  }
-
-  parsed.hostname = "localhost";
-  parsed.port = "5432";
-
-  if (parsed.pathname === "" || parsed.pathname === "/") {
-    parsed.pathname = "/cmumaps";
-  }
-
-  return parsed.toString();
 }
 
 function normalizeEnvValue(rawValue: string) {
@@ -454,7 +337,9 @@ async function ensureServerArtifacts() {
   ];
 
   const latestInputMtime = Math.max(
-    ...(await Promise.all(inputs.map(getFileMtimeMs))),
+    ...(await Promise.all(inputs.map(getFileMtimeMs))).map(
+      (mtime) => mtime ?? 0,
+    ),
   );
 
   const staleOutputs: string[] = [];
@@ -470,9 +355,7 @@ async function ensureServerArtifacts() {
     return;
   }
 
-  log(
-    `Refreshing generated server artifacts: ${staleOutputs.join(", ")}`,
-  );
+  log(`Refreshing generated server artifacts: ${staleOutputs.join(", ")}`);
   await runCommand(["bun", "run", "sync"], repoRoot, process.env);
 
   for (const output of outputs) {
@@ -485,10 +368,7 @@ async function ensureServerArtifacts() {
   }
 }
 
-async function ensureDatabase(
-  databaseUrl: string,
-  dockerAvailable: boolean,
-) {
+async function ensureDatabase(databaseUrl: string, dockerAvailable: boolean) {
   const target = getDatabaseTarget(databaseUrl);
 
   if (await isPortReachable(target.host, target.port)) {
@@ -623,7 +503,7 @@ async function runCommand(
 ) {
   log(`$ ${command.join(" ")}`);
 
-  const proc = Bun.spawn(command, {
+  const proc = Bun.spawn([...command], {
     cwd,
     env,
     stdin: "inherit",

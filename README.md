@@ -14,6 +14,8 @@ Key features include:
 
 ## Wiki
 
+For local environment setup using OpenBao, see the [local development guide](scripts/dev/README.md).
+
 Please check out our [wiki](https://github.com/ScottyLabs/cmumaps/wiki)
 for more information about the project.
 
