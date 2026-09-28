@@ -62,7 +62,12 @@ uploading it to the S3 bucket
 
 ### FMS
 
-`scraper/fms/` is responsible for scraping floorplan data from the FMS website.
+`scraper/fms/` fetches authenticated FMS floor-plan assets, converts downloaded
+PDF sheets to SVG/text-coordinate sidecars, and can upload SVG trees to S3. The
+PDF-derived SVGs are renderable assets; they do not by themselves produce the
+room polygons and placements required by `floorplans.json`. See
+[`docs/src/Data-Flow.md`](../../docs/src/Data-Flow.md#cmu-fms-floor-plan-pdfs-login-status-depends-on-the-asset-url)
+for the fetch results, conversion workflow, and remaining data-processing steps.
 
 ### OSM
 

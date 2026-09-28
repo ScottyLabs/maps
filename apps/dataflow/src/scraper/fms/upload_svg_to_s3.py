@@ -1,5 +1,6 @@
 """Upload all floorplan SVG files to S3."""
 
+import argparse
 from pathlib import Path
 
 from utils.s3_utils import bucket_name, client
@@ -10,17 +11,20 @@ LOCAL_SVG_FOLDER = Path("floorplan_svg")
 S3_DESTINATION = "floorplan_svg"
 
 
-def upload_all_svg_files() -> None:
-    """Upload all SVG files from floorplan_svg folder to S3."""
+def upload_all_svg_files(
+    local_svg_folder: Path = LOCAL_SVG_FOLDER,
+    s3_destination: str = S3_DESTINATION,
+) -> None:
+    """Upload SVGs from a building-folder tree to an S3 prefix."""
     success_count = 0
     fail_count = 0
 
-    if not LOCAL_SVG_FOLDER.is_dir():
-        msg = f"Local SVG folder not found: {LOCAL_SVG_FOLDER}"
+    if not local_svg_folder.is_dir():
+        msg = f"Local SVG folder not found: {local_svg_folder}"
         raise FileNotFoundError(msg)
 
     # Iterate through building folders
-    for building_path in LOCAL_SVG_FOLDER.iterdir():
+    for building_path in local_svg_folder.iterdir():
         # Skip if not a directory
         if not building_path.is_dir():
             continue
@@ -32,7 +36,7 @@ def upload_all_svg_files() -> None:
             if svg_file.suffix != ".svg":
                 continue
 
-            s3_object_name = f"{S3_DESTINATION}/{building}/{svg_file.name}"
+            s3_object_name = f"{s3_destination}/{building}/{svg_file.name}"
 
             try:
                 client.fput_object(
@@ -50,4 +54,17 @@ def upload_all_svg_files() -> None:
 
 
 if __name__ == "__main__":
-    upload_all_svg_files()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--source",
+        type=Path,
+        default=LOCAL_SVG_FOLDER,
+        help="Building-folder SVG source (default: floorplan_svg)",
+    )
+    parser.add_argument(
+        "--s3-prefix",
+        default=S3_DESTINATION,
+        help="Destination prefix (default: floorplan_svg)",
+    )
+    args = parser.parse_args()
+    upload_all_svg_files(args.source, args.s3_prefix)

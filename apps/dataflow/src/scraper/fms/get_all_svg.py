@@ -1,8 +1,6 @@
 """Pipeline: Fetch CMU floor-plan SVGs for a set of buildings.
 
-1. Run driver.py to activate the session for each floor and get cookies/headers.
-
-2. Put a buildings.json file in the current directory with the following format:
+1. Save a buildings JSON file in the following format:
 Input JSON format (buildings.json):
 [
   {
@@ -15,15 +13,17 @@ Input JSON format (buildings.json):
   }
 ]
 
-3. Update the `cookies` and `headers` dicts in this script with the values
-  copied from your browser session.
+2. Set CMU_FMS_COOKIE to the Cookie request header from an authenticated browser
+   request. See docs/src/Data-Flow.md for Brave instructions.
 
-4. Run this script to fetch all SVGs
+3. Run this script to fetch all SVGs. The cookie is read from the environment,
+   never stored in this source file.
 
 """
 
 import argparse
 import json
+import os
 import re
 import time
 from pathlib import Path
@@ -36,13 +36,6 @@ DEFAULT_PARAMS = {
     "isRevit": "false",
     "RoomBoundaryLayer": "A-AREA",
     "RoomTagLayer": "A-AREA-IDEN",
-}
-
-# Paste your session cookies and headers here (copied from your browser)
-cookies: dict[str, str] = {
-}
-
-headers: dict[str, str] = {
 }
 
 
@@ -76,29 +69,25 @@ def fetch_svg(  # noqa: PLR0913
     floor_id: str,
     svg_filename_param: str,
     out_file: Path,
-    cookies: dict[str, str],
-    headers: dict[str, str],
+    cookie_header: str,
+    headers: dict[str, str] | None = None,
     timeout: float = 30.0,
     retries: int = 3,
     backoff: float = 1.5,
-    verify_ssl: bool = False,  # noqa: FBT001, FBT002
 ) -> bool:
     """Fetch an SVG file from the FMSystems API."""
     params = dict(DEFAULT_PARAMS)
     params["floorId"] = floor_id
     params["svgFile"] = svg_filename_param
-    print(params)  # noqa: T201
-
     last_exc = None
     for attempt in range(1, retries + 1):
         try:
             resp = requests.get(
                 ENDPOINT,
                 params=params,
-                cookies=cookies,
-                headers=headers,
+                headers={"Cookie": cookie_header, **(headers or {})},
                 timeout=timeout,
-                verify=verify_ssl,
+                allow_redirects=False,
             )
             if resp.status_code == 200 and resp.text.strip():  # noqa: PLR2004
                 out_file.parent.mkdir(parents=True, exist_ok=True)
@@ -151,12 +140,20 @@ def main() -> None:
         help="Exponential backoff base between retries",
     )
     ap.add_argument(
-        "--verify-ssl",
-        action="store_true",
-        help="Verify SSL certificates (default: off)",
+        "--cookie-env",
+        default="CMU_FMS_COOKIE",
+        help="Environment variable containing the FMS Cookie request header "
+        "(default: CMU_FMS_COOKIE). Never pass the cookie as a command-line value.",
     )
 
     args = ap.parse_args()
+
+    cookie_header = os.environ.get(args.cookie_env, "").strip()
+    if not cookie_header:
+        ap.error(
+            f"Missing FMS session cookie. Set the {args.cookie_env} environment "
+            "variable; see docs/src/Data-Flow.md for Brave instructions.",
+        )
 
     buildings = read_buildings(args.buildings)
     out_root = Path(args.out)
@@ -254,12 +251,10 @@ def main() -> None:
                 floor_id=floor_id,
                 svg_filename_param=svg_filename_param,
                 out_file=out_file,
-                cookies=cookies,
-                headers=headers,
+                cookie_header=cookie_header,
                 timeout=args.timeout,
                 retries=args.retries,
                 backoff=args.backoff,
-                verify_ssl=args.verify_ssl,
             )
             if success:
                 ok += 1

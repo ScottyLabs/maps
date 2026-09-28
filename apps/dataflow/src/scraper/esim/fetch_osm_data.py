@@ -16,7 +16,7 @@ import os
 import time
 from pathlib import Path
 
-import overpass
+import requests
 
 from logger import get_app_logger
 
@@ -30,6 +30,8 @@ OSM_FILE = os.environ.get("CMUMAPS_OSM_FILE", "export.osm")
 # Retry configuration
 _MAX_RETRIES = 5
 _INITIAL_DELAY = 2
+OVERPASS_URL = "https://overpass-api.de/api/interpreter"
+USER_AGENT = "CMUMaps-dataflow/1.0 (https://github.com/ScottyLabs/cmumaps)"
 
 
 def fetch_osm_data(
@@ -47,8 +49,17 @@ def fetch_osm_data(
     """
     for attempt in range(max_retries):
         try:
-            api = overpass.API(timeout=60)
-            osm_xml = api.get(CMU_OVERPASS_QUERY, responseformat="xml")
+            response = requests.post(
+                OVERPASS_URL,
+                data={
+                    "data": f"[out:xml][timeout:60];{CMU_OVERPASS_QUERY}"
+                    "out body;>;out skel qt;",
+                },
+                headers={"User-Agent": USER_AGENT},
+                timeout=75,
+            )
+            response.raise_for_status()
+            osm_xml = response.text
         except Exception:
             if attempt == max_retries - 1:
                 logger.exception(
@@ -65,6 +76,7 @@ def fetch_osm_data(
             )
             time.sleep(delay)
         else:
+            osm_file.parent.mkdir(parents=True, exist_ok=True)
             osm_file.write_text(osm_xml, encoding="utf-8")
             return
 

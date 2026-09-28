@@ -15,4 +15,20 @@ build/
 
 # Misc
 .env*
+cookie-copied.txt
+fms-auth.har
+apps/dataflow/data/source-snapshots/
+apps/dataflow/data/fms_assets.json
+apps/dataflow/data/fms_floorplans/
+apps/dataflow/data/floorplan_pdf/
+apps/dataflow/data/floorplan_svg_pdf/
+apps/dataflow/data/fms_pdf_conversion.json
+apps/dataflow/data/fms_room_prototype/
+apps/dataflow/fms-pdfs.json
+apps/dataflow/floorplan_pdf/
+apps/dataflow/floorplan_svg/
+apps/dataflow/**/*fms*.json
+apps/dataflow/**/*.pdf
+apps/dataflow/**/*.svg
+apps/dataflow/**/*.bbox.html
 .DS_Store

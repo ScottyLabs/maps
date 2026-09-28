@@ -1,4 +1,4 @@
-"""Scraper for the FMS svg floorplans."""
+"""Fetch, convert, and upload CMU FMS floor-plan assets."""
 
 from logger import get_app_logger
 

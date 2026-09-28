@@ -37,24 +37,197 @@
 
 S3 bucket link: <https://minio.scottylabs.org/browser/cmumaps>
 
+The fetch scripts are in [`apps/dataflow/src/scraper`](https://github.com/ScottyLabs/cmumaps/tree/main/apps/dataflow/src/scraper). Run them from `apps/dataflow`; outputs are written to the paths passed below. ArcGIS and OpenStreetMap need no credentials. CMU labels its academic FMS floor-plan pages “Andrew ID Required”; access to pages and assets depends on the signed-in account.
+
+#### CMU ArcGIS building metadata (public)
+
+Fetches the public ESIM building layer as `query.json` (a JSON feature collection containing official names, abbreviations, IDs, and floor counts):
+
+```sh
+cd apps/dataflow
+uv run python src/scraper/esim/arc_gis_query.py --output data/source-snapshots/query.json
+```
+
+The source is the [CMU Building ArcGIS layer](https://www.arcgis.com/home/item.html?id=0a8e645dc06d43f1b197b2ea2c2b876e). [`arc_gis_query.py`](../../apps/dataflow/src/scraper/esim/arc_gis_query.py) uses the layer's public ArcGIS REST data and does not require an ArcGIS account.
+
+#### OpenStreetMap campus data (public)
+
+Fetch the raw campus extract and the derived outside graph:
+
+```sh
+cd apps/dataflow
+CMUMAPS_OSM_FILE=data/source-snapshots/export.osm uv run python src/scraper/esim/fetch_osm_data.py
+CMUMAPS_OSM_OUTSIDE_FILE=data/source-snapshots/osm-outside.json uv run python src/scraper/osm/osm_to_osm_outside_json.py
+```
+
+`export.osm` is the raw Overpass XML extract used by the building geometry pipeline; `osm-outside.json` is the JSON outside graph. These are fetched by [`fetch_osm_data.py`](../../apps/dataflow/src/scraper/esim/fetch_osm_data.py) and [`osm_to_osm_outside_json.py`](../../apps/dataflow/src/scraper/osm/osm_to_osm_outside_json.py). `osm-pois.json` is another OSM JSON output and can be fetched with `uv run scrape-osm-pois`.
+
+The scraper queries the [Overpass API](https://wiki.openstreetmap.org/wiki/Overpass_API) over HTTPS using the CMU campus bounding box configured in the scripts. It needs no credentials. Overpass is a shared service, so the raw extractor retries with backoff and the graph scraper retries failed requests; rerun later if its public endpoint is temporarily busy.
+
+#### CMU FMS floor plan PDFs (login status depends on the asset URL)
+
+The existing [`get_all_svg.py`](../../apps/dataflow/src/scraper/fms/get_all_svg.py) calls a separate FMSystems SVG endpoint; it is not the source of the PDF documents. CMU labels the academic and administrative floor-plan index “Andrew ID Required”; anonymous requests to the academic index redirect to CMU Login. A signed-in browser can access many building pages, while some pages still return HTTP 401.
+
+#### Browser-assisted FMS discovery
+
+[`discover_assets.py`](../../apps/dataflow/src/scraper/fms/discover_assets.py) starts Selenium-controlled Chrome or Brave, opens the academic building index, and waits for a CMU sign-in to return to that index. It then crawls the building pages and downloads direct PDF/SVG links. Browser cookies remain in memory and are scoped to CMU hosts; they are not written to the manifest or printed. Selenium Manager supplies the matching browser driver when needed.
+
+From `apps/dataflow`, run:
+
+```sh
+uv run python src/scraper/fms/discover_assets.py --browser brave \
+  --manifest data/fms_assets.json --out data/fms_floorplans
+```
+
+Complete CMU sign-in and Duo in the opened Brave window. The script starts crawling once the academic building list is visible. Use `--browser chrome` to use Google Chrome, `--headless` only when interactive sign-in is not needed, and `--login-timeout <seconds>` to change the default 15-minute sign-in window. It writes the result manifest to `fms_assets.json` and downloaded assets under `fms_floorplans/` by default. These outputs may contain restricted floor-plan data; keep them local unless you have permission to share them.
+
+For a remote Linux shell using MobaXterm, enable X11 forwarding in the SSH session and keep the MobaXterm X server running. Check that `DISPLAY` is set and `xdpyinfo` can connect before starting the script. If launching from a separate command runner, pass through the SSH-provided `DISPLAY` and the session's Xauthority file (commonly `~/.Xauthority` when `XAUTHORITY` is unset); do not guess a display number. Headless mode cannot complete interactive SSO or Duo.
+
+The manifest records each building page, discovered direct asset URL, HTTP status, content type, and local download path. The downloader verifies PDF signatures and SVG markup before writing files. FMS pages may instead expose a drawing-view page or API-generated SVG rather than a direct PDF/SVG link; those assets need a follow-up extractor.
+
+The September 28, 2026 authenticated Brave run discovered 63 academic building pages: 59 returned HTTP 200 and 4 returned HTTP 401. It downloaded 736 PDFs; Poppler converted them into 736 one-page SVGs and text-box sidecars. No direct SVG files were found. The manifest and downloaded files are local, git-ignored outputs at `data/fms_assets.json` and `data/fms_floorplans/`.
+
+Four pages remained unavailable after sign-in (HTTP 401):
+
+- Fifth 4570
+- Mehrabian Collaborative Innovation Center
+- Software Engineering Institute
+- Washington DC
+
+Thirteen pages returned HTTP 200 but exposed no direct PDF/SVG links:
+
+- Bakery Square, CMU-Qatar, Fifth 4721, and Henry Street 4618
+- Melwood 477, Mill 19, Murray Ave. 1723-25, and National Robotics Engineering Center
+- Silicon Valley 19, Silicon Valley 23, South Craig 203, South Craig 205, and South Neville Garage
+
+The crawl resolved page URLs for South Craig 203 and South Neville Garage under the finance/property-space site, but those pages still had no direct asset links. An earlier anonymous retry of 11 saved URLs redirected to `login.cmu.edu` and returned its HTTP 200 login interstitial; the HTTP status alone does not indicate access. No access controls were bypassed.
+
+#### Existing FMSystems SVG endpoint
+
+[`get_all_svg.py`](../../apps/dataflow/src/scraper/fms/get_all_svg.py) calls the FMSystems `getDefaultLayersData.ashx` endpoint. It needs a local JSON file containing FMS floor IDs, separate from the academic-index PDF manifest. For example, create `fms-buildings.json`:
+
+```json
+[
+  {
+    "building": "CFA",
+    "floorid": {
+      "1": "<FMS floor ID>"
+    }
+  }
+]
+```
+
+In Bash, enter the Cookie request header without echoing it or placing it in shell history, then run the fetch and clear the variable:
+
+```sh
+read -r -s -p 'FMS Cookie header: ' CMU_FMS_COOKIE
+printf '\n'
+export CMU_FMS_COOKIE
+uv run python src/scraper/fms/get_all_svg.py \
+  --buildings fms-buildings.json --out data/floorplan_svg
+unset CMU_FMS_COOKIE
+```
+
+The script saves one SVG per supplied building/floor. The cookie is sent only to its fixed HTTPS endpoint on `fmsystems.cmu.edu`; it is not written to a file or logged. The JSON input may contain local floor IDs, so keep it out of the PR. This endpoint returns its default-layer SVG and is separate from the PDF download and conversion workflow below.
+
+#### PDF-to-SVG bridge
+
+Inspection with Poppler identified the PDFs as one-page AutoCAD 2025 vector drawings (1224 × 792 PDF points in the sampled sheets), with extractable text and no embedded raster images. `pdftocairo` converts their paths into vector SVG; `pdftotext -bbox-layout` extracts text and word bounding boxes into XHTML sidecars. Conversion produced 736 SVGs and 736 text-box sidecars. The SVGs preserve the rendered linework, but PDF text is represented as glyph paths in the SVG; use the sidecars when actual text strings and positions are needed.
+
+Install the Poppler command-line tools for your OS (`sudo dnf install poppler-utils` on this machine), then from `apps/dataflow` run:
+
+```sh
+uv run python src/scraper/fms/convert_pdf_to_svg.py \
+  --manifest data/fms_assets.json \
+  --out data/floorplan_svg_pdf \
+  --conversion-manifest data/fms_pdf_conversion.json
+```
+
+The conversion manifest maps every source PDF to its SVG and text sidecar. A full conversion of the 736 PDFs produced about 2.5 GB of SVG and text data; those outputs are local and git-ignored. Each output folder uses the FMS academic-index page slug (for example, `ah`) and each filename retains its PDF variant (`Base`, `Dept`, or `Type`). These are visual floor-plan assets; they are not yet equivalent to the single “default layers” SVG fetched by [`get_all_svg.py`](../../apps/dataflow/src/scraper/fms/get_all_svg.py).
+
+[`upload_svg_to_s3.py`](../../apps/dataflow/src/scraper/fms/upload_svg_to_s3.py) accepts a source tree and S3 prefix. After reviewing which plan variants should be published and mapping page slugs to the building identifiers used by the app, an operator with S3 credentials can upload the converted SVG tree with:
+
+```sh
+uv run python src/scraper/fms/upload_svg_to_s3.py \
+  --source data/floorplan_svg_pdf --s3-prefix floorplan_svg
+```
+
+This upload was not run. The existing S3 download script can retrieve objects under `floorplan_svg/`; no in-repo application code currently parses that SVG prefix into room records.
+
+#### PDFs do not directly produce the app's floorplan JSON
+
+The room-processing path consumes structured JSON, not a PDF or SVG. [`models/floorplans.py`](../../apps/dataflow/src/models/floorplans.py) defines `floorplans.json` as building code → floor level → room ID → room, with a room name/type, geographic label position, floor identity, and polygon coordinates. [`models/placements.py`](../../apps/dataflow/src/models/placements.py) defines the per-floor geographic center, scale, angle, and local `pdfCenter`. The deserializers read `floorplans.json`, `placements.json`, and `all-graph.json` from S3 to populate rooms, floors, nodes, and edges. The existing generator scripts start from already processed geometry/graph data; they do not parse FMS PDFs or SVGs.
+
+The converter therefore bridges PDFs into the legacy **visual SVG asset** flow, not into routable room data. Building `floorplans.json` still needs a separate extraction stage: select the correct PDF variant per floor; identify and group room-boundary paths; match room-number/type text from the XHTML word boxes to those polygons; map FMS page/floor IDs to the canonical building codes; apply and validate each floor's geographic placement; then validate room adjacency and entrances against the navigation graph. The conversion output preserves the source needed for that work, but no automatic room-polygon or graph extraction is claimed yet.
+
+A local prototype associated one extracted room label with an enclosed room boundary in a representative PDF. Its JSON and visual overlay remain in the git-ignored `data/fms_room_prototype/`; they are not part of this PR. The geometry remains in PDF page coordinates: this checkout has no per-floor geographic placement or current `floorplans.json` to validate the candidate as a production `Room` record, so the prototype is not ready to generate app data.
+
+For a direct PDF URL collected from a browser request, the manifest-based downloader remains available:
+
+1. Sign in to [CMU FMS](https://fmsystems.cmu.edu/FMInteract/ShowDrawingView.aspx) and open the building/floor PDF request.
+2. Create `apps/dataflow/fms-pdfs.json` with one record per building/floor:
+
+   ```json
+   [
+     {
+       "building": "Example Building",
+       "floor": "1",
+       "url": "https://fmsystems.cmu.edu/path/from/the/network/request.pdf"
+     }
+   ]
+   ```
+
+   Treat this manifest as local data: a URL may contain a temporary access token. If the PDF request is a redirect or the interface only offers browser printing, use **Print → Save as PDF** for that floor; the script currently downloads direct PDF responses.
+3. Run the downloader:
+
+   ```sh
+   cd apps/dataflow
+   uv run python src/scraper/fms/get_all_pdf.py --manifest fms-pdfs.json --out floorplan_pdf
+   ```
+
+The manifest-based downloader saves files as `floorplan_pdf/<building>/<floor>.pdf`, uses HTTPS with certificate verification, and retries transient failures. If the direct request needs a session, save copied request headers to the ignored local file `cookie-copied.txt` and add `--headers-file cookie-copied.txt` to the command above. Include the request's `Host` header in that file. Alternatively, set `CMU_FMS_COOKIE` and `CMU_FMS_COOKIE_HOST` to the copied Cookie value and its exact source hostname. The downloader rejects a Cookie without a source host, sends it only to that exact hostname, and sends Referer only to a request on its own host. Never put copied Cookie headers or temporary access URLs in source files, terminal transcripts, issue trackers, or chat. The manifest is not needed if you save PDFs manually from the UI.
+
+For example, the local header file should contain the request's own host and copied headers:
+
+```text
+Host: fmsystems.cmu.edu
+Cookie: <copied Cookie header value>
+Referer: https://fmsystems.cmu.edu/FMInteract/
+```
+
+Then pass `--headers-file cookie-copied.txt` to [`get_all_pdf.py`](../../apps/dataflow/src/scraper/fms/get_all_pdf.py). The file is git-ignored.
+
+#### Source outputs and generated JSON
+
+Fetched snapshots are saved in the workspace under `apps/dataflow/data/source-snapshots/`: `query.json` has 122 ArcGIS records, `osm-outside.json` has 50,547 OSM graph nodes, and `export.osm` is the full raw OSM extract. They were fetched on 2026-09-27 and remain local, git-ignored outputs. OpenStreetMap data is available under the [Open Database License](https://www.openstreetmap.org/copyright); attribute the source as “© OpenStreetMap contributors” when distributing data or maps derived from it.
+
+The raw and derived files above are scraper outputs. The complete app JSON files (`buildings.json`, `osm-outside.json`, `osm-pois.json`, and generated `floorplans.json`) are produced by different stages and are not all direct responses from a source API. See the FMS sections above for the fetched PDF inventory, the PDF-to-SVG bridge, and the remaining room/graph extraction work.
+
+#### Offline validation
+
+From `apps/dataflow`, run the focused fetch checks and the full dataflow lint/type checks:
+
+```sh
+uv run python tests/test_osm_fetch.py
+uv run python tests/test_fms_fetch.py
+uv run python -m compileall -q src/scraper/fms src/scraper/esim/fetch_osm_data.py src/scraper/osm/osm_to_osm_outside_json.py tests
+uv run lint
+```
+
+The focused checks use mocked HTTP responses, local sample HTML, and temporary files; they do not sign in, access the network, or upload data.
+
 Data sources:
 
 - OSM Scraper uses the [Overpass API](https://wiki.openstreetmap.org/wiki/Overpass_API) to scrape outside graph from OpenStreetMaps.
 
 - ESIM Scraper scrapes the [CMU Building ArcGIS layer](https://www.arcgis.com/home/item.html?id=0a8e645dc06d43f1b197b2ea2c2b876e).
 
-- FMS Scraper scrapes the svgs from the [CMU FMS website](https://fmsystems.cmu.edu/FMInteract/ShowDrawingView.aspx?file_code=L0&bldgcode%2Bfloorcode%2Boptn=073%20%20%20%20%20%20%201%20%20%20&bldgcode=073%20%20%20%20%20%20%20&floorcode=1%20%20%20&act_code=Q).
+- FMS floor plan PDFs are available to authenticated CMU users through the [CMU FMS site](https://fmsystems.cmu.edu/FMInteract/ShowDrawingView.aspx?file_code=L0&bldgcode%2Bfloorcode%2Boptn=073%20%20%20%20%20%20%201%20%20%20&bldgcode=073%20%20%20%20%20%20%20&floorcode=1%20%20%20&act_code=Q). See the CMU login steps above. The repo's legacy SVG endpoint remains separately available in `get_all_svg.py`.
   - Backup link: <https://www.cmu.edu/enterprise-space/database/index.html>
 
 ### Step 2: Generation
 
-The [generator](https://github.com/ScottyLabs/cmumaps/tree/staging/apps/dataflow/src/generator)
-takes in the scraped data and the serialized data as input and generates
-
-- Rescale the svgs to fit in a [1920x1080](https://en.wikipedia.org/wiki/1080p) rectangle
-    and converts them to `floorplans.json` file.
-
-- Generates the inside graph from the `floorplans.json` file.
+The existing [`apps/dataflow/src/generator`](../../apps/dataflow/src/generator) scripts build navigation graph data from already processed floor plan polygons. They do not fetch FMS assets. `convert_pdf_to_svg.py` only produces renderable SVG plus text-coordinate sidecars; extracting room polygons, geographic placement, and graph data from these artifacts remains follow-up work.
 
 ### Step 3: Deserialization
 

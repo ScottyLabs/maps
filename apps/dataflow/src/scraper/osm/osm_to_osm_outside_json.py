@@ -5,18 +5,22 @@ into a JSON that contains all nodes that are outside.
 """
 
 import json
+import os
 from pathlib import Path
 from typing import Any
 from xml.etree.ElementTree import Element
 
 # requires python <= 3.12
-import overpass
+import requests
 from defusedxml import ElementTree
 from geopy import distance
 
 from logger import get_app_logger
 
 logger = get_app_logger()
+OUTPUT_FILE = Path(os.environ.get("CMUMAPS_OSM_OUTSIDE_FILE", "osm-outside.json"))
+OVERPASS_URL = "https://overpass-api.de/api/interpreter"
+USER_AGENT = "CMUMaps-dataflow/1.0 (https://github.com/ScottyLabs/cmumaps)"
 
 # all of the tags of ways that should not be used
 excluded_tags: list[str] = [
@@ -72,11 +76,12 @@ def main() -> None:
         if n not in safe_nodes:
             nodes.pop(n)
 
-    logger.print("Saving to file osm-outside.json...")
-    with Path("osm-outside.json").open("w") as file:
+    logger.print(f"Saving to file {OUTPUT_FILE}...")
+    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with OUTPUT_FILE.open("w", encoding="utf-8") as file:
         json.dump(nodes, file, indent=4)
 
-    logger.print("File Saved")
+    logger.print(f"File saved to {OUTPUT_FILE}")
 
 
 def query_osm(max_attempt_count: int) -> str | None:
@@ -90,16 +95,23 @@ def query_osm(max_attempt_count: int) -> str | None:
 
     """
     counter = 0
-    api = overpass.API()
     response = None
     while counter < max_attempt_count:
         try:
-            response = api.get(
-                "nwr(40.440278, -79.951806, 40.451722, -79.933778);",
-                responseformat="xml",
+            result = requests.post(
+                OVERPASS_URL,
+                data={
+                    "data": "[out:xml][timeout:60];"
+                    "nwr(40.440278,-79.951806,40.451722,-79.933778);"
+                    "out body;>;out skel qt;",
+                },
+                headers={"User-Agent": USER_AGENT},
+                timeout=75,
             )
-            counter = 100
-        except overpass.errors.ServerLoadError:
+            result.raise_for_status()
+            response = result.text
+            break
+        except requests.RequestException:
             logger.print("Query failed. Trying again...")
             counter += 1
 
