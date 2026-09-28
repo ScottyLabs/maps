@@ -13,11 +13,11 @@ Input JSON format (buildings.json):
   }
 ]
 
-2. Set CMU_FMS_COOKIE to the Cookie request header from an authenticated browser
-   request. See docs/src/Data-Flow.md for Brave instructions.
+2. Set CMU_FMS_COOKIE from the Cookie request header copied from an
+  authenticated browser request. See docs/src/Data-Flow.md for Brave instructions.
 
-3. Run this script to fetch all SVGs. The cookie is read from the environment,
-   never stored in this source file.
+3. Run this script to fetch all SVGs. It reads the cookie from the
+  environment and never stores it here.
 
 """
 
