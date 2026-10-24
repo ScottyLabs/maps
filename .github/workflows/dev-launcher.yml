@@ -16,5 +16,25 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.9'
-      - name: Test portable host launcher (no credentials or daemon)
+      - name: Test native launcher contracts (no credentials or Nix builds)
         run: python -m unittest discover -s scripts/dev/tests -v
+
+  native-services:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v31
+      - name: Install devenv from the project Nix pin
+        shell: bash
+        run: |
+          revision=$(python3 -c 'import json; d=json.load(open("devenv.lock")); print(d["nodes"][d["nodes"]["root"]["inputs"]["nixpkgs"]]["locked"]["rev"])')
+          nix profile install "github:NixOS/nixpkgs/$revision#devenv"
+      - name: Start and check native PostgreSQL and Ricochet
+        shell: bash
+        run: |
+          trap 'devenv processes down' EXIT
+          devenv up -d postgres ricochet
+          devenv shell -- bash scripts/dev/tests/services.sh
