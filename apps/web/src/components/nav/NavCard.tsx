@@ -14,6 +14,7 @@ import outdoorSelectedIcon from "@/assets/icons/nav/route-selection/outdoorSelec
 import outdoorUnavailableIcon from "@/assets/icons/nav/route-selection/outdoorUnavailable.svg";
 import { useNavPaths } from "@/hooks/useNavigationParams.ts";
 import { useBoundStore } from "@/store/index.ts";
+import { metresToFeet } from "@/utils/distanceUtils";
 
 interface NavHeaderProps {
   isNavigating: boolean;
@@ -65,7 +66,7 @@ const NavCard = ({
 
   const { navPaths, setSrc, setDst } = useNavPaths();
 
-  const distance = Math.round(navPaths?.[selectedPath]?.path.distance ?? 0);
+  const distance = metresToFeet(navPaths?.[selectedPath]?.path.distance ?? 0);
   const time = Math.round((navPaths?.[selectedPath]?.path.distance ?? 0) / 100);
   const endTime = new Date(Date.now() + time * 60 * 1000).toLocaleTimeString(
     "en-US",
@@ -110,6 +111,7 @@ const NavCard = ({
           return (
             <button
               type="button"
+              disabled={!isAvailable}
               onClick={
                 isAvailable && !isSelected
                   ? () => setSelectedPath(option.id)

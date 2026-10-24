@@ -3,6 +3,8 @@ import type { Floor } from "./floorTypes.ts";
 import type { RoomType } from "./roomTypes.ts";
 
 export interface GeoRoom {
+  /** Source label; empty when a captured space still needs a name. */
+  name?: string;
   /**
    * The coordinates of the label of the room
    */

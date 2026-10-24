@@ -5,11 +5,11 @@ import { getFloorCode } from "@/utils/floorUtils";
 import { getPoiTypeStyle } from "./poiTypeStyles";
 
 interface Props {
-  floor: Floor;
+  floor: Floor | "outside";
 }
 
 const PoiOverlay = ({ floor }: Props) => {
-  const floorCode = getFloorCode(floor);
+  const floorCode = floor === "outside" ? "outside" : getFloorCode(floor);
   const { data: pois } = $api.useQuery(
     "get",
     "/floors/{floorCode}/pois",
@@ -31,6 +31,8 @@ const PoiOverlay = ({ floor }: Props) => {
         displayPriority="required"
       >
         <div
+          role="img"
+          aria-label={poi.type || "POI"}
           title={poi.type || "POI"}
           className="flex size-5 items-center justify-center rounded-full text-white shadow"
           style={{ background }}

@@ -41,6 +41,7 @@ const FloorplanOverlay = ({ floor }: Props) => {
   }
 
   const handleSelectRoom = (roomName: string, room: GeoRoom) => {
+    if (roomName === room.id) return;
     // biome-ignore lint/nursery/noShadow: TODO: fix the shadow
     const { floor } = room;
 
@@ -61,16 +62,19 @@ const FloorplanOverlay = ({ floor }: Props) => {
   };
 
   return Object.entries(rooms).map(([roomName, room]) => {
+    const displayName = room.name ?? roomName;
+    const navigable = roomName !== room.id;
     const isSelected = roomName === selectedRoomName;
     const roomColors = getRoomTypeDetails(room.type);
     const pinlessRoomTypes = ["Default", "Corridors"];
-    const showPin = !pinlessRoomTypes.includes(room.type) || isSelected;
+    const showPin =
+      navigable && (!pinlessRoomTypes.includes(room.type) || isSelected);
 
     const renderRoomName = () => {
-      if (showRoomNames || room.alias) {
+      if ((showRoomNames && displayName) || room.alias) {
         return (
           <div className="text-center text-sm leading-[1.1] tracking-wide">
-            {showRoomNames && <p>{roomName}</p>}
+            {showRoomNames && <p>{displayName}</p>}
             {/** biome-ignore lint/nursery/noLeakedRender: TODO: fix the leaked render */}
             {room.alias && (
               <p className="w-16 text-wrap italic">{room.alias}</p>
@@ -85,7 +89,7 @@ const FloorplanOverlay = ({ floor }: Props) => {
         <Polygon
           points={room.points}
           selected={isSelected}
-          enabled={true}
+          enabled={navigable}
           fillColor={roomColors.background}
           fillOpacity={1}
           strokeColor={isSelected ? "#FFBD59" : roomColors.border}
@@ -94,25 +98,27 @@ const FloorplanOverlay = ({ floor }: Props) => {
           onSelect={() => handleSelectRoom(roomName, room)}
           fillRule="nonzero"
         />
-        <Annotation
-          latitude={room.labelPosition.latitude}
-          longitude={room.labelPosition.longitude}
-          displayPriority="low"
-        >
-          <button
-            type="button"
-            tabIndex={0}
-            className="flex flex-col items-center"
-            onClick={(e) => {
-              handleSelectRoom(roomName, room);
-              e.stopPropagation();
-            }}
+        {navigable && (
+          <Annotation
+            latitude={room.labelPosition.latitude}
+            longitude={room.labelPosition.longitude}
+            displayPriority="low"
           >
-            {/** biome-ignore lint/nursery/noLeakedRender: TODO: fix the leaked render */}
-            {showPin && <RoomPin room={{ ...room, name: roomName }} />}
-            {renderRoomName()}
-          </button>
-        </Annotation>
+            <button
+              type="button"
+              tabIndex={0}
+              className="flex flex-col items-center"
+              onClick={(e) => {
+                handleSelectRoom(roomName, room);
+                e.stopPropagation();
+              }}
+            >
+              {/** biome-ignore lint/nursery/noLeakedRender: TODO: fix the leaked render */}
+              {showPin && <RoomPin room={{ ...room, name: roomName }} />}
+              {renderRoomName()}
+            </button>
+          </Annotation>
+        )}
       </div>
     );
   });

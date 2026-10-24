@@ -16,6 +16,7 @@ import rightArrowIconGrey from "@/assets/icons/nav/directions-list/right-arrow-g
 import rightArrowIconWhite from "@/assets/icons/nav/directions-list/right-arrow-white.svg";
 import { useNavPaths } from "@/hooks/useNavigationParams.ts";
 import { useBoundStore } from "@/store/index.ts";
+import { metresToFeet } from "@/utils/distanceUtils";
 
 interface DirectionIconSet {
   Black: string;
@@ -103,7 +104,7 @@ const NavDirectionsList = () => {
           <div
             className={`mr-5 font-inter font-medium text-[1.5rem] ${textColors[color]}`}
           >
-            {distance} ft
+            {metresToFeet(distance)} ft
           </div>
 
           <div

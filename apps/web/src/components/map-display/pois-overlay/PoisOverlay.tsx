@@ -10,11 +10,12 @@ const PoisOverlay = () => {
   // mirrors floorplan overlay: auth users see all, anon sees public buildings
   const canShowPois = user || isPublicBuilding(focusedFloor?.buildingCode);
 
-  if (!(focusedFloor && canShowPois)) {
-    return;
-  }
-
-  return <PoiOverlay floor={focusedFloor} />;
+  return (
+    <>
+      {user && <PoiOverlay floor="outside" />}
+      {focusedFloor && canShowPois && <PoiOverlay floor={focusedFloor} />}
+    </>
+  );
 };
 
 export { PoisOverlay };

@@ -154,6 +154,7 @@ const NavLine = ({ map }: Props) => {
   ]);
 
   useEffect(() => {
+    if (!map) return;
     const newPathOverlays: mapkit.PolylineOverlay[] = [];
 
     if (isNavigating) {
@@ -226,6 +227,7 @@ const NavLine = ({ map }: Props) => {
       setPathOverlay([]);
     }
   }, [
+    map,
     recommendedPath,
     completedPath,
     isNavigating,

@@ -11,6 +11,7 @@ import { NavDirectionsList } from "@/components/nav/NavDirectionsList.tsx";
 import { NavHeader } from "@/components/nav/NavHeader.tsx";
 import { useNavPaths } from "@/hooks/useNavigationParams.ts";
 import { useBoundStore } from "@/store/index.ts";
+import { metresToFeet } from "@/utils/distanceUtils";
 
 interface NavOverlayMobileProps {
   isNavigating: boolean;
@@ -32,7 +33,7 @@ const NavOverlayMobile = ({
   const instructions = useBoundStore((state) => state.navInstructions) ?? [];
   const instructionIndex = useBoundStore((state) => state.navInstructionIndex);
 
-  const distance = instructions[instructionIndex]?.distance;
+  const distance = metresToFeet(instructions[instructionIndex]?.distance ?? 0);
   const action = instructions[instructionIndex]?.action;
 
   const instructionIcons: Record<string, string> = {

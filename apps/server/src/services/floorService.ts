@@ -127,8 +127,10 @@ export const floorService = {
   },
 
   getFloorPois: async (floorCode: string) => {
-    const buildingCode = extractBuildingCode(floorCode);
-    const floorLevel = extractFloorLevel(floorCode);
+    const buildingCode =
+      floorCode === "outside" ? null : extractBuildingCode(floorCode);
+    const floorLevel =
+      floorCode === "outside" ? null : extractFloorLevel(floorCode);
 
     const dbPois = await prisma.poi.findMany({
       where: { buildingCode, floorLevel },
@@ -284,8 +286,15 @@ export const floorService = {
 
     // Convert the rooms to the format expected by the frontend
     const rooms: GeoRooms = {};
+    const nameCounts = new Map<string, number>();
+    for (const room of dbRooms)
+      nameCounts.set(room.name, (nameCounts.get(room.name) ?? 0) + 1);
     for (const room of dbRooms) {
-      rooms[room.name] = {
+      // Unassigned/ambiguous labels must not overwrite other source geometry.
+      const key =
+        room.name && nameCounts.get(room.name) === 1 ? room.name : room.roomId;
+      rooms[key] = {
+        name: room.name,
         labelPosition: {
           latitude: room.labelLatitude,
           longitude: room.labelLongitude,

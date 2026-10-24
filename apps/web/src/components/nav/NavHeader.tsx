@@ -13,6 +13,7 @@ import startIcon from "@/assets/icons/nav/nav-overlay/start.svg";
 import { SearchResults } from "@/components/toolbar/SearchResults.tsx";
 import { useNavPaths } from "@/hooks/useNavigationParams.ts";
 import { useBoundStore } from "@/store/index.ts";
+import { metresToFeet } from "@/utils/distanceUtils";
 
 interface NavHeaderProps {
   isNavigating: boolean;
@@ -60,7 +61,7 @@ const NavHeader = ({ isNavigating, mapRef, children }: NavHeaderProps) => {
     (state) => state.setNavInstructionIndex,
   );
 
-  const distance = instructions[instructionIndex]?.distance;
+  const distance = metresToFeet(instructions[instructionIndex]?.distance ?? 0);
   const action = instructions[instructionIndex]?.action;
 
   const srcInputRef = useRef<HTMLInputElement>(null);

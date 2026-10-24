@@ -129,7 +129,7 @@ export async function getFloorplans(database = prisma): Promise<FloorPlans> {
     const { buildingCode, floorLevel } = room;
 
     // Skip rooms without building code or floor level
-    if (!(buildingCode && floorLevel)) continue;
+    if (!(buildingCode && floorLevel && room.name.trim())) continue;
 
     // Initialize building if not exists
     if (!floorplans[buildingCode]) {
