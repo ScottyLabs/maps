@@ -1,3 +1,5 @@
+import { requestRuntime } from "../lib/mapRuntime.ts";
+import { prisma } from "../../prisma/index.ts";
 import type { GeoCoordinate } from "@cmumaps/common";
 import { getSearchContext } from "../utils/search/build.ts";
 import { parseQuery } from "../utils/search/parse.ts";
@@ -7,11 +9,15 @@ import type { Document } from "../utils/search/types.ts";
 const DEFAULT_NUM_RESULTS = 20;
 
 // Cache the search context (index, documents, and avgDl)
-let searchContextCache:
-  | (Awaited<ReturnType<typeof getSearchContext>> & {
-      avgDl: number;
-    })
-  | null = null;
+export type SearchContext = Awaited<ReturnType<typeof getSearchContext>> & {
+  avgDl: number;
+};
+let searchContextCache: SearchContext | null = null;
+
+export function activeSearchContext(): SearchContext {
+  if (!searchContextCache) throw new Error("Search cache is not ready");
+  return searchContextCache;
+}
 
 /**
  * Calculate average document length from a collection of documents.
@@ -26,19 +32,21 @@ function calculateAvgDl(documents: Record<string, Document>): number {
   return total / numDocs;
 }
 
+export async function prepareSearchContext(database = prisma) {
+  const context = await getSearchContext(database);
+  return { ...context, avgDl: calculateAvgDl(context.documents) };
+}
+
+export function activateSearchContext(
+  context: Awaited<ReturnType<typeof prepareSearchContext>>,
+) {
+  searchContextCache = context;
+}
+
 async function getOrBuildSearchContext() {
-  if (!searchContextCache) {
-    console.log("Building search context...");
-    const context = await getSearchContext();
-
-    const avgDl = calculateAvgDl(context.documents);
-    const numDocs = Object.keys(context.documents).length;
-
-    searchContextCache = { ...context, avgDl };
-    console.log(
-      `Search context built with ${numDocs} documents (avgDl: ${avgDl.toFixed(2)})`,
-    );
-  }
+  const context = requestRuntime();
+  if (context) return context.search;
+  if (!searchContextCache) searchContextCache = await prepareSearchContext();
   return searchContextCache;
 }
 
@@ -114,8 +122,3 @@ export const searchService = {
     return topResults.map(([docId, _]) => documents[docId]);
   },
 };
-
-// Build search context on startup for faster first request and easier debugging
-getOrBuildSearchContext().catch((err) => {
-  console.error("Failed to build search context on startup:", err);
-});

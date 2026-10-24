@@ -14,12 +14,16 @@ import { prisma } from "../prisma/index.ts";
 import { env } from "./env.ts";
 import { auth } from "./lib/auth.ts";
 import { pipelineRouter } from "./lib/pipeline.ts";
+import { activePreview, previewGate } from "./lib/previewGate.ts";
+import { initializePreview } from "./services/previewService.ts";
 import { errorHandler } from "./middleware/errorHandler.ts";
 import { notFoundHandler } from "./middleware/notFoundHandler.ts";
 import { socketAuth } from "./middleware/socketAuth.ts";
 import { WebSocketService } from "./services/webSocketService.ts";
 
 const app = express();
+if (process.env.PIPELINE_ROOT)
+  app.use("/pipeline", express.json({ limit: "16mb" }));
 app.use(express.json({ limit: "1mb" }));
 
 // Define CORS options
@@ -65,17 +69,22 @@ app.get("/openapi.json", (_req, res) => {
 });
 
 // Development workspace access uses the same session and pipeline engine.
-app.use("/pipeline", pipelineRouter());
+app.use(
+  "/pipeline",
+  pipelineRouter(() => io.disconnectSockets(true)),
+);
+app.get("/preview", (_request, response) => response.json(activePreview()));
+app.get("/", (_request, response) => response.json({ status: "ok" }));
+app.use(previewGate);
 
 // Routes
 RegisterRoutes(app);
-app.get("/", (_req, res) => {
-  res.status(200).json({ status: "ok" });
-});
 
 // Error Handling and Not Found Handlers
 app.use(errorHandler as ErrorRequestHandler);
 app.use(notFoundHandler);
+
+await initializePreview();
 
 const port = env.SERVER_PORT;
 server.listen(port, env.SERVER_HOST, () => {

@@ -1,5 +1,6 @@
 /** biome-ignore-all lint/style/useNamingConvention: TODO: use the right naming convention */
 import type { GeoNodes, PreciseRoute } from "@cmumaps/common";
+import { requestRuntime } from "../lib/mapRuntime.ts";
 import { prisma } from "../../prisma/index.ts";
 import {
   getRoute,
@@ -13,64 +14,75 @@ const OUTSIDE_MULTIPLIER = 100;
 // Cache the graph
 let graphCache: GeoNodes | null = null;
 
-async function getOrBuildGraph(): Promise<GeoNodes> {
-  if (!graphCache) {
-    console.log("Building graph cache...");
-    const dbNodes = await prisma.node.findMany({
-      include: {
-        outEdges: {
-          include: {
-            outNode: { select: { buildingCode: true, floorLevel: true } },
-          },
+export async function prepareGraph(database = prisma): Promise<GeoNodes> {
+  const dbNodes = await database.node.findMany({
+    include: {
+      outEdges: {
+        include: {
+          outNode: { select: { buildingCode: true, floorLevel: true } },
         },
-        floor: true,
       },
-    });
+      floor: true,
+    },
+  });
 
-    const graph: GeoNodes = {};
-    for (const node of dbNodes) {
-      const neighbors: Record<string, { outFloorCode?: string }> = {};
-      for (const edge of node.outEdges) {
-        const out = edge.outNode;
-        const outFloorCode = `${out.buildingCode ?? "outside"}-${out.floorLevel ?? "outside"}`;
-        neighbors[edge.outNodeId] = {};
-        if (
-          out.buildingCode !== node.buildingCode ||
-          out.floorLevel !== node.floorLevel
-        ) {
-          neighbors[edge.outNodeId].outFloorCode = outFloorCode;
-        }
+  const graph: GeoNodes = {};
+  for (const node of dbNodes) {
+    const neighbors: Record<string, { outFloorCode?: string }> = {};
+    for (const edge of node.outEdges) {
+      const out = edge.outNode;
+      const outFloorCode = `${out.buildingCode ?? "outside"}-${out.floorLevel ?? "outside"}`;
+      neighbors[edge.outNodeId] = {};
+      if (
+        out.buildingCode !== node.buildingCode ||
+        out.floorLevel !== node.floorLevel
+      ) {
+        neighbors[edge.outNodeId].outFloorCode = outFloorCode;
       }
-
-      graph[node.nodeId] = {
-        id: node.nodeId,
-        neighbors,
-        roomId: node.roomId ?? null,
-        pos: {
-          latitude: node.latitude,
-          longitude: node.longitude,
-        },
-        floor: node.floor
-          ? {
-              buildingCode: node.floor.buildingCode,
-              level: node.floor.floorLevel,
-              centerX: node.floor.centerX,
-              centerY: node.floor.centerY,
-              centerLatitude: node.floor.centerLatitude,
-              centerLongitude: node.floor.centerLongitude,
-              scale: node.floor.scale,
-              angle: node.floor.angle,
-            }
-          : {
-              buildingCode: "outside",
-              level: "1",
-            },
-      } as GeoNodes[string];
     }
 
-    graphCache = graph;
-    console.log(`Graph cache built with ${Object.keys(graph).length} nodes`);
+    graph[node.nodeId] = {
+      id: node.nodeId,
+      neighbors,
+      roomId: node.roomId ?? null,
+      pos: {
+        latitude: node.latitude,
+        longitude: node.longitude,
+      },
+      floor: node.floor
+        ? {
+            buildingCode: node.floor.buildingCode,
+            level: node.floor.floorLevel,
+            centerX: node.floor.centerX,
+            centerY: node.floor.centerY,
+            centerLatitude: node.floor.centerLatitude,
+            centerLongitude: node.floor.centerLongitude,
+            scale: node.floor.scale,
+            angle: node.floor.angle,
+          }
+        : {
+            buildingCode: "outside",
+            level: "1",
+          },
+    } as GeoNodes[string];
   }
+
+  return graph;
+}
+
+export function activateGraph(graph: GeoNodes) {
+  graphCache = graph;
+}
+
+export function activeGraph(): GeoNodes {
+  if (!graphCache) throw new Error("Graph cache is not ready");
+  return graphCache;
+}
+
+async function getOrBuildGraph(): Promise<GeoNodes> {
+  const context = requestRuntime();
+  if (context) return context.graph;
+  if (!graphCache) graphCache = await prepareGraph();
   return graphCache;
 }
 
@@ -184,8 +196,3 @@ export const pathService = {
     return result;
   },
 };
-
-// Build graph cache on startup for faster first request and easier debugging
-getOrBuildGraph().catch((err) => {
-  console.error("Failed to build graph cache on startup:", err);
-});

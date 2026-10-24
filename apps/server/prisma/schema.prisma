@@ -99,3 +99,14 @@ model Poi {
 
   @@index([buildingCode, floorLevel])
 }
+
+// Native development keeps candidate data in separate schemas. This control row
+// lives in public, so a restart reopens the same explicitly activated candidate.
+model PreviewSelection {
+  id         String @id
+  workspace  String
+  revision   String
+  schemaName String
+  warnings   Json
+  counts     Json
+}

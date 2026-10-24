@@ -9,9 +9,9 @@ import { prisma } from "../../prisma/index.ts";
 import { BuildingError } from "../errors/error.ts";
 
 export const buildingService = {
-  async getBuildings(): Promise<Buildings> {
+  async getBuildings(database = prisma): Promise<Buildings> {
     // get all buildings and their floors and default floor
-    const dbBuildings = await prisma.building.findMany({
+    const dbBuildings = await database.building.findMany({
       include: { floors: true },
     });
 

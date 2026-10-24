@@ -116,8 +116,8 @@ export function floorToDocument({
   return { doc, terms };
 }
 
-export async function getFloorplans(): Promise<FloorPlans> {
-  const allRooms = await prisma.room.findMany({
+export async function getFloorplans(database = prisma): Promise<FloorPlans> {
+  const allRooms = await database.room.findMany({
     include: {
       aliases: true,
     },
@@ -276,10 +276,10 @@ export function buildSearchIndex(
   };
 }
 
-export async function getSearchContext() {
+export async function getSearchContext(database = prisma) {
   const [buildings, floorplans] = await Promise.all([
-    buildingService.getBuildings(),
-    getFloorplans(),
+    buildingService.getBuildings(database),
+    getFloorplans(database),
   ]);
   const { index, documents } = await buildSearchIndex(floorplans, buildings);
   return { index, documents, buildings, floorplans };
