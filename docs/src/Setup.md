@@ -46,17 +46,29 @@ If OpenBao cannot open a browser in WSL, use the [login fallback](#windows-wsl2)
 Open another terminal in the repository root. Continue only if the check succeeds:
 
 ```sh
-python3 scripts/dev/dev.py populate --check --include-pois
-python3 scripts/dev/dev.py populate --include-pois
+python3 scripts/dev/dev.py populate --dataset new --check --include-pois
+python3 scripts/dev/dev.py populate --dataset new --include-pois
 ```
 
 This reads the shared temporary S3 dataset and replaces your local map tables.
 It does not scrape or publish data. Each developer has their own database.
-The bucket currently contains the partial Ansys test dataset: five processed
-floors, with indoor routing still incomplete. The commands above include its
-34 point POIs. See the dated
-[storage checkpoint](Data-Storage.md#current-bucket-checkpoint--october-24-2026-1410-edt)
-for coverage and the matching saved scrape.
+Choose one dataset for both commands:
+
+| Choice | Available data | POIs |
+| --- | --- | --- |
+| `--dataset new` (default) | Fresh Ansys test: five processed floors; indoor routing incomplete | 34 outdoor points; use `--include-pois` |
+| `--dataset old` | Historical campus snapshot: 74 buildings and existing indoor graphs | No separate POI file; omit `--include-pois` |
+
+For the historical campus data, replace the two commands above with:
+
+```sh
+python3 scripts/dev/dev.py populate --dataset old --check
+python3 scripts/dev/dev.py populate --dataset old
+```
+
+See [Data storage](Data-Storage.md#choosing-a-hosted-dataset) for both snapshots
+and the matching saved scrape. Switching replaces your local map tables; it does
+not combine datasets. Follow the same restart step afterward.
 
 ### 3. Restart and open
 
@@ -69,8 +81,8 @@ python3 scripts/dev/dev.py start --skip-secrets
 
 Wait for startup to finish again, then open [Ansys Hall](http://localhost:5173/AN).
 Complete the app's CMU/Keycloak login if prompted; this is separate from OpenBao
-login. You should see the imported Ansys floors. Other campus floorplans and
-indoor routes are not included in this temporary snapshot.
+login. You should see the imported Ansys floors. With `new`, other campus floorplans and
+indoor routes are not included yet. With `old`, the historical campus data is available.
 
 The visualizer runs at [localhost:5174](http://localhost:5174). Its source-workspace
 editor needs the matching scrape/working JSON locally; ordinary database
@@ -262,8 +274,8 @@ policy. Your personal Bao login does not grant this API permission.
 
 ## Populate the local database
 
-This imports the current shared S3 baseline, now the partial Ansys snapshot
-described in [Data storage](Data-Storage.md). For a freshly captured workspace,
+This imports the selected shared S3 snapshot (`new` by default), as described in
+[Data storage](Data-Storage.md). For a freshly captured local workspace,
 use [build and load preview](FMS-Capture.md#generate-an-application-candidate)
 instead. That path stages a separate local schema transactionally and refreshes
 caches automatically. If a generated preview is active, run
@@ -272,9 +284,12 @@ caches automatically. If a generated preview is active, run
 With the app running:
 
 ```sh
-python3 scripts/dev/dev.py populate --check --include-pois
-python3 scripts/dev/dev.py populate --include-pois
+python3 scripts/dev/dev.py populate --dataset new --check --include-pois
+python3 scripts/dev/dev.py populate --dataset new --include-pois
 ```
+
+Keys below are relative to `datasets/new/` or `datasets/old/`, chosen by
+`--dataset`. The importer never falls back to another dataset or the root mirror.
 
 | S3 object key | Contents |
 | --- | --- |
@@ -355,8 +370,8 @@ In a third terminal:
 
 ```sh
 devenv shell
-bash scripts/dev/populate.sh --check --include-pois
-bash scripts/dev/populate.sh --include-pois
+bash scripts/dev/populate.sh --dataset new --check --include-pois
+bash scripts/dev/populate.sh --dataset new --include-pois
 ```
 
 The helper runs the minimal population dependency group with Nix's Python 3.12
@@ -364,7 +379,7 @@ and uv. Its virtual environment lives under `.devenv/state/dataflow-venv`:
 
 ```sh
 cd apps/dataflow
-uv run --locked --only-group populate --python "$(command -v python3)" python -m deserializer --local --check
+uv run --locked --only-group populate --python "$(command -v python3)" python -m deserializer --local --dataset new --check
 ```
 
 The helper also sets `PYTHONPATH=src`, `UV_PROJECT_ENVIRONMENT`, and disables uv's
@@ -384,7 +399,7 @@ problems are covered in [Troubleshooting](Troubleshooting.md):
 | API not reachable during population | Wait for startup; inspect `logs`, `logs postgres` and `logs ricochet` |
 | Population authorization fails | Run `populate --check --include-pois`; the service account needs the project admin group |
 | Port already occupied | Stop the other application or an old Maps stack, then retry; do not change OAuth ports independently |
-| Map is blank after import | Restart the stack and open `/AN`; only Ansys is in the current dataset; inspect browser errors for MapKit token failures |
+| Map is blank after import | Restart the stack and open `/AN`; `new` contains Ansys only; inspect browser errors for MapKit token failures |
 | A generated preview is active | Restore `baseline` as described above before ordinary population |
 
 The workflow has been exercised on macOS. Launcher contract tests cover Windows,

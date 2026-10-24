@@ -8,6 +8,13 @@ newest scrape and processed results. That transfer is complete; see DP-07 and th
 The original handoff remains a historical snapshot. Pipeline implementation is
 still paused.
 
+Scope clarification: the target is **every building and floor available through
+FMS**. Ansys is the first end-to-end validation case. Expand discovery/capture
+campus-wide, keep an availability/coverage report, and track placement/alignment
+blockers explicitly; a successful Ansys run does not establish campus coverage.
+Both historical campus data and the fresh Ansys candidate are now selectable in
+storage; see [the current dataset choices](Data-Storage.md#choosing-a-hosted-dataset).
+
 Read the [detailed handoff](handoffs/2026-10-24_1200-EDT-data-pipeline.md) for the
 verified state, source findings, commands and limitations. The
 [v1 specification](Data-Pipeline-Spec.md) defines acceptance. This is the live task
@@ -36,7 +43,7 @@ No tasks are currently running. Resume a task explicitly after this pause.
 | DP-06 | P2 | Complete indoor and area-based POI coverage | Unassigned | DP-01; DP-03 for navigable associations |
 | DP-07 | P1 | Save and restore named workspaces through temporary S3 | Unassigned | Storage access and destination policy |
 | DP-08 | P2 | Expand preview activation/recovery checks | Unassigned | Existing preview loader |
-| DP-09 | P2 | Validate another real building and encountered formats | Unassigned | DP-01 adapter when ready; authorized source access |
+| DP-09 | P1 | Campus-wide capture, coverage and source formats | Unassigned | Authorized source access; DP-01 adapter when ready |
 | DP-10 | P2 | Verify Linux/WSL startup and lightweight dependency installs | Unassigned | Native development setup |
 | DP-11 | P1 | Close the first-building v1 acceptance case | Unassigned | DP-01–DP-09 as applicable |
 
@@ -182,16 +189,18 @@ local preview environment.
   search or graph state. Record the test command and what it detects.
 - **Evidence:** *Not started; earlier success cases are listed in the handoff.*
 
-## DP-09 — Another selection and source format
+## DP-09 — Campus-wide capture and source formats
 
-- [ ] **Deliver:** a second real building selection through the same engine, and
-  explicit coverage of the source format it exposes.
+- [ ] **Deliver:** discovery and resumable capture for every FMS-accessible
+  building/floor, with a coverage inventory and explicit source-format failures.
 - **Start:** parameterized FMS discovery and public numeric-ID join. Current live
   acceptance is Ansys only; fixtures exercise different crops and arbitrary names.
 - **Implement:** discover rather than hardcode filenames, layer roles, floor IDs
   and app/GIS abbreviations. Add a unit adapter only after verifying an encountered
   format; the current normalizer explicitly rejects Revit coordinates.
-- **Done when:** a bounded real selection captures, resumes offline, normalizes,
+- **Done when:** campus-wide acquisition accounts for all discovered selections;
+  missing, denied and unsupported drawings are listed rather than silently skipped.
+  A second bounded real selection captures, resumes offline, normalizes,
   accepts a saved placement, builds, loads and renders without code changes for
   that building. Unsupported formats remain explicit incomplete results.
 - **Evidence:** *Not started.*

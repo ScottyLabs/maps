@@ -46,13 +46,18 @@ The [running guide](../../docs/src/Setup.md#populate-the-local-database) documen
 import of the existing hosted baseline:
 
 ```sh
-python3 scripts/dev/dev.py populate --check
-python3 scripts/dev/dev.py populate
+python3 scripts/dev/dev.py populate --dataset old --check
+python3 scripts/dev/dev.py populate --dataset old
 ```
 
 OpenBao's `TEMP_DEV_S3` supplies the temporary bucket settings in ignored dataflow
 env files. The client uses that saved configuration rather than inherited shell
 storage settings. App identity settings come from the ignored server env file.
+
+Choose `--dataset old` for the historical campus snapshot or `--dataset new`
+(default) for the fresh Ansys candidate. Each reads its own
+`datasets/<choice>/floorplans/` prefix; no fallback mixes snapshots. The old
+snapshot has no POI file; only `new` supports `--include-pois`.
 
 The baseline requires `floorplans/{buildings,floorplans,placements,all-graph}.json`;
 POIs need `osm-pois.json` and `--include-pois`. Source/auth checks precede reset,

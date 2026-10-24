@@ -41,8 +41,8 @@ WSL browser login and tool verification. From the repository root:
    shared S3 dataset, then populate the local database. Continue only if the check succeeds.
 
    ```sh
-   python3 scripts/dev/dev.py populate --check --include-pois
-   python3 scripts/dev/dev.py populate --include-pois
+   python3 scripts/dev/dev.py populate --dataset new --check --include-pois
+   python3 scripts/dev/dev.py populate --dataset new --include-pois
    ```
 
 3. **Terminal 1:** after population finishes, press **Ctrl-C** and restart the app
@@ -56,8 +56,10 @@ WSL browser login and tool verification. From the repository root:
 4. Once startup is ready again, open [Ansys Hall](http://localhost:5173/AN) and
    complete the app login if prompted. Windows users can use their Windows browser.
 
-The temporary bucket currently supplies **Ansys only**: five processed floors
-and 34 point POIs. Indoor routing remains incomplete. Database population does
+The bucket offers two choices: `--dataset new` (default) imports the fresh Ansys
+test with five floors and 34 point POIs; indoor routing remains incomplete.
+For the historical 74-building campus snapshot, use `--dataset old` in both
+population commands and omit `--include-pois`. Database population does
 not fetch the source workspace for visualizer editing; see the
 [fresh-source guide](docs/src/FMS-Capture.md) for that workflow.
 

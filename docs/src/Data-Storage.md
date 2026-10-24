@@ -33,13 +33,48 @@ This branch temporarily uses `categorized-lockerbox-v9qy6t` at
 `secret/secretspec/maps/dev/TEMP_DEV_S3`, downloaded into ignored
 `apps/dataflow/.env`. See the [running guide](Setup.md#quick-start) for setup.
 
-The importer reads processed JSON under `floorplans/` and sends records through
+The importer reads the selected `datasets/{old,new}/floorplans/` prefix and sends records through
 the local API into each developer's own PostgreSQL database. It does not modify
 hosted storage. Builds and preview loads also leave hosted storage unchanged;
 upload is a separate operation. Raw source-fetch artifacts are not import datasets.
 Keep downloaded files under ignored `uploads/` and never commit credentials.
 
+### Choosing a hosted dataset
+
+As of **October 24, 2026, 14:57 EDT**, both snapshots are available in the same
+temporary bucket. This supersedes the earlier newest-only retention request.
+
+| Selection | Prefix | Imported records |
+| --- | --- | --- |
+| `--dataset old` | `datasets/old/floorplans/` | 74 buildings, 130 indoor floors, 9,779 indoor rooms, 353 aliases, 26,526 nodes, 59,962 edges |
+| `--dataset new` (default) | `datasets/new/floorplans/` | Ansys: five floors, 145 source pieces, 1,155 nodes, 2,114 outdoor edges, 34 POIs |
+
+The historical files also contain outside pseudo-floor/room records excluded by
+the existing converters, so imported totals differ from raw JSON counts. The old
+snapshot has no separate POI source. Omit `--include-pois` when selecting it;
+no empty POI file or new-data fallback was fabricated.
+
+Both snapshots passed model/reference checks and conversion through all seven
+table batches (POIs omitted for `old`) after downloading from storage. All uploaded
+objects were checked against local bytes. The active database preview was unchanged.
+
+The old graph contained five references to nonexistent neighbor nodes. Its
+importable copy removes only those five links. The exact original graph remains at
+`datasets/old/original/all-graph.json`; the other three original JSONs are preserved
+byte-for-byte under the import prefix. `datasets/old/manifest.json` lists the five
+corrections, object checksums and imported row counts. The new manifest records the
+current generated revision and matching `workspaces/ansys-v1/` capture.
+`datasets/catalog.json` lists both completed snapshots and was uploaded last.
+
+The root `floorplans/` mirror still contains the new data for older clients. The
+current importer uses the named prefixes exclusively. It validates and caches the
+selected files before reset and never switches datasets when a file is missing.
+See [Running locally](Setup.md#populate-the-local-database) to choose, import and
+restart. Saved credentials are shared; dataset selection does not edit OpenBao.
+
 ### Current bucket checkpoint — October 24, 2026, 14:10 EDT
+
+This earlier checkpoint is retained as history; the selection above is current.
 
 The latest `ansys-v1` scrape and processed results were uploaded explicitly at
 18:10 UTC. The four older campus JSON objects were replaced. **Ordinary population

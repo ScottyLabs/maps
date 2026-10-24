@@ -57,11 +57,11 @@ does not publish data or update hosted S3 objects.
 ## Shared baseline import
 
 The [running guide](Setup.md#populate-the-local-database) describes the shared-data
-import used for ordinary app onboarding. Its current source is the partial Ansys
-snapshot, which replaced the older campus objects on October 24:
+import used for ordinary app onboarding. Choose `--dataset old` for the historical campus data or `--dataset new`
+(default) for the partial fresh Ansys candidate:
 
 ```text
-Temporary S3 floorplans/*.json
+Temporary S3 datasets/{old,new}/floorplans/*.json
   -> model/reference checks + Keycloak authorization
   -> population API -> local baseline PostgreSQL tables
   -> explicit backend restart -> search/graph caches -> app

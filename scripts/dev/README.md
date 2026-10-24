@@ -24,7 +24,9 @@ secret values as shell code. Windows development runs inside WSL2.
 
 The temporary bucket is `categorized-lockerbox-v9qy6t` at
 `https://t3.storageapi.dev`, region `auto`. Population only reads its processed
-`floorplans/*.json` dataset. It validates before replacing local map tables;
+`datasets/{old,new}/floorplans/*.json` datasets, selected with
+`populate --dataset old|new` (default: `new`). The old campus snapshot has no
+separate POI file; the new Ansys snapshot supports `--include-pois`. It validates before replacing local map tables;
 restart the app after importing to refresh caches.
 
 `devenv.lock` pins the project inputs. Native PostgreSQL and the importer's virtual
