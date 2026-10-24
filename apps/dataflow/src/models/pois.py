@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, RootModel
 
 # Mirror of @cmumaps/common PoiTypes
 PoiType = Literal[
@@ -42,3 +42,7 @@ OSM_TAG_TO_POI_TYPE: dict[tuple[str, str], PoiType] = {
     ("amenity", "toilets"): "Restroom",
     ("emergency", "phone"): "Emergency Phone",
 }
+
+
+class Pois(RootModel[dict[str, Poi]]):
+    """Root POI dictionary; an empty dictionary is a valid zero-result dataset."""

@@ -10,6 +10,7 @@ from pydantic import BaseModel, ValidationError
 
 from logger import get_app_logger
 from models import Buildings, Floorplans, Graph, Placements
+from models.pois import Pois
 
 # Mapping of S3 object name patterns to their Pydantic validator models
 SCHEMA_VALIDATORS: dict[str, type[BaseModel]] = {
@@ -17,6 +18,7 @@ SCHEMA_VALIDATORS: dict[str, type[BaseModel]] = {
     "floorplans.json": Floorplans,
     "placements.json": Placements,
     "all-graph.json": Graph,
+    "osm-pois.json": Pois,
 }
 
 
@@ -132,7 +134,9 @@ class S3Client:
     def preload_json_file(self, s3_object_name: str) -> dict[str, Any]:
         """Validate and cache an input so imports use the preflight snapshot."""
         data = self.get_json_file(s3_object_name)
-        if not isinstance(data, dict) or not data:
+        if not isinstance(data, dict) or (
+            not data and Path(s3_object_name).name != "osm-pois.json"
+        ):
             msg = f"Missing, empty, or invalid dataset: {s3_object_name}"
             raise ValueError(msg)
         validator = self._get_validator(s3_object_name)

@@ -89,7 +89,9 @@ def build_workspace(workspace: Path) -> BuildReport:
     dataset, warnings = _generate(view.working)
     contents = dataset.files()
     hashes = {name: hashlib.sha256(data).hexdigest() for name, data in contents.items()}
-    identity = json.dumps([view.revision, hashes, warnings], sort_keys=True).encode()
+    identity = json.dumps(
+        [workspace.name, view.revision, hashes, warnings], sort_keys=True,
+    ).encode()
     revision = hashlib.sha256(identity).hexdigest()
     directory = f"generated/{revision}"
     target = workspace / directory / "floorplans"

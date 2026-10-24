@@ -319,8 +319,11 @@ fms = [
     { name = "selenium" },
 ]
 pipeline = [
+    { name = "colorama" },
     { name = "defusedxml" },
+    { name = "minio" },
     { name = "pydantic" },
+    { name = "python-dotenv" },
     { name = "requests" },
     { name = "shapely" },
     { name = "svgpathtools" },
@@ -370,8 +373,11 @@ fms = [
     { name = "selenium", specifier = ">=4.0.0" },
 ]
 pipeline = [
+    { name = "colorama", specifier = ">=0.4.6" },
     { name = "defusedxml", specifier = ">=0.7.1" },
+    { name = "minio", specifier = ">=7.2.20" },
     { name = "pydantic", specifier = ">=2.12.5" },
+    { name = "python-dotenv", specifier = ">=1.2.1" },
     { name = "requests", specifier = ">=2.32.5" },
     { name = "shapely", specifier = "==2.1.1" },
     { name = "svgpathtools", specifier = ">=1.7.2" },

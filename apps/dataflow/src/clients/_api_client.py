@@ -3,6 +3,8 @@ from functools import lru_cache
 from typing import Any, Literal
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from logger import get_app_logger
 
@@ -73,9 +75,13 @@ class ApiClient:
             "client_secret": self.auth_client_secret,
         }
 
-        response = requests.post(self.token_url, data=data, timeout=self.TIMEOUT)
-        response.raise_for_status()
-        token_data = response.json()
+        # Retry connection establishment only; never replay database writes.
+        with requests.Session() as session:
+            retry = Retry(total=2, connect=2, read=0, status=0, backoff_factor=0.5)
+            session.mount("https://", HTTPAdapter(max_retries=retry))
+            response = session.post(self.token_url, data=data, timeout=self.TIMEOUT)
+            response.raise_for_status()
+            token_data = response.json()
 
         self._cached_token = token_data.get("access_token")
         if not self._cached_token:
@@ -88,6 +94,34 @@ class ApiClient:
     def preflight(self) -> None:
         """Check credentials, admin authorization, and backend without adding rows."""
         self.populate_table("Building", [])
+
+    def load_preview(self, workspace: str, revision: str) -> dict[str, Any]:
+        """Ask the native API to stage and explicitly activate one candidate."""
+        return self._preview_operation(
+            {"operation": "load", "workspace": workspace, "revision": revision},
+        )
+
+    def restore_baseline(self) -> dict[str, Any]:
+        """Select the preserved ordinary import without deleting any map data."""
+        return self._preview_operation({"operation": "baseline"})
+
+    def _preview_operation(self, operation: dict[str, str]) -> dict[str, Any]:
+        response = requests.post(
+            f"{self.server_url}/pipeline",
+            json=operation,
+            headers={"Authorization": f"Bearer {self._get_token()}"},
+            timeout=120,
+        )
+        data = response.json()
+        if not isinstance(data, dict):
+            msg = "Invalid preview activation response"
+            raise TypeError(msg)
+        if response.status_code != self.SUCCESS_STATUS_CODE:
+            msg = (
+                data.get("message") or data.get("error") or "Preview activation failed"
+            )
+            raise RuntimeError(msg)
+        return data
 
     def drop_tables(self, table_names: list[TableName]) -> bool:
         """Drop specified tables."""

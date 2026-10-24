@@ -9,6 +9,8 @@ from pathlib import Path
 
 import requests
 
+from clients import get_api_client_singleton
+from deserializer.main import configure_local
 from processor.bridge import main as bridge_main
 from processor.generate import build_workspace
 from processor.workspace import normalize_workspace
@@ -34,11 +36,25 @@ def main() -> int:
     public.add_argument("--refresh-source", action="store_true")
     build = stages.add_parser("build", help="Export one saved working revision")
     build.add_argument("--workspace", type=Path, required=True)
+    load = stages.add_parser("load", help="Stage and activate a native app preview")
+    load.add_argument("--workspace", type=Path, required=True)
+    load.add_argument("--revision", required=True)
+    stages.add_parser("baseline", help="Return to the preserved shared-source import")
     stages.add_parser("bridge", help="Local API JSON transport")
     args = parser.parse_args()
     if args.stage == "bridge":
         return bridge_main()
     try:
+        if args.stage in {"load", "baseline"}:
+            configure_local()
+            client = get_api_client_singleton()
+            selected = (
+                client.restore_baseline()
+                if args.stage == "baseline"
+                else client.load_preview(args.workspace.name, args.revision)
+            )
+            print(selected["appUrl"])
+            return 0
         if args.stage == "build":
             report = build_workspace(args.workspace)
             print(report.model_dump_json(indent=2))
@@ -52,7 +68,7 @@ def main() -> int:
                 )
         else:
             working = normalize_workspace(args.workspace, replace=args.replace_working)
-    except (OSError, ValueError, requests.RequestException) as error:
+    except (OSError, ValueError, RuntimeError, requests.RequestException) as error:
         print(f"Pipeline failed: {error}", file=sys.stderr)
         return 1
     for building, floors in working.floors.items():

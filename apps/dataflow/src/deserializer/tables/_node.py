@@ -1,18 +1,29 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from clients.dataset import JsonSource, TableWriter
+
 from clients import get_api_client_singleton, get_s3_client_singleton
 from logger import get_app_logger
 
 MAX_NODES_PER_REQUEST = 5000  # Tested to work with 1MB request payload limit
 
 
-def populate_node_table() -> None:
+def populate_node_table(
+    *,
+    source: JsonSource | None = None,
+    writer: TableWriter | None = None,
+) -> None:
     """Populate the Node table using all-graph.json.
 
     Precondition: Room table must be populated.
     """
     # Get the logger and clients
     logger = get_app_logger()
-    api_client = get_api_client_singleton()
-    s3_client = get_s3_client_singleton()
+    api_client = writer if writer is not None else get_api_client_singleton()
+    s3_client = source if source is not None else get_s3_client_singleton()
 
     # Get the all-graph data from S3
     graph = s3_client.get_json_file("floorplans/all-graph.json")

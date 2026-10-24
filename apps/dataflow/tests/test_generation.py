@@ -2,10 +2,12 @@
 """Saved source and placement export the application's existing JSON contracts."""
 
 import json
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
 
+from deserializer.bundle import serialize_candidate
 from models.buildings import Buildings
 from processor.generate import build_workspace
 from processor.store import WorkspaceStore
@@ -77,6 +79,19 @@ class GenerationTests(unittest.TestCase):
             )
             graph = json.loads((target / "all-graph.json").read_text())
             self.assertNotIn("nodes", graph)
+            payload = serialize_candidate(workspace, report.revision)
+            self.assertEqual(payload.tables["Building"][0]["buildingCode"], "AN")
+            self.assertEqual(payload.tables["Poi"], [])
+            self.assertEqual(len(payload.tables["Room"]), 1)
+            other = root / "other-selection"
+            shutil.copytree(workspace, other)
+            other_report = build_workspace(other)
+            self.assertEqual(other_report.files, report.files)
+            self.assertNotEqual(other_report.revision, report.revision)
+            self.assertEqual(
+                serialize_candidate(other, other_report.revision).tables,
+                payload.tables,
+            )
             self.assertTrue(
                 any("door" in warning.lower() for warning in report.warnings),
             )

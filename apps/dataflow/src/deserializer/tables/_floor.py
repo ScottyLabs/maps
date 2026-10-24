@@ -1,16 +1,27 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from clients.dataset import JsonSource, TableWriter
+
 from clients import get_api_client_singleton, get_s3_client_singleton
 from logger import get_app_logger
 
 
-def populate_floor_table() -> None:
+def populate_floor_table(
+    *,
+    source: JsonSource | None = None,
+    writer: TableWriter | None = None,
+) -> None:
     """Populate the Floor table using placements.json and buildings.json.
 
     Precondition: Building table must be populated.
     """
     # Get the logger and clients
     logger = get_app_logger()
-    api_client = get_api_client_singleton()
-    s3_client = get_s3_client_singleton()
+    api_client = writer if writer is not None else get_api_client_singleton()
+    s3_client = source if source is not None else get_s3_client_singleton()
 
     # Get the buildings data from S3
     buildings = s3_client.get_json_file("floorplans/buildings.json")
