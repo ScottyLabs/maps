@@ -56,6 +56,8 @@ The launcher reports missing devenv/OpenBao dependencies; it does not install th
 The project documentation lives in [docs/src](docs/src/SUMMARY.md).
 See the [development script reference](scripts/dev/README.md) for the Kennel scaffold,
 service layout, and storage configuration.
+For fresh-source work, start with the [pipeline work queue](docs/src/Data-Pipeline-TODO.md)
+and its timestamped handoff, then follow the [capture-to-preview guide](docs/src/FMS-Capture.md).
 
 ## Contributing
 

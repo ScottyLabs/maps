@@ -7,6 +7,8 @@
 - [Data Flow](./Data-Flow.md)
   - [Fresh-source Pipeline V1 Spec](./Data-Pipeline-Spec.md)
   - [Fresh FMS Capture](./FMS-Capture.md)
+  - [Pipeline Work Queue](./Data-Pipeline-TODO.md)
+  - [Handoff: 2026-10-24 12:00 EDT](./handoffs/2026-10-24_1200-EDT-data-pipeline.md)
 - [Data Storage](./Data-Storage.md)
 - [Data Visualizer](./Data-Visualizer-Wiki.md)
 - [Style Guide](./Style-Guide.md)
