@@ -26,7 +26,8 @@ declare module "@tanstack/react-router" {
 function AppContent() {
   const { data: session, isPending } = auth.useSession();
   const [error, setError] = useState("");
-  if (!env.VITE_IGNORE_LOGIN && isPending) return <p>Checking session…</p>;
+  if (!env.VITE_IGNORE_LOGIN && isPending && !session)
+    return <p>Checking session…</p>;
   if (!env.VITE_IGNORE_LOGIN && !session) {
     return (
       <main className="m-auto max-w-lg space-y-5 p-10">

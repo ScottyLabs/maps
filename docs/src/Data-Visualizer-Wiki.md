@@ -22,13 +22,24 @@ the same Python engine used by the CLI.
    initial position is a draft centred on the freshly fetched CMU GIS footprint.
    Use the existing map placement controls to align one floor. Click the map to
    move the drawing, adjust angle/scale, then **Save placement to JSON**.
+6. Return to **Working drawing**, then **Build candidate**. Review the counts and
+   source warnings. Unsaved edits must be saved first.
+7. Choose **Load preview in app**. The backend validates the candidate, imports it
+   into a separate local schema, and prepares search and routing caches before
+   selecting it. The browser opens a fresh app page for that revision.
 
 The map controls use the app's existing coordinate conversion. Normalized source
 coordinates are metres with y up; the visualizer's drawing coordinates use y down.
 A saved building anchor records the reference floor, physical origin, geographic
 centre, angle, and scale. Do not treat merely similar SVG crops as verified floor
-alignment. Landmark verification and generated preview loading are subsequent
-pipeline stages still being implemented.
+alignment. Unverified floors are excluded with warnings. Door/connector and
+outdoor generation remain incomplete; a preview being viewable does not verify routes.
+
+The app shows its workspace/revision and preserves that context in room and route
+URLs. An older page gets a reload prompt after another preview activates. Failed
+loads keep the previous preview selected. Saving JSON alone leaves it unchanged.
+See [preview loading](FMS-Capture.md#load-the-candidate) for CLI commands and how
+to return to the preserved shared-source import.
 
 Apple's basemap needs a valid `MAPKIT_TOKEN` in OpenBao. If it expires, the GIS
 footprint and floor overlays can still render over a blank map grid. Refresh the
@@ -61,7 +72,7 @@ extractor. Production starts without this root and cannot use the local bridge.
 The original floor/map editor remains available for inspecting previously imported
 data while the fresh-source workflow is being completed. Its writes target the
 database and are separate from the selected source workspace. Use the workspace
-editor for the agreed JSON-first pipeline; generation and explicit candidate
-activation are covered by the [pipeline specification](Data-Pipeline-Spec.md).
+editor for the agreed JSON-first pipeline. Database mutations are blocked while
+a generated preview is selected; restore the baseline before using the old editor.
 
 [Original visualizer documentation](https://wiki-scottylabs.notion.site/CMU-Maps-Data-Visualizer-Documentation-20396192554c80ac9daee627cd3f852b?pvs=74).

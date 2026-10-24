@@ -111,8 +111,8 @@ increment; the command does not upload them or populate the database.
 
 The October 24, 2026 live run discovered and captured six ANSYS floors:
 `1`, `2`, `A`, `B`, `C`, and `D`. It used fresh FMS responses and did not read the
-old processed JSONs. The native app's imported baseline remains separate until
-generation and explicit preview loading are implemented.
+old processed JSONs. The native app's imported baseline stays separate from
+explicitly loaded generated previews.
 
 | Source information | Verified use or limitation |
 | --- | --- |
@@ -186,3 +186,38 @@ Generated revisions are immutable. A bad polygon or failed generation must not
 replace the previous successful report. Application coordinate schemas reject
 out-of-range geographic values, and nullable fields such as `osmId` are retained
 for compatibility with the existing importer.
+
+## Load the candidate
+
+With the native stack running, use **Load preview in app** in the visualizer,
+or pass the full revision printed by `build`:
+
+```sh
+devenv shell -- bash scripts/dev/pipeline.sh load --workspace uploads/pipeline/ansys-v1 --revision <full-revision>
+```
+
+The command uses the same existing JSON-to-table converters as the S3 importer.
+It verifies all five files, checksums, saved working revision and references
+before staging rows. All seven map tables are imported in one transaction into
+a candidate schema on the private devenv database. Search and graph caches are
+built before activation; the previously selected schema remains intact on failure.
+Authentication records stay in the ordinary schema.
+
+The API checks the existing population service account's Keycloak permission.
+Browser requests use your existing session. The offline Python worker receives
+no credentials and does not contact Keycloak. Loading writes no hosted data.
+
+Activation selects one ready database/cache set, then opens a fresh app URL with
+workspace and revision. Old requests are drained before switching; stale app
+pages must reload. The selected revision survives backend restarts. A copied
+workspace receives its own candidate identity even when JSON contents match.
+
+Return to the preserved shared-source dataset without deleting either schema:
+
+```sh
+devenv shell -- bash scripts/dev/pipeline.sh baseline
+```
+
+Open the URL it prints. Ordinary `dev.py populate` is blocked while a generated
+preview is selected; restore the baseline before using that command. It remains
+the older multi-request importer and needs a backend restart after population.

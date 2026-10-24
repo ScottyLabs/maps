@@ -10,9 +10,22 @@ existing scripts and do not imply that all stages are currently connected.
 [Fresh FMS capture](FMS-Capture.md) now discovers selected building floors,
 captures drawings/bounds/additional layers, and supports verified offline resume.
 The live validation captured all six ANSYS floors without the old processed JSONs.
-Normalization, visualizer working-JSON edits, generation, and atomic preview
-activation remain the next implementation stages. The import below still loads
-the shared baseline; raw capture is not a generated application dataset.
+Normalization, visualizer working-JSON edits, canonical generation, and isolated
+preview activation are connected through the same pipeline engine:
+
+```text
+Fresh FMS capture + public building metadata
+  -> saved working JSON + reference placement in the visualizer
+  -> explicit build: five canonical JSON files + validation report
+  -> explicit load: existing converters -> local candidate schema transaction
+  -> ready search/graph caches -> fresh revision-scoped app page
+```
+
+The first preview contains the reference floor's rooms and labels. Verified
+stacking, source-backed door/connector routes, outdoor paths and full POI coverage
+remain work in progress. Warnings identify excluded floors and missing evidence.
+The import below loads the preserved shared baseline; raw capture is not a
+generated application dataset.
 
 ## Local development import
 
@@ -117,7 +130,6 @@ The updated data are serialized to the S3 bucket.
 
 The S3 bucket files are deserialized in staging and production.
 
-Fresh capture, offline normalization and working-JSON editing are implemented.
-See [the visualizer workflow](Data-Visualizer-Wiki.md). Generated candidate
-export, verified stacking, routing/POIs and atomic preview activation remain
-implementation work under the specification.
+See [the visualizer workflow](Data-Visualizer-Wiki.md) for the connected fresh-source
+path. The historical steps above describe the older source-processing scripts;
+they are not prerequisites for the new JSON-first workspace.

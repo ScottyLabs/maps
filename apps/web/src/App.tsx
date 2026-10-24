@@ -9,6 +9,7 @@ import { IconsDisplay } from "@/components/ui-layout/icons-display/IconsDisplay.
 import { MyToastContainer } from "@/components/ui-layout/MyToastContainer.tsx";
 import { useUser } from "@/hooks/useUser.ts";
 import { useBoundStore } from "@/store/index.ts";
+import { PreviewStatus } from "./preview";
 import { NavOverlay } from "./components/nav/NavOverlay.tsx";
 
 const App = () => {
@@ -43,6 +44,7 @@ const App = () => {
       <FloorSwitcher />
       <Toolbar mapRef={mapRef} />
       <MyToastContainer />
+      <PreviewStatus />
     </main>
   );
 };

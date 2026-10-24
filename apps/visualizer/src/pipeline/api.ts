@@ -70,7 +70,15 @@ export async function pipeline<T>(
   const result = await response.json();
   if (!response.ok)
     throw new Error(
-      result.error ?? result.message ?? "Pipeline request failed",
+      result.message ?? result.error ?? "Pipeline request failed",
     );
   return result;
+}
+
+export interface BuildReport {
+  revision: string;
+  working_revision: string;
+  directory: string;
+  warnings: string[];
+  counts: Record<string, number>;
 }

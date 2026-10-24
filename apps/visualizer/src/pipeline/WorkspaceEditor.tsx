@@ -10,6 +10,7 @@ import MapDisplay from "../components/map-view/MapDisplay";
 import PlacementPanel from "../components/map-view/PlacementPanel";
 import {
   pipeline,
+  type BuildReport,
   type Point,
   type WorkingDataset,
   type WorkspaceView,
@@ -23,6 +24,7 @@ interface Props {
 
 export default function WorkspaceEditor({ workspace, initial }: Props) {
   const [view, setView] = useState(initial);
+  const [report, setReport] = useState<BuildReport | null>(null);
   const [draft, setDraft] = useState(initial.working);
   const [building, setBuilding] = useState(Object.keys(draft.floors)[0]);
   const [level, setLevel] = useState(Object.keys(draft.floors[building])[0]);
@@ -60,6 +62,7 @@ export default function WorkspaceEditor({ workspace, initial }: Props) {
       setView(saved);
       setDraft(saved.working);
       setDirty(false);
+      setReport(null);
       setMessage("Working JSON saved. The database preview is unchanged.");
     } catch (error) {
       setMessage((error as Error).message);
@@ -81,6 +84,33 @@ export default function WorkspaceEditor({ workspace, initial }: Props) {
     } catch (error) {
       setMessage((error as Error).message);
     } finally {
+      setBusy(false);
+    }
+  };
+  const build = async () => {
+    setBusy(true);
+    try {
+      const candidate = await pipeline<BuildReport>("build", workspace, {
+        expected_revision: view.revision,
+      });
+      setReport(candidate);
+      setMessage("Candidate built. Review its source warnings before loading.");
+    } catch (error) {
+      setMessage((error as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const load = async () => {
+    if (!report) return;
+    setBusy(true);
+    try {
+      const selected = await pipeline<{ appUrl: string }>("load", workspace, {
+        revision: report.revision,
+      });
+      window.location.assign(selected.appUrl);
+    } catch (error) {
+      setMessage((error as Error).message);
       setBusy(false);
     }
   };
@@ -246,6 +276,30 @@ export default function WorkspaceEditor({ workspace, initial }: Props) {
         </button>
         <button
           type="button"
+          disabled={busy || dirty}
+          className="rounded border px-3 py-2 disabled:opacity-40"
+          onClick={() => {
+            void build();
+          }}
+        >
+          Build candidate
+        </button>
+        {report && (
+          <button
+            type="button"
+            disabled={
+              busy || dirty || report.working_revision !== view.revision
+            }
+            className="rounded bg-emerald-700 px-3 py-2 text-white disabled:opacity-40"
+            onClick={() => {
+              void load();
+            }}
+          >
+            Load preview in app
+          </button>
+        )}
+        <button
+          type="button"
           disabled={busy}
           className="rounded border px-3 py-2"
           onClick={() => {
@@ -313,6 +367,26 @@ export default function WorkspaceEditor({ workspace, initial }: Props) {
         <p role="status" className="rounded border p-3">
           {message}
         </p>
+      )}
+      {report && (
+        <section className="rounded border bg-slate-50 p-3">
+          <h2 className="font-semibold">
+            Candidate {report.revision.slice(0, 8)}
+          </h2>
+          <p>
+            {Object.entries(report.counts)
+              .map(([name, count]) => `${count} ${name}`)
+              .join(" · ")}
+          </p>
+          <details>
+            <summary>{report.warnings.length} source warnings</summary>
+            <ul className="max-h-52 list-inside list-disc overflow-y-auto text-sm">
+              {report.warnings.map((warning, index) => (
+                <li key={`${warning}-${index}`}>{warning}</li>
+              ))}
+            </ul>
+          </details>
+        </section>
       )}
       <div className="grid gap-5 lg:grid-cols-[1fr_22rem]">
         <SourceCanvas

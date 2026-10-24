@@ -159,6 +159,12 @@ policy. Your personal Bao login does not grant this API permission.
 
 ## Populate the local database
 
+This imports the existing shared S3 baseline. For a freshly captured workspace,
+use [build and load preview](FMS-Capture.md#generate-an-application-candidate)
+instead. That path stages a separate local schema transactionally and refreshes
+caches automatically. If a generated preview is active, run
+`devenv shell -- bash scripts/dev/pipeline.sh baseline` before ordinary population.
+
 With the app running:
 
 ```sh

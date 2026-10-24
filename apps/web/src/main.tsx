@@ -4,6 +4,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router";
 import { env } from "@/env.ts";
+import { initializePreviewContext } from "./preview";
 import { App } from "./App.tsx";
 import "./index.css";
 import { NuqsAdapter } from "nuqs/adapters/react";
@@ -19,16 +20,17 @@ posthog.init(env.VITE_PUBLIC_POSTHOG_KEY || "", {
 const queryClient = new QueryClient();
 
 // Render the App
-createRoot(document.getElementById("root") as HTMLElement).render(
-  <BrowserRouter>
-    <QueryClientProvider client={queryClient}>
-      <NuqsAdapter>
-        <PostHogProvider client={posthog}>
-          <StrictMode>
-            <App />
-          </StrictMode>
-        </PostHogProvider>
-      </NuqsAdapter>
-    </QueryClientProvider>
-  </BrowserRouter>,
-);
+if (await initializePreviewContext())
+  createRoot(document.getElementById("root") as HTMLElement).render(
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <NuqsAdapter>
+          <PostHogProvider client={posthog}>
+            <StrictMode>
+              <App />
+            </StrictMode>
+          </PostHogProvider>
+        </NuqsAdapter>
+      </QueryClientProvider>
+    </BrowserRouter>,
+  );
