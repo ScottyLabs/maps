@@ -5,6 +5,7 @@
 - [Setup](./Setup.md)
 - [Environments](./Environments.md)
 - [Data Flow](./Data-Flow.md)
+  - [Fresh-source Pipeline V1 Spec](./Data-Pipeline-Spec.md)
 - [Data Storage](./Data-Storage.md)
 - [Data Visualizer](./Data-Visualizer-Wiki.md)
 - [Style Guide](./Style-Guide.md)

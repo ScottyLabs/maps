@@ -1,5 +1,10 @@
 # Data flow
 
+The agreed replacement workflow is documented in the
+[fresh-source pipeline v1 specification](Data-Pipeline-Spec.md). It requires the
+complete fresh-scrape-to-app loop; the source-processing notes below describe
+existing scripts and do not imply that all stages are currently connected.
+
 ## Local development import
 
 The [running guide](Setup.md#populate-the-local-database) describes the
