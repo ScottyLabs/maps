@@ -48,14 +48,17 @@ The database is derived from a complete generated revision through the existing
 seven table converters. Per-workspace source provenance belongs in capture and
 working/report metadata rather than unsupported canonical fields.
 
-Fresh captures, working JSON and generated candidates currently remain under
-ignored `uploads/pipeline/`. Remote named-workspace synchronization is an open
-task. A local build/load does not publish data or update hosted S3 objects.
+Fresh captures, working JSON and generated candidates live under ignored
+`uploads/pipeline/`. The current Ansys workspace was explicitly uploaded to the
+temporary bucket; see the dated [storage checkpoint](Data-Storage.md#current-bucket-checkpoint--october-24-2026-1410-edt).
+A supported synchronization command remains an open task. A local build/load
+does not publish data or update hosted S3 objects.
 
 ## Shared baseline import
 
-The [running guide](Setup.md#populate-the-local-database) describes the older
-shared-data import used for ordinary app onboarding:
+The [running guide](Setup.md#populate-the-local-database) describes the shared-data
+import used for ordinary app onboarding. Its current source is the partial Ansys
+snapshot, which replaced the older campus objects on October 24:
 
 ```text
 Temporary S3 floorplans/*.json

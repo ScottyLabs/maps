@@ -2,6 +2,12 @@
 
 Checkpoint: **2026-10-24 12:00 EDT** · branch `hotfix` · status: **paused**.
 
+Storage update: **2026-10-24 14:10 EDT** — the user authorized uploading only the
+newest scrape and processed results. That transfer is complete; see DP-07 and the
+[storage checkpoint](Data-Storage.md#current-bucket-checkpoint--october-24-2026-1410-edt).
+The original handoff remains a historical snapshot. Pipeline implementation is
+still paused.
+
 Read the [detailed handoff](handoffs/2026-10-24_1200-EDT-data-pipeline.md) for the
 verified state, source findings, commands and limitations. The
 [v1 specification](Data-Pipeline-Spec.md) defines acceptance. This is the live task
@@ -140,18 +146,27 @@ local preview environment.
 - [ ] **Deliver:** explicit upload/download of a coherent named workspace and its
   generated revision using `TEMP_DEV_S3`.
 - **Start:** `clients/_s3_client.py`, `processor/store.py`, the spec's workspace
-  section and the handoff's storage inventory. Fresh Ansys data currently exists
-  only under ignored local `uploads/pipeline/ansys-v1`.
+  section and the current [storage layout](Data-Storage.md). Fresh Ansys data is
+  saved under both ignored local `uploads/pipeline/ansys-v1` and remote
+  `workspaces/ansys-v1/`.
 - **Implement:** agree a prefix layout for capture, raw/working data and immutable
   generated revisions. Verify destination access rules for detailed FMS data.
   Validate checksums/completeness before selecting a remote revision; exclude env
-  files, tokens, cookies and profiles. Preserve the existing root baseline objects.
+  files, tokens, cookies and profiles. Retain only the newest scrape/working data
+  and generated revision remotely, with the root `floorplans/` mirror matching it;
+  the user explicitly authorized replacing the older campus baseline.
 - **Done when:** a separate clean workspace can retrieve a complete revision and
   reproduce build/load/verify without the original machine's cache; interrupted
   transfers do not advertise partial revisions. Document and run the operation
   against the temporary bucket with appropriately scoped authorization.
-- **Evidence:** *Not started. No new workspace uploaded; baseline has four older
-  objects and no `osm-pois.json`.*
+- **Evidence:** October 24, 14:10 EDT: a one-off transfer uploaded 62 workspace
+  files, five canonical root mirrors (including `osm-pois.json`) and a completion
+  manifest. All 68 objects passed downloaded SHA-256 verification. A clean
+  downloaded workspace reproduced revision `e053b4ff…` and serialized all seven
+  table batches. The four older campus objects were replaced; the active local
+  database was not changed. Still open: reusable CLI/visualizer synchronization,
+  interrupted-transfer recovery, and restore → load → API verification through
+  the supported workflow. This task remains unchecked.
 
 ## DP-08 — Activation, failure and recovery coverage
 

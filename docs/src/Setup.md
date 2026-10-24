@@ -30,6 +30,11 @@ python3 scripts/dev/dev.py populate
 
 This reads the shared temporary S3 dataset and replaces your local map tables.
 It does not scrape or publish data. Each developer has their own database.
+The bucket currently contains the partial Ansys test dataset: five processed
+floors, with indoor routing still incomplete. Add `--include-pois` to both commands
+to validate and import its 34 point POIs. See the dated
+[storage checkpoint](Data-Storage.md#current-bucket-checkpoint--october-24-2026-1410-edt)
+for coverage and the matching saved scrape.
 
 ### 3. Restart and open
 
@@ -159,7 +164,8 @@ policy. Your personal Bao login does not grant this API permission.
 
 ## Populate the local database
 
-This imports the existing shared S3 baseline. For a freshly captured workspace,
+This imports the current shared S3 baseline, now the partial Ansys snapshot
+described in [Data storage](Data-Storage.md). For a freshly captured workspace,
 use [build and load preview](FMS-Capture.md#generate-an-application-candidate)
 instead. That path stages a separate local schema transactionally and refreshes
 caches automatically. If a generated preview is active, run
