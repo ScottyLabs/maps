@@ -4,21 +4,9 @@ import type {
   DeleteEdgeAcrossFloorsArg,
   DeleteEdgeArg,
 } from "../../api/edgeApiSlice.ts";
-import type {
-  CreateNodeArg,
-  DeleteNodeArg,
-  UpdateNodeArg,
-} from "../../api/nodeApiSlice.ts";
-import type {
-  CreatePoiArg,
-  DeletePoiArg,
-  UpdatePoiArg,
-} from "../../api/poiApiSlice.ts";
-import type {
-  CreateRoomArg,
-  DeleteRoomArg,
-  UpdateRoomArg,
-} from "../../api/roomApiSlice.ts";
+import type { CreateNodeArg, DeleteNodeArg, UpdateNodeArg } from "../../api/nodeApiSlice.ts";
+import type { CreatePoiArg, DeletePoiArg, UpdatePoiArg } from "../../api/poiApiSlice.ts";
+import type { CreateRoomArg, DeleteRoomArg, UpdateRoomArg } from "../../api/roomApiSlice.ts";
 
 interface CreateNodeEdit {
   endpoint: "createNode";

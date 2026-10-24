@@ -19,7 +19,7 @@ const App = () => {
   const posthog = usePostHog();
   useEffect(() => {
     if (user) {
-      posthog?.identify(user.id);
+      posthog?.identify(String(user.id));
     } else {
       posthog?.reset();
     }

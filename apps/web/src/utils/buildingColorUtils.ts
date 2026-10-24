@@ -37,6 +37,4 @@ const buildingCodeToShapeFillColor = {
 };
 
 export const getBuildingShapeFillColor = (buildingCode: string) =>
-  buildingCodeToShapeFillColor[
-    buildingCode as keyof typeof buildingCodeToShapeFillColor
-  ];
+  buildingCodeToShapeFillColor[buildingCode as keyof typeof buildingCodeToShapeFillColor];

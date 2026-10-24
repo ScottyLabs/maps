@@ -10,10 +10,7 @@ export const getFloorOrdinal = (building: Building, floor: Floor) => {
   return (building?.defaultOrdinal || 0) + focusedIndex - defaultIndex;
 };
 
-export const getFloorByOrdinal = (
-  building: Building,
-  ordinal: number,
-): Floor | null => {
+export const getFloorByOrdinal = (building: Building, ordinal: number): Floor | null => {
   if (!building.defaultFloor) {
     return null;
   }

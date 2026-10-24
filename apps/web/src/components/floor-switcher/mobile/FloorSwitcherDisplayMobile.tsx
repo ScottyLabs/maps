@@ -29,7 +29,7 @@ const FloorSwitcherDisplayMobile = ({ building, initialFloorLevel }: Props) => {
 
   const focusedFloor = useBoundStore((state) => state.focusedFloor);
 
-  const { data: buildings } = $api.useQuery("get", "/buildings");
+  const { data: buildings } = $api.useQuery("get", "/api/buildings");
 
   useEffect(() => {
     const focusedBuilding = buildings?.[focusedFloor?.buildingCode ?? ""];
@@ -48,11 +48,8 @@ const FloorSwitcherDisplayMobile = ({ building, initialFloorLevel }: Props) => {
 
   const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
     if (e.touches[0]?.clientY) {
-      const newValue =
-        startingProgressValue - (e.touches[0]?.clientY - startingTouchY) / 50;
-      progressValue.set(
-        Math.max(0, Math.min(building.floors.length - 1, newValue)),
-      );
+      const newValue = startingProgressValue - (e.touches[0]?.clientY - startingTouchY) / 50;
+      progressValue.set(Math.max(0, Math.min(building.floors.length - 1, newValue)));
     }
   };
 
@@ -115,10 +112,7 @@ const FloorSwitcherDisplayMobile = ({ building, initialFloorLevel }: Props) => {
         className="btn-shadow m-auto h-52 w-45 self-center bg-white/10 backdrop-blur-md"
         style={{ borderRadius: "50% / 50%" }}
       >
-        <FloorSwitcherCarouselMobile
-          building={building}
-          progressValue={progressValue}
-        />
+        <FloorSwitcherCarouselMobile building={building} progressValue={progressValue} />
       </motion.div>
     </div>
   );

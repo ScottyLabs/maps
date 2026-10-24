@@ -38,10 +38,7 @@ export const WalkwayTypeList = ["Corridor", "Ramp", "Library"];
  * OSM Simple Indoor Tagging tags for each RoomType, used for export and contribution
  * https://wiki.openstreetmap.org/wiki/Simple_Indoor_Tagging
  */
-export const RoomOsmTags: Record<
-  Exclude<RoomType, "">,
-  { key: string; value: string }[]
-> = {
+export const RoomOsmTags: Record<Exclude<RoomType, "">, { key: string; value: string }[]> = {
   Default: [{ key: "indoor", value: "room" }],
   Corridor: [{ key: "indoor", value: "corridor" }],
   Auditorium: [

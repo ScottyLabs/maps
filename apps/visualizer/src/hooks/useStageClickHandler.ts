@@ -14,10 +14,7 @@ import {
   POLYGON_SELECT,
   setMode,
 } from "../store/features/modeSlice.ts";
-import {
-  setEditRoomLabel,
-  setShowRoomSpecific,
-} from "../store/features/uiSlice.ts";
+import { setEditRoomLabel, setShowRoomSpecific } from "../store/features/uiSlice.ts";
 import { useAppDispatch, useAppSelector } from "../store/hooks.ts";
 import { getCursorPos } from "../utils/canvasUtils.ts";
 import { distPointToLine } from "../utils/geometryUtils.ts";

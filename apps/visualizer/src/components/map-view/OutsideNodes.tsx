@@ -35,10 +35,7 @@ const OutsideNodes = ({ mapRef, nodes }: Props) => {
         const lineOverlay = new mapkit.PolylineOverlay(
           [
             new mapkit.Coordinate(node.pos.latitude, node.pos.longitude),
-            new mapkit.Coordinate(
-              neighbor.pos.latitude,
-              neighbor.pos.longitude,
-            ),
+            new mapkit.Coordinate(neighbor.pos.latitude, neighbor.pos.longitude),
           ],
           { style: new mapkit.Style({ strokeColor: "black" }) },
         );

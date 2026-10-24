@@ -1,6 +1,11 @@
+// queryCompiler + driverAdapters replace the Rust query engine, which needs a
+// system libssl that neither the devenv shell nor the NixOS deploy host has.
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "debian-openssl-3.0.x"]
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  runtime      = "deno"
+  moduleFormat = "esm"
+  engineType   = "client"
 }
 
 datasource db {
@@ -98,4 +103,24 @@ model Poi {
   floor        Floor?  @relation(fields: [buildingCode, floorLevel], references: [buildingCode, floorLevel])
 
   @@index([buildingCode, floorLevel])
+}
+
+model User {
+  id          Int       @id @default(autoincrement())
+  name        String
+  andrewId    String
+  oidcSubject String    @unique
+  createdTime DateTime  @default(now())
+  sessions    Session[]
+}
+
+model Session {
+  id        String   @id
+  userId    Int
+  groups    String[]
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

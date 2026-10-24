@@ -32,9 +32,7 @@ const RoomlessDisplay = ({ floorCode, nodeId, graph }: Props) => {
     await createRoom({ floorCode, roomId, roomNodes, roomInfo, batchId });
   };
 
-  return (
-    <InfoDisplayButton text="Create Room" handleClick={handleCreateRoom} />
-  );
+  return <InfoDisplayButton text="Create Room" handleClick={handleCreateRoom} />;
 };
 
 export default RoomlessDisplay;

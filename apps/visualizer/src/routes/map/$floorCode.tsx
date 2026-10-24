@@ -18,9 +18,7 @@ function MapView() {
   const buildingCode = extractBuildingCode(floorCode);
   const { data: building } = useGetBuildingQuery(buildingCode);
   const { data: initialPlacement } = useGetFloorPlacementQuery(floorCode);
-  const [placement, setPlacement] = useState<Placement | undefined>(
-    initialPlacement,
-  );
+  const [placement, setPlacement] = useState<Placement | undefined>(initialPlacement);
 
   useEffect(() => {
     setPlacement(initialPlacement);
@@ -34,11 +32,7 @@ function MapView() {
     <>
       <NavBar floorCode={floorCode} />
       <ViewSwitch floorCode={floorCode} />
-      <PlacementPanel
-        floorCode={floorCode}
-        placement={placement}
-        setPlacement={setPlacement}
-      />
+      <PlacementPanel floorCode={floorCode} placement={placement} setPlacement={setPlacement} />
       <MapDisplay
         floorCode={floorCode}
         building={building}

@@ -8,10 +8,7 @@ const Loader = ({ loadingText }: Props) => {
       <div className="h-12 w-12 animate-spin rounded-full border-4 border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]" />
       <div className="m-6 text-3xl">
         {loadingText}
-        <span
-          className="ml-1"
-          style={{ animation: "dotBlink 1.5s infinite linear" }}
-        >
+        <span className="ml-1" style={{ animation: "dotBlink 1.5s infinite linear" }}>
           .
         </span>
       </div>

@@ -14,13 +14,7 @@ interface Props {
   scale: number;
 }
 
-const SelectedPolygonDisplay = ({
-  floorCode,
-  roomId,
-  polygon,
-  offset,
-  scale,
-}: Props) => {
+const SelectedPolygonDisplay = ({ floorCode, roomId, polygon, offset, scale }: Props) => {
   const nodeSize = useAppSelector((state) => state.ui.nodeSize);
   const editPolygon = useAppSelector(selectEditPolygon);
 
@@ -30,12 +24,7 @@ const SelectedPolygonDisplay = ({
 
   if (!editPolygon) {
     return polygon.coordinates.map((coords, index) => (
-      <Line
-        key={index}
-        points={coords.flat()}
-        stroke="orange"
-        strokeWidth={nodeSize / 2}
-      />
+      <Line key={index} points={coords.flat()} stroke="orange" strokeWidth={nodeSize / 2} />
     ));
   }
 

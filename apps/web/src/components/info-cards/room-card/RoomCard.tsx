@@ -12,10 +12,10 @@ const RoomCard = () => {
 
   // Query data
   const floorCode = buildingCode && floor ? `${buildingCode}-${floor}` : null;
-  const { data: buildings } = $api.useQuery("get", "/buildings");
+  const { data: buildings } = $api.useQuery("get", "/api/buildings");
   const { data: rooms } = $api.useQuery(
     "get",
-    "/floors/{floorCode}/floorplan",
+    "/api/floors/{floorCode}/floorplan",
     { params: { path: { floorCode: floorCode ?? "" } } },
     { enabled: Boolean(floorCode) },
   );
@@ -46,11 +46,7 @@ const RoomCard = () => {
       return <h2>{room.alias}</h2>;
     }
 
-    if (
-      room.type === "Restroom" ||
-      room.type === "Stairs" ||
-      room.type === "Elevator"
-    ) {
+    if (room.type === "Restroom" || room.type === "Stairs" || room.type === "Elevator") {
       return <h2>{room.type}</h2>;
     }
 
@@ -64,9 +60,7 @@ const RoomCard = () => {
     );
   };
 
-  const renderSchedule = () => (
-    <p className="text-gray-500">No Room Schedule Available</p>
-  );
+  const renderSchedule = () => <p className="text-gray-500">No Room Schedule Available</p>;
 
   return (
     <>

@@ -17,9 +17,7 @@ const NodeSizeSlider = ({ text }: Props) => {
         max="10"
         step=".1"
         value={nodeSize}
-        onChange={(e) =>
-          dispatch(setNodeSize(Number.parseFloat(e.target.value)))
-        }
+        onChange={(e) => dispatch(setNodeSize(Number.parseFloat(e.target.value)))}
         className="h-2 w-full cursor-pointer rounded-lg bg-blue-400"
       />
       <div className="text-center text-sm">

@@ -1,36 +1,72 @@
 # AGENTS.md
 
-## Cursor Cloud specific instructions
+## Overview
 
-### Overview
+CMU Maps is a Deno workspace monorepo deployed by [kennel](https://docs.kennel.scottylabs.org).
+The root `deno.json` lists the workspace members and shared tasks; each app/package declares its
+own dependencies.
 
-CMU Maps is a Deno workspace monorepo with 4 apps and 3 shared packages. Each app/package has its own `deno.json` declaring its dependencies; the root `deno.json` lists the workspace members and shared tasks. See `README.md` and `.github/CONTRIBUTING.md` for general project info.
+| Member | What it is |
+|---|---|
+| `apps/server` | Elysia API on Deno. Serves `/api/*`, plus both SPAs as static files in production. |
+| `apps/web` | Public map SPA (React + Vite), served at `/`. |
+| `apps/visualizer` | Internal floorplan editor (React + Vite), served at `/visualizer`. |
+| `apps/dataflow` | Python (uv) scrapers and the database population job. Operator-run, never deployed. |
+| `packages/*` | Shared types and utilities. |
 
-### Services
+## Environment
 
-| Service | Port | How to start |
-| -- | -- | -- |
-| PostgreSQL 17 | 5432 | `sudo docker start cmumaps-postgres` (or create via `docker run`) |
-| Server (`@cmumaps/server`) | 80 | `cd apps/server && deno run -A --watch --env-file=.env src/server.ts` |
-| Web app (`@cmumaps/web`) | 5173 | `cd apps/web && deno run -A npm:vite --port 5173 --host` |
+Everything comes from devenv. Enter the shell (`devenv shell`, or let direnv do it) and you get
+Deno, Python/uv, PostgreSQL, the `bao`/`secretspec` CLIs, and every secret resolved out of OpenBao.
 
-### Key gotchas
+- One-time per machine: `nix run git+https://codeberg.org/ScottyLabs/kennel#login`
+- Secrets are declared in `secretspec.toml` under project name `maps` and live at
+  `secret/secretspec/maps/<profile>/<KEY>` in OpenBao. Check with `secretspec check -P dev`.
+- `DATABASE_URL` comes from the devenv postgres module locally and from kennel in deployments.
+  `PORT`, `APP_URL` and `COMMIT_HASH` are injected by kennel. None of them belong in `secretspec.toml`.
+- `apps/dataflow` reads its own `.env` (`cp .env.example .env`); it is not part of secretspec.
 
-- **`DATABASE_URL` in shell env**: The VM may have a stale `DATABASE_URL` env var (e.g. `postgres:5432` from Docker Compose). Always `unset DATABASE_URL` before starting the server, or rely on `dotenv -e .env` properly. The server's `.env` should point to `localhost:5432`.
-- **`SERVER_PORT` in Zod v4**: `z.number()` in Zod v4 does NOT coerce strings. Do NOT set `SERVER_PORT` in `.env`; let it default to 80. Use `sudo setcap cap_net_bind_service=+ep $(which deno)` to allow binding port 80 without root.
-- **Code generation before lint/build**: Before running `deno task check`, `deno task tsc`, or `deno task build`, you must first generate the server's build artifacts: `deno task db-generate && deno task tsoa && deno task openapi` (or use `deno task sync` from the root).
-- **Pre-commit hooks** (`.husky/pre-commit`): Runs `editorconfig-checker`, `deno task check`, and `uv run lint` for Python. These are automatically run by husky on commit.
+## Standard commands
 
-### Populating the database from S3
+- Dev (server + web): `deno task dev:web` — backend on `:3001`, Vite on `:5173` proxying `/api`
+- Dev without auth: `deno task dev:web:noauth` (sets `IGNORE_LOGIN`/`VITE_IGNORE_LOGIN`)
+- Dev (server + visualizer): `deno task dev:visualizer` (Vite on `:5174`)
+- Type check: `deno task check` (browser code is excluded; Vite builds cover it)
+- Build everything: `deno task build`
+- Regenerate the Prisma client: `deno task db-generate`
+- Regenerate `apps/server/build/openapi.{json,d.ts}` for the web client: `deno task openapi`
+- Push schema in dev: `deno task db-push`
+- Python lint: `cd apps/dataflow && uv run lint`
 
-The dataflow app reads JSON from S3 and POSTs to the server's `/populate-table/*` endpoints. Required env vars in `apps/dataflow/.env`: `S3_ENDPOINT`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `SERVER_URL`, `AUTH_CLIENT_ID`, `AUTH_CLIENT_SECRET`. The server must be running with valid OIDC config (AUTH_ISSUER, AUTH_JWKS_URI derived from `tsoa.json`'s openIdConnectUrl). Run: `cd apps/dataflow && uv run populate-database`. After populating, restart the server to rebuild the in-memory search index and graph cache.
+## Auth
 
-### Standard commands
+Keycloak OIDC through the Ricochet relay, the same structure as `ScottyLabs/housing`:
 
-- **Lint/check**: `deno task check` (runs `deno check` across all workspace members)
-- **Python lint**: `cd apps/dataflow && uv run lint`
-- **Build**: `deno task build`
-- **Dev (server + web)**: `deno task dev:web` (uses `concurrently` to start both)
-- **Dev (server + web, no auth)**: `deno task dev:web:noauth` (bypasses all CMU login checks — sets `IGNORE_LOGIN=true` and `VITE_IGNORE_LOGIN=true). Use this for local development and testing features that requires authentication(e.g. viewing floorplans, path finding to POIs).
-- **Dev (server only)**: `deno task dev:server`
-- See `deno.json` tasks for the full list.
+- `GET /api/auth/login` → relay → Keycloak → `GET /api/auth/callback` → session cookie
+- Session rows live in Postgres (`Session`), keyed to a `User` upserted on the OIDC subject
+- `GET /api/me` returns the session user and their Keycloak `groups`
+- Route authorization uses the `auth` macro from `apps/server/src/auth/middleware.ts`:
+  `auth: "user" | "member" | "admin"`, or `optionalAuth: true` for routes that tolerate anonymous
+  callers. `member`/`admin` are checked against `PROJECT_GROUP`/`PROJECT_ADMIN_GROUP`.
+- `IGNORE_LOGIN=true` short-circuits every check to a synthetic admin, for local development.
+- Machine clients (`apps/dataflow`) send a Keycloak client-credentials bearer token, verified
+  against the realm JWKS.
+
+## Browser configuration
+
+The SPAs are built by Nix in a sandbox with no secrets, and a preview's values are not knowable
+at build time, so nothing is inlined by Vite. `GET /api/config` serves the browser-facing values
+(`mapkitToken`, `googleMapsApiKey`, `posthogKey`, `posthogHost`, `ignoreLogin`) from server env at
+runtime, and each SPA awaits it in `main.tsx` before rendering. Add a new browser value by
+declaring it in `secretspec.toml`, returning it from `apps/server/src/routes/config.ts`, and
+exposing it as a getter on the app's `env.ts`.
+
+## Deployment
+
+Kennel builds the flake on every push to `main`, `staging`, `dev`, and on pull requests.
+
+- `flake.nix` exposes `server`, `web` and `visualizer`. The `server` binary is wrapped with
+  `STATIC_DIR` and `VISUALIZER_DIR` pointing at the two built SPAs, so one service serves everything.
+- `devenv.nix` declares `scottylabs.kennel.services.server.customDomain = "cmumaps.com"`.
+- `GET /api/health` must keep returning `200`; kennel gates every deployment on it.
+- Preview deployments land at `maps-server-pr-<n>.scottylabs.net` with their own database.

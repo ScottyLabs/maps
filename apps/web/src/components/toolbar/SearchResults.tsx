@@ -53,7 +53,7 @@ const SearchResults = ({ searchQuery, mapRef }: Props) => {
 
   const { data: searchResults } = $api.useQuery(
     "get",
-    "/search",
+    "/api/search",
     {
       params: { query: { query: searchQuery } },
     },
@@ -62,15 +62,13 @@ const SearchResults = ({ searchQuery, mapRef }: Props) => {
     },
   );
 
-  const { data: buildings } = $api.useQuery("get", "/buildings");
+  const { data: buildings } = $api.useQuery("get", "/api/buildings");
 
   const organizedResults = useMemo(() => {
     if (!searchResults) return [];
 
     // biome-ignore lint/nursery/noShadow: TODO: fix the shadowing
-    const buildings = searchResults.filter(
-      (result) => result.type === "building",
-    );
+    const buildings = searchResults.filter((result) => result.type === "building");
     const floors = searchResults.filter((result) => result.type === "floor");
     const rooms = searchResults.filter((result) => result.type === "room");
 
@@ -120,9 +118,7 @@ const SearchResults = ({ searchQuery, mapRef }: Props) => {
           <img width={24} src={icon} alt="classroom" />
         </div>
         <div className="flex flex-col overflow-hidden whitespace-nowrap font-foreground-neutral-primary text-[0.875rem]">
-          {result.alias && result.alias !== ""
-            ? result.alias
-            : result.nameWithSpace}
+          {result.alias && result.alias !== "" ? result.alias : result.nameWithSpace}
         </div>
       </>
     );
@@ -183,11 +179,7 @@ const SearchResults = ({ searchQuery, mapRef }: Props) => {
     const roomName = result.nameWithSpace?.split(" ")[1];
     const buildingName = result.nameWithSpace?.split(" ")[0];
     const floor = getFloorLevelFromRoomName(roomName);
-    if (
-      buildingName &&
-      floor &&
-      buildings?.[buildingName]?.floors.includes(floor)
-    ) {
+    if (buildingName && floor && buildings?.[buildingName]?.floors.includes(floor)) {
       switch (searchTarget) {
         case "nav-src":
           setSrc(`${buildingName}-${roomName}`);
@@ -206,18 +198,12 @@ const SearchResults = ({ searchQuery, mapRef }: Props) => {
       switch (searchTarget) {
         case "nav-src":
           if (!result.labelPosition) break;
-          setSrc(
-            `${result.labelPosition?.latitude},${result.labelPosition?.longitude}`,
-          );
+          setSrc(`${result.labelPosition?.latitude},${result.labelPosition?.longitude}`);
           break;
         case "nav-dst":
           if (!result.labelPosition) break;
-          navigate(
-            `/${result.labelPosition?.latitude},${result.labelPosition?.longitude}`,
-          );
-          setDst(
-            `${result.labelPosition?.latitude},${result.labelPosition?.longitude}`,
-          );
+          navigate(`/${result.labelPosition?.latitude},${result.labelPosition?.longitude}`);
+          setDst(`${result.labelPosition?.latitude},${result.labelPosition?.longitude}`);
           break;
         default:
           navigate("/");
@@ -318,8 +304,7 @@ const SearchResults = ({ searchQuery, mapRef }: Props) => {
     if (result.type === "room" || result.type === "floor") {
       // Public buildings are accessible to unauthenticated users via the public pathfinding API
       // Other indoor destinations require authentication
-      const [nameBuildingCode, roomName] =
-        result.nameWithSpace?.split(" ") ?? [];
+      const [nameBuildingCode, roomName] = result.nameWithSpace?.split(" ") ?? [];
       const buildingCode =
         result.type === "floor"
           ? (result.floor?.buildingCode ?? result.id.split("-")[0])

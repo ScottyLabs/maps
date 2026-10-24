@@ -115,10 +115,7 @@ export const floorService = {
         type: room.type as RoomType,
         displayAlias: room.aliases.find((a) => a.isDisplayAlias)?.alias,
         aliases: room.aliases.map((a) => a.alias),
-        polygon: geoPolygonToPdfPolygon(
-          room.polygon as unknown as GeoCoordinate[][],
-          placement,
-        ),
+        polygon: geoPolygonToPdfPolygon(room.polygon as unknown as GeoCoordinate[][], placement),
       };
     }
 

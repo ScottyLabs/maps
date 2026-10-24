@@ -10,11 +10,7 @@ export const Route = createFileRoute("/buildings/$buildingCode")({
 
 function Building() {
   const { buildingCode } = Route.useParams();
-  const {
-    data: floorLevel,
-    isLoading,
-    error,
-  } = useGetDefaultFloorQuery(buildingCode);
+  const { data: floorLevel, isLoading, error } = useGetDefaultFloorQuery(buildingCode);
 
   if (isLoading) {
     return <Loader loadingText="Fetching building floors" />;
@@ -33,9 +29,6 @@ function Building() {
   }
 
   return (
-    <Navigate
-      to="/floors/$floorCode"
-      params={{ floorCode: `${buildingCode}-${floorLevel}` }}
-    />
+    <Navigate to="/floors/$floorCode" params={{ floorCode: `${buildingCode}-${floorLevel}` }} />
   );
 }

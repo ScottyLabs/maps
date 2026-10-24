@@ -22,8 +22,7 @@ const FloorSwitcherButton = ({
   const focusFloor = useBoundStore((state) => state.focusFloor);
 
   const offsetDistance = useTransform(
-    () =>
-      `${Math.max(0, Math.min(100, (progressValue.get() - index) * 25 + 50))}%`,
+    () => `${Math.max(0, Math.min(100, (progressValue.get() - index) * 25 + 50))}%`,
   );
 
   useEffect(() => {
@@ -71,9 +70,7 @@ const FloorSwitcherButton = ({
     return controls.stop;
   };
 
-  const color = useTransform(() =>
-    lerpColor("#90CFEA", "#0E96D1", distCurveValue()),
-  );
+  const color = useTransform(() => lerpColor("#90CFEA", "#0E96D1", distCurveValue()));
 
   return (
     <motion.div
@@ -108,8 +105,7 @@ interface DummyButtonProps {
 
 const DummyButton = ({ index, progressValue }: DummyButtonProps) => {
   const offsetDistance = useTransform(
-    () =>
-      `${Math.max(0, Math.min(100, (progressValue.get() - index) * 25 + 50))}%`,
+    () => `${Math.max(0, Math.min(100, (progressValue.get() - index) * 25 + 50))}%`,
   );
 
   return (
@@ -137,7 +133,7 @@ interface Props {
 const FloorSwitcherCarouselMobile = ({ building, progressValue }: Props) => {
   const focusedFloor = useBoundStore((state) => state.focusedFloor);
 
-  const { data: buildings } = $api.useQuery("get", "/buildings");
+  const { data: buildings } = $api.useQuery("get", "/api/buildings");
   const currentBuilding = buildings?.[focusedFloor?.buildingCode ?? ""];
   const floors = currentBuilding?.floors ?? [];
 
@@ -153,10 +149,7 @@ const FloorSwitcherCarouselMobile = ({ building, progressValue }: Props) => {
           key={floor}
         />
       ))}
-      <DummyButton
-        index={building.floors.length}
-        progressValue={progressValue}
-      />
+      <DummyButton index={building.floors.length} progressValue={progressValue} />
     </>
   );
 };

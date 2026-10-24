@@ -1,8 +1,4 @@
-import type {
-  CreatePoiPayload,
-  DeletePoiPayload,
-  UpdatePoiPayload,
-} from "@cmumaps/websocket";
+import type { CreatePoiPayload, DeletePoiPayload, UpdatePoiPayload } from "@cmumaps/websocket";
 
 import { toast } from "react-toastify";
 
@@ -26,39 +22,27 @@ export const createPoi =
   (floorCode: string, { poiId, poiInfo }: CreatePoiPayload) =>
   (dispatch: AppDispatch) =>
     dispatch(
-      floorDataApiSlice.util.updateQueryData(
-        "getFloorPois",
-        floorCode,
-        (draft) => {
-          draft[poiId] = poiInfo;
-        },
-      ),
+      floorDataApiSlice.util.updateQueryData("getFloorPois", floorCode, (draft) => {
+        draft[poiId] = poiInfo;
+      }),
     );
 
 export const deletePoi =
   (floorCode: string, { poiId }: DeletePoiPayload) =>
   (dispatch: AppDispatch) =>
     dispatch(
-      floorDataApiSlice.util.updateQueryData(
-        "getFloorPois",
-        floorCode,
-        (draft) => {
-          delete draft[poiId];
-        },
-      ),
+      floorDataApiSlice.util.updateQueryData("getFloorPois", floorCode, (draft) => {
+        delete draft[poiId];
+      }),
     );
 
 export const updatePoi =
   (floorCode: string, { poiId, poiType }: UpdatePoiPayload) =>
   (dispatch: AppDispatch) =>
     dispatch(
-      floorDataApiSlice.util.updateQueryData(
-        "getFloorPois",
-        floorCode,
-        (draft) => {
-          draft[poiId].type = poiType;
-        },
-      ),
+      floorDataApiSlice.util.updateQueryData("getFloorPois", floorCode, (draft) => {
+        draft[poiId].type = poiType;
+      }),
     );
 
 export const poiApiSlice = apiSlice.injectEndpoints({
@@ -101,12 +85,7 @@ export const poiApiSlice = apiSlice.injectEndpoints({
           // add to history
           if (batchId) {
             const getStore = getState as () => RootState;
-            const editPair = await buildDeletePoiEditPair(
-              batchId,
-              arg,
-              getStore,
-              dispatch,
-            );
+            const editPair = await buildDeletePoiEditPair(batchId, arg, getStore, dispatch);
             dispatch(addEditToHistory(editPair));
           }
           // optimistic update
@@ -131,12 +110,7 @@ export const poiApiSlice = apiSlice.injectEndpoints({
           // add to history
           if (batchId) {
             const getStore = getState as () => RootState;
-            const editPair = await buildUpdatePoiEditPair(
-              batchId,
-              arg,
-              getStore,
-              dispatch,
-            );
+            const editPair = await buildUpdatePoiEditPair(batchId, arg, getStore, dispatch);
             dispatch(addEditToHistory(editPair));
           }
           // optimistic update
@@ -151,8 +125,4 @@ export const poiApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const {
-  useCreatePoiMutation,
-  useDeletePoiMutation,
-  useUpdatePoiMutation,
-} = poiApiSlice;
+export const { useCreatePoiMutation, useDeletePoiMutation, useUpdatePoiMutation } = poiApiSlice;

@@ -6,11 +6,11 @@ import { buildFloorCode } from "@/utils/floorUtils.ts";
 
 const useAutofillSearchQuery = (setSearchQuery: (query: string) => void) => {
   const { buildingCode, roomName, floor } = useLocationParams();
-  const { data: buildings } = $api.useQuery("get", "/buildings");
+  const { data: buildings } = $api.useQuery("get", "/api/buildings");
   const floorCode = buildFloorCode(buildingCode, floor);
   const { data: rooms } = $api.useQuery(
     "get",
-    "/floors/{floorCode}/floorplan",
+    "/api/floors/{floorCode}/floorplan",
     { params: { path: { floorCode: floorCode ?? "" } } },
     { enabled: Boolean(floorCode) },
   );

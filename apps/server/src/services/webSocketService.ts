@@ -1,84 +1,61 @@
-import type { LiveUser, WebSocketPayloads } from "../../../../packages/websocket/src/index.ts";
+import type {
+  BroadcastPayload,
+  LiveUser,
+  WebSocketFrame,
+  WebSocketPayloads,
+} from "../../../../packages/websocket/src/index.ts";
 import { WebSocketEvents } from "../../../../packages/websocket/src/index.ts";
-import type { Server } from "socket.io";
+import { logger } from "../utils/log.ts";
+
+// structural, so both a native WebSocket and elysia's ElysiaWS fit
+export interface WebSocketConnection {
+  send(data: string): unknown;
+  close(code?: number, reason?: string): void;
+}
 
 export class WebSocketService {
-  private readonly io: Server;
-
   private readonly socketToRoom: Map<string, string> = new Map();
   private readonly socketToUser: Map<string, LiveUser> = new Map();
+  private readonly socketToConnection: Map<string, WebSocketConnection> = new Map();
 
-  public constructor(io: Server) {
-    this.io = io;
-    // Socket.IO connection handling
-    io.on("connection", (socket) => {
-      console.log(`Client connected: ${socket.id}`);
-      this.socketToUser.set(socket.id, {
-        userName: socket.handshake.query.userName as string,
-        color: socket.handshake.query.userColor as string,
-      });
-
-      // Join a room
-      socket.on("join", async (room) => {
-        await socket.join(room);
-        this.socketToRoom.set(socket.id, room);
-        console.log(`${socket.id} joined room: ${room}`);
-        await this.syncUsers(room, socket.id, true);
-      });
-
-      // Leave a room
-      socket.on("leave", async (room) => {
-        // sync users before leaving because can only broadcast to a room that the socket is in
-        await this.syncUsers(room, socket.id, false);
-        await socket.leave(room);
-        this.socketToRoom.delete(socket.id);
-        console.log(`${socket.id} left room: ${room}`);
-      });
-
-      // Handle broadcasts
-      socket.on("broadcast", (message) => {
-        // broadcast the message to all clients in the room except the sender
-        const room = this.socketToRoom.get(socket.id);
-        if (room) {
-          socket.to(room).emit("broadcast", message);
-        } else {
-          console.error(
-            "Could not send broadcast to room (excluding the sender) due to invalid sender or room",
-          );
-        }
-      });
-
-      // Handle disconnections
-      socket.on("disconnect", async () => {
-        const room = this.socketToRoom.get(socket.id);
-        if (room) {
-          await this.syncUsers(room, socket.id, false);
-        }
-
-        this.socketToUser.delete(socket.id);
-        this.socketToRoom.delete(socket.id);
-        console.log(`Client disconnected: ${socket.id}`);
-      });
-    });
+  public register(socketId: string, connection: WebSocketConnection): void {
+    this.socketToConnection.set(socketId, connection);
   }
 
-  private async syncUsers(
-    room: string,
-    senderId: string,
-    includeSender: boolean,
-  ) {
-    // fetch all users in the room except the sender
-    const users = await this.io.in(room).fetchSockets();
-    const userMap: Record<string, LiveUser> = {};
-    for (const user of users) {
-      if (includeSender || user.id !== senderId) {
-        userMap[user.id] = this.socketToUser.get(user.id) as LiveUser;
-      }
+  public unregister(socketId: string): void {
+    const room = this.socketToRoom.get(socketId);
+
+    this.socketToConnection.delete(socketId);
+    this.socketToUser.delete(socketId);
+    this.socketToRoom.delete(socketId);
+
+    if (room) {
+      this.syncUsers(room);
+    }
+  }
+
+  public joinFloor(socketId: string, room: string, user: LiveUser): void {
+    this.socketToUser.set(socketId, user);
+    this.socketToRoom.set(socketId, room);
+    this.syncUsers(room);
+  }
+
+  public leaveFloor(socketId: string, room: string): void {
+    this.socketToRoom.delete(socketId);
+    this.syncUsers(room);
+  }
+
+  // sender is excluded: it already applied the message locally
+  public relayBroadcast(senderId: string, payload: BroadcastPayload): void {
+    const room = this.socketToRoom.get(senderId);
+    if (!room) {
+      logger.warn(
+        "Could not send broadcast to room (excluding the sender) due to invalid sender or room",
+      );
+      return;
     }
 
-    // broadcast the updated user list
-    const payload = { users: userMap };
-    this.broadcastToUserFloor(senderId, WebSocketEvents.SYNC_USERS, payload);
+    this.emit(room, WebSocketEvents.BROADCAST, payload, senderId);
   }
 
   /**
@@ -91,11 +68,9 @@ export class WebSocketService {
   ): void {
     const room = this.socketToRoom.get(senderId);
     if (room) {
-      this.io.to(room).emit(event, payload);
+      this.emit(room, event, payload);
     } else {
-      console.error(
-        "Could not broadcast to room due to invalid sender or room",
-      );
+      logger.warn("Could not broadcast to room due to invalid sender or room");
     }
   }
 
@@ -108,11 +83,55 @@ export class WebSocketService {
     payload: WebSocketPayloads[E],
   ): void {
     if (room) {
-      this.io.to(room).emit(event, payload);
+      this.emit(room, event, payload);
     } else {
-      console.error(
-        "Could not broadcast to room due to invalid sender or room",
-      );
+      logger.warn("Could not broadcast to room due to invalid sender or room");
+    }
+  }
+
+  private syncUsers(room: string): void {
+    const users: Record<string, LiveUser> = {};
+    for (const [socketId, socketRoom] of this.socketToRoom) {
+      if (socketRoom !== room) {
+        continue;
+      }
+      const user = this.socketToUser.get(socketId);
+      if (user) {
+        users[socketId] = user;
+      }
+    }
+
+    this.emit(room, WebSocketEvents.SYNC_USERS, { users });
+  }
+
+  private emit<E extends keyof WebSocketPayloads>(
+    room: string,
+    event: E,
+    payload: WebSocketPayloads[E],
+    excludeSocketId?: string,
+  ): void {
+    const frame: WebSocketFrame<E> = { event, payload };
+    const data = JSON.stringify(frame);
+
+    for (const [socketId, socketRoom] of this.socketToRoom) {
+      if (socketRoom !== room || socketId === excludeSocketId) {
+        continue;
+      }
+      const connection = this.socketToConnection.get(socketId);
+      if (!connection) {
+        continue;
+      }
+
+      try {
+        connection.send(data);
+      } catch (error) {
+        logger.error(
+          `Failed to send ${event} to socket ${socketId}`,
+          error instanceof Error ? error : new Error(String(error)),
+        );
+      }
     }
   }
 }
+
+export const webSocketService = new WebSocketService();

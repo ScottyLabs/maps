@@ -12,9 +12,7 @@ const CollapsibleWrapper = ({ title, children }: Props) => {
   const renderTrigger = () => (
     <div className="flex items-center justify-between rounded px-4 pt-2 pb-1">
       <h3>{title}</h3>
-      <div>
-        {open ? <IoIosArrowUp size={15} /> : <IoIosArrowDown size={15} />}
-      </div>
+      <div>{open ? <IoIosArrowUp size={15} /> : <IoIosArrowDown size={15} />}</div>
     </div>
   );
 

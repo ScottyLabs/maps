@@ -51,21 +51,11 @@ const PolygonTab = ({ floorCode, rooms }: Props) => {
     };
 
     if (ringIndex === 0) {
-      return (
-        <SidePanelButton
-          text="Add Hole"
-          handleClick={() => addHole()}
-          style="px-2 py-1"
-        />
-      );
+      return <SidePanelButton text="Add Hole" handleClick={() => addHole()} style="px-2 py-1" />;
     }
 
     return (
-      <SidePanelButton
-        text="Delete Hole"
-        handleClick={() => deleteHole()}
-        style="px-2 py-1"
-      />
+      <SidePanelButton text="Delete Hole" handleClick={() => deleteHole()} style="px-2 py-1" />
     );
   };
 
@@ -114,10 +104,7 @@ const PolygonTab = ({ floorCode, rooms }: Props) => {
         handleClick={() => dispatch(setMode(POLYGON_DELETE_VERTEX))}
       />
 
-      <SidePanelButton
-        text="Simplify Polygon"
-        handleClick={() => simplifyPolygon()}
-      />
+      <SidePanelButton text="Simplify Polygon" handleClick={() => simplifyPolygon()} />
 
       <NodeSizeSlider text="Vertex" />
 

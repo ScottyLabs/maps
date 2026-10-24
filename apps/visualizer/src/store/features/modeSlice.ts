@@ -25,11 +25,7 @@ export const POLYGON_ADD_VERTEX: Mode = "Polygon Add Vertex";
 export const POLYGON_DELETE_VERTEX: Mode = "Polygon Delete Vertex";
 
 const isEditPolygon = (mode: string) => {
-  return (
-    mode === POLYGON_SELECT ||
-    mode === POLYGON_ADD_VERTEX ||
-    mode === POLYGON_DELETE_VERTEX
-  );
+  return mode === POLYGON_SELECT || mode === POLYGON_ADD_VERTEX || mode === POLYGON_DELETE_VERTEX;
 };
 
 interface ModeState {

@@ -19,6 +19,6 @@
     "MD049": { "style": "asterisk" },
 
     // Allows duplicate headings in different sections but flags duplicates at the same level.
-    "MD024": { "siblings_only": true }
-  }
+    "MD024": { "siblings_only": true },
+  },
 }

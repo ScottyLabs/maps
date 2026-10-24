@@ -1,34 +1,29 @@
 {
+  "tasks": {
+    "dev": "PORT=3001 deno run --allow-all --watch src/index.ts",
+    "build": "deno compile --frozen --no-check --allow-all --cached-only --include src --include prisma --output dist/bin/cmumaps-server src/index.ts",
+    "db:generate": "deno run -A npm:prisma@^6.18.0 generate",
+    "db:migrate": "deno run -A npm:prisma@^6.18.0 migrate deploy",
+    "db:push": "deno run -A npm:prisma@^6.18.0 db push",
+    "db:studio": "deno run -A npm:prisma@^6.18.0 studio",
+    "openapi": "deno run -A scripts/generate-openapi.ts"
+  },
   "imports": {
-    "@clerk/express": "npm:@clerk/express@^1.7.43",
-    "@prisma/client": "npm:@prisma/client@^6.18.0",
-    "@tsoa/runtime": "npm:@tsoa/runtime@^6.6.0",
-    "@types/cors": "npm:@types/cors@^2.8.19",
-    "@types/express": "npm:@types/express@^5.0.5",
-    "@types/express-serve-static-core": "npm:@types/express-serve-static-core@5.1.0",
-    "@types/jsonwebtoken": "npm:@types/jsonwebtoken@^9.0.10",
-    "@types/node": "npm:@types/node@^24.9.2",
-    "@types/swagger-ui-express": "npm:@types/swagger-ui-express@^4.1.8",
-    "better-auth": "npm:better-auth@^1.4.18",
-    "cors": "npm:cors@^2.8.5",
-    "express": "npm:express@^5.1.0",
-    "jsonwebtoken": "npm:jsonwebtoken@^9.0.2",
-    "jwks-rsa": "npm:jwks-rsa@^3.2.0",
-    "socket.io": "npm:socket.io@^4.8.1",
-    "swagger-ui-dist": "npm:swagger-ui-dist@^5.31.0",
-    "swagger-ui-express": "npm:swagger-ui-express@^5.0.1",
-    "tinyqueue": "npm:tinyqueue@^3.0.0",
-    "tsoa": "npm:tsoa@^6.6.0",
-    "zod": "npm:zod@^4.1.12"
+    "@elysia/static": "npm:@elysia/static@^1.4.11",
+    "@elysiajs/openapi": "npm:@elysiajs/openapi@^1.4.15",
+    "@logtape/elysia": "npm:@logtape/elysia@^2.2.1",
+    "@logtape/logtape": "npm:@logtape/logtape@^2.2.4",
+    "@panva/openid-client": "npm:openid-client@^6.8.4",
+    "@prisma/adapter-pg": "npm:@prisma/adapter-pg@^6.19.3",
+    "@prisma/client": "npm:@prisma/client@^6.19.3",
+    "@sinclair/typebox": "npm:@sinclair/typebox@0.34.49",
+    "elysia": "npm:elysia@^1.4.29",
+    "jose": "npm:jose@^6.1.0",
+    "openapi-typescript": "npm:openapi-typescript@^7.10.1",
+    "tinyqueue": "npm:tinyqueue@^3.0.0"
   },
   "compilerOptions": {
-    "lib": [
-      "ESNext",
-      "deno.window"
-    ],
-    "types": [
-      "npm:@types/node@^24.9.2"
-    ],
+    "lib": ["ESNext", "deno.window"],
     "module": "Preserve",
     "moduleResolution": "bundler",
     "verbatimModuleSyntax": true,
@@ -40,7 +35,6 @@
     "noPropertyAccessFromIndexSignature": false,
     "allowUnusedLabels": false,
     "allowUnreachableCode": false,
-    "checkJs": true,
-    "experimentalDecorators": true
+    "checkJs": true
   }
 }

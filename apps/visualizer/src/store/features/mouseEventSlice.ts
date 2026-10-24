@@ -38,11 +38,6 @@ const mouseEventSlice = createSlice({
   },
 });
 
-export const {
-  dragNode,
-  releaseNode,
-  setDragNodePos,
-  setDragVertexInfo,
-  releaseVertex,
-} = mouseEventSlice.actions;
+export const { dragNode, releaseNode, setDragNodePos, setDragVertexInfo, releaseVertex } =
+  mouseEventSlice.actions;
 export default mouseEventSlice.reducer;

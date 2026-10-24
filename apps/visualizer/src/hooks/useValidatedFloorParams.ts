@@ -6,10 +6,7 @@ import {
   useGetFloorPoisQuery,
   useGetFloorRoomsQuery,
 } from "../store/api/floorDataApiSlice.ts";
-import {
-  InfoDisplayTabIndex,
-  setInfoDisplayActiveTabIndex,
-} from "../store/features/uiSlice.ts";
+import { InfoDisplayTabIndex, setInfoDisplayActiveTabIndex } from "../store/features/uiSlice.ts";
 
 type FloorParamsResult =
   | { error: string; nodeId?: undefined; roomId?: undefined; poiId?: undefined }

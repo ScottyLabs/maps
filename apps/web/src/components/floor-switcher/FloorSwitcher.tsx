@@ -21,7 +21,7 @@ const FloorSwitcher = () => {
   const cardStatus = useBoundStore((state) => state.cardStatus);
 
   // Query data
-  const { data: buildings } = $api.useQuery("get", "/buildings");
+  const { data: buildings } = $api.useQuery("get", "/api/buildings");
 
   // Don't show the floor switcher in mobile if either the card is open or the search is open
   if (isMobile && (isSearchOpen || cardStatus !== CardStates.COLLAPSED)) {
@@ -51,12 +51,7 @@ const FloorSwitcher = () => {
   }
 
   if (isMobile) {
-    return (
-      <FloorSwitcherDisplayMobile
-        building={building}
-        initialFloorLevel={floor.level}
-      />
-    );
+    return <FloorSwitcherDisplayMobile building={building} initialFloorLevel={floor.level} />;
   }
 
   return (

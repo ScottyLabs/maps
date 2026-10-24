@@ -55,19 +55,11 @@ export const roomService = {
     });
   },
 
-  updateRoom: async (
-    roomId: string,
-    roomInfo: Partial<RoomInfo>,
-    placement: Placement,
-  ) => {
+  updateRoom: async (roomId: string, roomInfo: Partial<RoomInfo>, placement: Placement) => {
     const { labelPosition, polygon } = roomInfo;
-    const geoCoords = labelPosition
-      ? pdfCoordsToGeoCoords(placement)(labelPosition)
-      : undefined;
+    const geoCoords = labelPosition ? pdfCoordsToGeoCoords(placement)(labelPosition) : undefined;
 
-    const geoPolygon = polygon
-      ? pdfPolygonToGeoPolygon(polygon, placement)
-      : undefined;
+    const geoPolygon = polygon ? pdfPolygonToGeoPolygon(polygon, placement) : undefined;
 
     const data = {
       name: roomInfo.name,

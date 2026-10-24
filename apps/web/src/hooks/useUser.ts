@@ -1,18 +1,22 @@
 import { env } from "@/env.ts";
-import { useSession } from "@/lib/authClient.ts";
+import { type User, useSession } from "@/lib/authClient.ts";
 
-const useUser = () => {
+const DEV_USER: User = {
+  id: 0,
+  name: "Dev User",
+  andrewId: "dev",
+  oidcSubject: "dev-user",
+  groups: [],
+};
+
+const useUser = (): User | null => {
   const { data } = useSession();
 
-  if (env.VITE_IGNORE_LOGIN) {
-    return { id: "dev-user", name: "Dev User", email: "dev@localhost" };
+  if (env.ignoreLogin) {
+    return DEV_USER;
   }
 
-  if (data?.user) {
-    return data.user;
-  }
-
-  return null;
+  return data;
 };
 
 export { useUser };

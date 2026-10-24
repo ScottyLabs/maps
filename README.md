@@ -17,4 +17,5 @@ Please check out our [wiki](https://github.com/ScottyLabs/cmumaps/wiki) for more
 
 ## Contributing
 
-Please check out our [Contributing Guide](.github/CONTRIBUTING.md) for more information about how to contribute to the project.
+Please check out our [Contributing Guide](.forgejo/CONTRIBUTING.md)
+for more information about how to contribute to the project.

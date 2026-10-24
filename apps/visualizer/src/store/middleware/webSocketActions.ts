@@ -32,8 +32,7 @@ export const BroadcastEvents = {
 } as const;
 
 // Create a type from the values
-export type BroadcastEventType =
-  (typeof BroadcastEvents)[keyof typeof BroadcastEvents];
+export type BroadcastEventType = (typeof BroadcastEvents)[keyof typeof BroadcastEvents];
 
 // Event payload types
 interface SyncCursorsPayload {

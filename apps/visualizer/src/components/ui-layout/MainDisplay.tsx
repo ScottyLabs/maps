@@ -70,12 +70,7 @@ const MainDisplay = ({ floorCode }: Props) => {
       </div>
       <ZoomPanWrapper floorCode={floorCode} graph={graph} rooms={rooms} />
       <div className="absolute top-28 right-4 z-50">
-        <InfoDisplay
-          floorCode={floorCode}
-          graph={graph}
-          rooms={rooms}
-          pois={pois}
-        />
+        <InfoDisplay floorCode={floorCode} graph={graph} rooms={rooms} pois={pois} />
       </div>
     </>
   );

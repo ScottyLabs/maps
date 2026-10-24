@@ -7,11 +7,7 @@ import type {
   DeleteEdgeArg,
 } from "../../api/edgeApiSlice.ts";
 import { floorDataApiSlice } from "../../api/floorDataApiSlice.ts";
-import type {
-  CreateNodeArg,
-  DeleteNodeArg,
-  UpdateNodeArg,
-} from "../../api/nodeApiSlice.ts";
+import type { CreateNodeArg, DeleteNodeArg, UpdateNodeArg } from "../../api/nodeApiSlice.ts";
 import type { AppDispatch, RootState } from "../../store.ts";
 import type { Edit, EditPair } from "./historyTypes.ts";
 
@@ -20,23 +16,16 @@ const getGraph = async (
   getStore: () => RootState,
   dispatch: AppDispatch,
 ): Promise<Graph> => {
-  let nodes = floorDataApiSlice.endpoints.getFloorGraph.select(floorCode)(
-    getStore(),
-  ).data;
+  let nodes = floorDataApiSlice.endpoints.getFloorGraph.select(floorCode)(getStore()).data;
 
   if (!nodes) {
-    nodes = await dispatch(
-      floorDataApiSlice.endpoints.getFloorGraph.initiate(floorCode),
-    ).unwrap();
+    nodes = await dispatch(floorDataApiSlice.endpoints.getFloorGraph.initiate(floorCode)).unwrap();
   }
 
   return nodes;
 };
 
-export const buildCreateNodeEditPair = (
-  batchId: string,
-  arg: CreateNodeArg,
-): EditPair => {
+export const buildCreateNodeEditPair = (batchId: string, arg: CreateNodeArg): EditPair => {
   const { floorCode, nodeId } = arg;
   const edit: Edit = {
     endpoint: "createNode",
@@ -108,10 +97,7 @@ export const getNodesInRoom = async (
   return nodes;
 };
 
-export const buildCreateEdgeEditPair = (
-  batchId: string,
-  arg: CreateEdgeArg,
-): EditPair => {
+export const buildCreateEdgeEditPair = (batchId: string, arg: CreateEdgeArg): EditPair => {
   const edit: Edit = {
     endpoint: "createEdge",
     arg: { ...arg, batchId: null },
@@ -123,10 +109,7 @@ export const buildCreateEdgeEditPair = (
   return { batchId, edit, reverseEdit };
 };
 
-export const buildDeleteEdgeEditPair = (
-  batchId: string,
-  arg: DeleteEdgeArg,
-): EditPair => {
+export const buildDeleteEdgeEditPair = (batchId: string, arg: DeleteEdgeArg): EditPair => {
   const edit: Edit = {
     endpoint: "deleteEdge",
     arg: { ...arg, batchId: null },

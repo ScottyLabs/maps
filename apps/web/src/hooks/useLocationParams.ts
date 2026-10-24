@@ -27,7 +27,7 @@ const useLocationParams = (): Params => {
 
   const navigate = useNavigate();
 
-  const { data: buildings } = $api.useQuery("get", "/buildings");
+  const { data: buildings } = $api.useQuery("get", "/api/buildings");
 
   const [buildingCode, roomName] = suffix.split("-") || [];
   const floor = getFloorLevelFromRoomName(roomName) || "";
@@ -35,7 +35,7 @@ const useLocationParams = (): Params => {
   const floorCode = buildFloorCode(buildingCode, floor);
   const { data: rooms } = $api.useQuery(
     "get",
-    "/floors/{floorCode}/floorplan",
+    "/api/floors/{floorCode}/floorplan",
     { params: { path: { floorCode: floorCode ?? "" } } },
     { enabled: Boolean(floorCode) },
   );
@@ -61,11 +61,7 @@ const useLocationParams = (): Params => {
 
   if (suffix.includes(",")) {
     const [latitude, longitude] = suffix.split(",").map(Number.parseFloat);
-    if (
-      !(latitude && longitude) ||
-      Number.isNaN(latitude) ||
-      Number.isNaN(longitude)
-    ) {
+    if (!(latitude && longitude) || Number.isNaN(latitude) || Number.isNaN(longitude)) {
       navigate("/");
       return { error: "Invalid coordinate" };
     }

@@ -82,26 +82,16 @@ const useViewportParams = (mapRef: RefObject<mapkit.Map | null>) => {
     }
     const { region } = map;
     if (
-      Math.abs(region.center.latitude - initialRegion.centerLatitude) <
-        EPSILON &&
-      Math.abs(region.center.longitude - initialRegion.centerLongitude) <
-        EPSILON &&
-      Math.abs(region.span.latitudeDelta - initialRegion.latitudeDelta) <
-        EPSILON &&
-      Math.abs(region.span.longitudeDelta - initialRegion.longitudeDelta) <
-        EPSILON
+      Math.abs(region.center.latitude - initialRegion.centerLatitude) < EPSILON &&
+      Math.abs(region.center.longitude - initialRegion.centerLongitude) < EPSILON &&
+      Math.abs(region.span.latitudeDelta - initialRegion.latitudeDelta) < EPSILON &&
+      Math.abs(region.span.longitudeDelta - initialRegion.longitudeDelta) < EPSILON
     ) {
       return;
     }
     const target = new mapkit.CoordinateRegion(
-      new mapkit.Coordinate(
-        initialRegion.centerLatitude,
-        initialRegion.centerLongitude,
-      ),
-      new mapkit.CoordinateSpan(
-        initialRegion.latitudeDelta,
-        initialRegion.longitudeDelta,
-      ),
+      new mapkit.Coordinate(initialRegion.centerLatitude, initialRegion.centerLongitude),
+      new mapkit.CoordinateSpan(initialRegion.latitudeDelta, initialRegion.longitudeDelta),
     );
     map.setRegionAnimated(target, !prefersReducedMotion());
   }, [mapRef, initialRegion]);

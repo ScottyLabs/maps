@@ -27,7 +27,7 @@ def download_all_svg_files() -> None:
             continue
 
         # Extract relative path
-        relative_path = obj.object_name[len(S3_SOURCE):]
+        relative_path = obj.object_name[len(S3_SOURCE) :]
         local_file_path = LOCAL_DESTINATION / relative_path
 
         # Create building subfolder if needed

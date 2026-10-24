@@ -1,13 +1,9 @@
-import { useUser } from "@clerk/clerk-react";
-
 import { useEffect, useRef } from "react";
 
+import { useSession } from "../auth.tsx";
 import { USE_STRICT_MODE } from "../settings.ts";
 import { useAppDispatch } from "../store/hooks.ts";
-import {
-  joinWebSocket,
-  leaveWebSocket,
-} from "../store/middleware/webSocketActions.ts";
+import { joinWebSocket, leaveWebSocket } from "../store/middleware/webSocketActions.ts";
 
 const getRandomColor = (): string => {
   return `#${Math.floor(Math.random() * 16777215)
@@ -19,7 +15,7 @@ const getRandomColor = (): string => {
 // Compatible with React Strict Mode
 const useWebSocket = (floorCode?: string) => {
   const dispatch = useAppDispatch();
-  const { user: clerkUser } = useUser();
+  const { name } = useSession();
   const isInitialRender = useRef<boolean>(true);
 
   useEffect(() => {
@@ -29,16 +25,12 @@ const useWebSocket = (floorCode?: string) => {
       return;
     }
 
-    if (clerkUser) {
-      const userName = clerkUser.firstName || "";
-      const user = { userName, color: getRandomColor() };
-      dispatch(joinWebSocket(user));
-    }
+    dispatch(joinWebSocket({ color: getRandomColor(), userName: name }));
 
     return () => {
       dispatch(leaveWebSocket(floorCode));
     };
-  }, [clerkUser, dispatch, floorCode]);
+  }, [name, dispatch, floorCode]);
 };
 
 export default useWebSocket;

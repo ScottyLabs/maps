@@ -9,10 +9,7 @@ export const floorDataApiSlice = apiSlice.injectEndpoints({
       query: (floorCode) => `floors/${floorCode}/placement`,
       keepUnusedDataFor: 0,
     }),
-    updateFloorPlacement: builder.mutation<
-      Placement,
-      { floorCode: string; placement: Placement }
-    >({
+    updateFloorPlacement: builder.mutation<Placement, { floorCode: string; placement: Placement }>({
       query: ({ floorCode, placement }) => ({
         url: `floors/${floorCode}/placement`,
         method: "PUT",

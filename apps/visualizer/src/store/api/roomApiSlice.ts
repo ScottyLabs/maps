@@ -1,8 +1,4 @@
-import type {
-  CreateRoomPayload,
-  DeleteRoomPayload,
-  UpdateRoomPayload,
-} from "@cmumaps/websocket";
+import type { CreateRoomPayload, DeleteRoomPayload, UpdateRoomPayload } from "@cmumaps/websocket";
 
 import { toast } from "react-toastify";
 
@@ -27,28 +23,20 @@ export const createRoom =
   (floorCode: string, { roomId, roomNodes, roomInfo }: CreateRoomPayload) =>
   (dispatch: AppDispatch) => {
     const { undo: roomUndo } = dispatch(
-      floorDataApiSlice.util.updateQueryData(
-        "getFloorRooms",
-        floorCode,
-        (draft) => {
-          draft[roomId] = roomInfo;
-        },
-      ),
+      floorDataApiSlice.util.updateQueryData("getFloorRooms", floorCode, (draft) => {
+        draft[roomId] = roomInfo;
+      }),
     );
 
     // also need to add back room id of every node in this room
     const { undo: nodesUndo } = dispatch(
-      floorDataApiSlice.util.updateQueryData(
-        "getFloorGraph",
-        floorCode,
-        (draft) => {
-          if (roomNodes) {
-            for (const nodeId of roomNodes) {
-              draft[nodeId].roomId = roomId;
-            }
+      floorDataApiSlice.util.updateQueryData("getFloorGraph", floorCode, (draft) => {
+        if (roomNodes) {
+          for (const nodeId of roomNodes) {
+            draft[nodeId].roomId = roomId;
           }
-        },
-      ),
+        }
+      }),
     );
 
     return {
@@ -63,28 +51,20 @@ export const deleteRoom =
   (floorCode: string, { roomId }: DeleteRoomPayload) =>
   (dispatch: AppDispatch) => {
     const { undo: roomUndo } = dispatch(
-      floorDataApiSlice.util.updateQueryData(
-        "getFloorRooms",
-        floorCode,
-        (draft) => {
-          delete draft[roomId];
-        },
-      ),
+      floorDataApiSlice.util.updateQueryData("getFloorRooms", floorCode, (draft) => {
+        delete draft[roomId];
+      }),
     );
 
     // also need to delete room id of every node in this room
     const { undo: nodesUndo } = dispatch(
-      floorDataApiSlice.util.updateQueryData(
-        "getFloorGraph",
-        floorCode,
-        (draft) => {
-          for (const nodeId in draft) {
-            if (draft[nodeId].roomId === roomId) {
-              draft[nodeId].roomId = "";
-            }
+      floorDataApiSlice.util.updateQueryData("getFloorGraph", floorCode, (draft) => {
+        for (const nodeId in draft) {
+          if (draft[nodeId].roomId === roomId) {
+            draft[nodeId].roomId = "";
           }
-        },
-      ),
+        }
+      }),
     );
 
     return {
@@ -99,13 +79,9 @@ export const updateRoom =
   (floorCode: string, { roomId, roomInfo }: UpdateRoomPayload) =>
   (dispatch: AppDispatch) =>
     dispatch(
-      floorDataApiSlice.util.updateQueryData(
-        "getFloorRooms",
-        floorCode,
-        (draft) => {
-          draft[roomId] = { ...draft[roomId], ...roomInfo };
-        },
-      ),
+      floorDataApiSlice.util.updateQueryData("getFloorRooms", floorCode, (draft) => {
+        draft[roomId] = { ...draft[roomId], ...roomInfo };
+      }),
     );
 
 export const roomApiSlice = apiSlice.injectEndpoints({
@@ -129,9 +105,7 @@ export const roomApiSlice = apiSlice.injectEndpoints({
             dispatch(addEditToHistory(editPair));
           }
           // optimistic update
-          const { undo } = dispatch(
-            createRoom(floorCode, { roomId, roomNodes, roomInfo }),
-          );
+          const { undo } = dispatch(createRoom(floorCode, { roomId, roomNodes, roomInfo }));
           handleQueryError(queryFulfilled, undo);
         } catch (e) {
           toast.error("Check the Console for detailed error.");
@@ -155,12 +129,7 @@ export const roomApiSlice = apiSlice.injectEndpoints({
             const getStore = getState as () => RootState;
 
             // delete all nodes in this room
-            const roomNodes = await getNodesInRoom(
-              floorCode,
-              roomId,
-              getStore,
-              dispatch,
-            );
+            const roomNodes = await getNodesInRoom(floorCode, roomId, getStore, dispatch);
 
             // update room
             const editPair = await buildDeleteRoomEditPair(
@@ -197,18 +166,11 @@ export const roomApiSlice = apiSlice.injectEndpoints({
           // add to history
           if (batchId) {
             const getStore = getState as () => RootState;
-            const editPair = await buildUpdateRoomEditPair(
-              batchId,
-              arg,
-              getStore,
-              dispatch,
-            );
+            const editPair = await buildUpdateRoomEditPair(batchId, arg, getStore, dispatch);
             dispatch(addEditToHistory(editPair));
           }
           // optimistic update
-          const { undo } = dispatch(
-            updateRoom(floorCode, { roomId, roomInfo }),
-          );
+          const { undo } = dispatch(updateRoom(floorCode, { roomId, roomInfo }));
           handleQueryError(queryFulfilled, undo);
         } catch (e) {
           toast.error("Check the Console for detailed error.");
@@ -219,8 +181,4 @@ export const roomApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const {
-  useCreateRoomMutation,
-  useDeleteRoomMutation,
-  useUpdateRoomMutation,
-} = roomApiSlice;
+export const { useCreateRoomMutation, useDeleteRoomMutation, useUpdateRoomMutation } = roomApiSlice;

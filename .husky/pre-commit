@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-set -e
-editorconfig-checker --exclude '(^LICENSE|^apps/rust-server/.*)'
-# markdownlint-cli2 is intentionally not run here
-deno task check
-if git diff --cached --name-only | grep -q '^apps/dataflow/'; then
-  (cd apps/dataflow && uv run lint)
-fi

@@ -22,7 +22,7 @@ import { useUser } from "./useUser.ts";
 
 const useMapRegionChange = (mapRef: RefObject<mapkit.Map | null>) => {
   // Query data
-  const { data: buildings } = $api.useQuery("get", "/buildings");
+  const { data: buildings } = $api.useQuery("get", "/api/buildings");
   const user = useUser();
 
   // Global state
@@ -54,8 +54,7 @@ const useMapRegionChange = (mapRef: RefObject<mapkit.Map | null>) => {
 
     const centerBuilding =
       Object.values(buildings).find(
-        (building: Building) =>
-          building.shape && isInPolygon(center, building.shape.flat(2)),
+        (building: Building) => building.shape && isInPolygon(center, building.shape.flat(2)),
       ) ?? null;
 
     if (!centerBuilding) {
@@ -80,8 +79,7 @@ const useMapRegionChange = (mapRef: RefObject<mapkit.Map | null>) => {
       // If the focused floor is in the same building as the selected floor (given by the URL params),
       // then focus the selected floor
       const path = window.location.pathname;
-      const [selectedBuildingCode, roomName] =
-        path.split("/")?.[1]?.split("-") || [];
+      const [selectedBuildingCode, roomName] = path.split("/")?.[1]?.split("-") || [];
       const selectedFloor = getFloorLevelFromRoomName(roomName);
 
       if (

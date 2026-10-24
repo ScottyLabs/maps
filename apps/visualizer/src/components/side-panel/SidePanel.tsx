@@ -17,23 +17,15 @@ const SidePanel = ({ floorCode, graph, rooms }: Props) => {
   const dispatch = useAppDispatch();
 
   const editPolygon = useAppSelector(selectEditPolygon);
-  const activeTabIndex = useAppSelector(
-    (state) => state.ui.sidePanelActiveTabIndex,
-  );
+  const activeTabIndex = useAppSelector((state) => state.ui.sidePanelActiveTabIndex);
 
-  const tabNames = editPolygon
-    ? ["Visibility", "Polygon"]
-    : ["Visibility", "Graph"];
+  const tabNames = editPolygon ? ["Visibility", "Polygon"] : ["Visibility", "Graph"];
 
   const renderVisibilityTab = () => <VisibilityTab />;
 
-  const renderGraphTab = () => (
-    <GraphTab floorCode={floorCode} graph={graph} rooms={rooms} />
-  );
+  const renderGraphTab = () => <GraphTab floorCode={floorCode} graph={graph} rooms={rooms} />;
 
-  const renderPolygonTab = () => (
-    <PolygonTab floorCode={floorCode} rooms={rooms} />
-  );
+  const renderPolygonTab = () => <PolygonTab floorCode={floorCode} rooms={rooms} />;
 
   const tabContents = editPolygon
     ? [renderVisibilityTab, renderPolygonTab]

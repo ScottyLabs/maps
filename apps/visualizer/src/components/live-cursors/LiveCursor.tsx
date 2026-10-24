@@ -23,16 +23,9 @@ interface LiveCursorProps {
   scale: number;
 }
 
-const LiveCursor = ({
-  floorCode,
-  userSocketId,
-  user,
-  scale,
-}: LiveCursorProps) => {
+const LiveCursor = ({ floorCode, userSocketId, user, scale }: LiveCursorProps) => {
   const dispatch = useAppDispatch();
-  const cursorInfos = useAppSelector((state) =>
-    selectCursorInfos(state, userSocketId),
-  );
+  const cursorInfos = useAppSelector((state) => selectCursorInfos(state, userSocketId));
 
   // keep popping off the first element of cursor info list
   useEffect(() => {

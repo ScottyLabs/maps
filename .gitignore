@@ -1,17 +1,32 @@
-# Dependency directories
-node_modules/
-.venv/
+# Nix / devenv
+.devenv/
+.direnv/
+.pre-commit-config.yaml
 
-# Cache directories
+# AI
+.mcp.json
+.claude
+
+# JS / deno
+node_modules/
+apps/*/dist/
+
+# Python
+.venv/
 __pycache__/
-**/*.egg-info/
 .ruff_cache/
 .mypy_cache/
+**/*.egg-info/
 
-# Build
-dist/
-build/
+# Generated
+apps/server/build/
 
-# Misc
-.env*
+# Secrets
+.env
+!.env.example
+
+# OS
 .DS_Store
+
+result
+result-*

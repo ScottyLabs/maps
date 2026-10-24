@@ -1,8 +1,4 @@
-import {
-  getRoomTypeDetails,
-  type Placement,
-  pdfPolygonToGeoPolygon,
-} from "@cmumaps/common";
+import { getRoomTypeDetails, type Placement, pdfPolygonToGeoPolygon } from "@cmumaps/common";
 import { Polygon } from "mapkit-react";
 import { useGetFloorRoomsQuery } from "../../store/api/floorDataApiSlice.ts";
 

@@ -20,8 +20,7 @@ const NavCardDesktop = ({ mapRef }: Props) => {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (scrollRef.current)
-      scrollRef.current.scrollTop = 44 * (instructionIndex - 1);
+    if (scrollRef.current) scrollRef.current.scrollTop = 44 * (instructionIndex - 1);
   }, [instructionIndex]);
 
   const renderCard = () => (
@@ -34,20 +33,12 @@ const NavCardDesktop = ({ mapRef }: Props) => {
         className="btn-shadow flex flex-col"
         style={{ boxShadow: "0 4px 6px 0 rgba(0, 0, 0, 0.20)" }}
       >
-        <NavHeader
-          isNavigating={isNavigating}
-          startNav={startNav}
-          listShown={true}
-          mapRef={mapRef}
-        >
+        <NavHeader isNavigating={isNavigating} startNav={startNav} listShown={true} mapRef={mapRef}>
           {renderCard()}
         </NavHeader>
       </div>
       {isNavigating && (
-        <div
-          className="mt-2 h-100 overflow-y-scroll bg-white pb-2"
-          ref={scrollRef}
-        >
+        <div className="mt-2 h-100 overflow-y-scroll bg-white pb-2" ref={scrollRef}>
           <NavDirectionsList />
         </div>
       )}

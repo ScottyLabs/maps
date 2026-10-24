@@ -2,11 +2,7 @@ import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
 import { useDeleteNodeMutation } from "../../../store/api/nodeApiSlice.ts";
-import {
-  ADD_EDGE,
-  DELETE_EDGE,
-  setMode,
-} from "../../../store/features/modeSlice.ts";
+import { ADD_EDGE, DELETE_EDGE, setMode } from "../../../store/features/modeSlice.ts";
 import { useAppDispatch } from "../../../store/hooks.ts";
 import InfoDisplayButton from "../shared/InfoDisplayButton.tsx";
 import { RED_BUTTON_STYLE } from "../shared/TableCell.tsx";
@@ -41,14 +37,8 @@ const GraphInfoButtons = ({ floorCode, nodeId }: Props) => {
         />
       </div>
       <div className="flex space-x-4">
-        <InfoDisplayButton
-          text="Add Edge"
-          handleClick={() => dispatch(setMode(ADD_EDGE))}
-        />
-        <InfoDisplayButton
-          text="Delete Edge"
-          handleClick={() => dispatch(setMode(DELETE_EDGE))}
-        />
+        <InfoDisplayButton text="Add Edge" handleClick={() => dispatch(setMode(ADD_EDGE))} />
+        <InfoDisplayButton text="Delete Edge" handleClick={() => dispatch(setMode(DELETE_EDGE))} />
       </div>
     </div>
   );

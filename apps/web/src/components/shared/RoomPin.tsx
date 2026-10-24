@@ -20,9 +20,7 @@ const RoomPin = ({ room }: Props) => {
   const icon = getIcon(room);
   const hasGraphic = Boolean(icon);
 
-  const roomColors = getRoomTypeDetails(
-    room.type === "Building" ? "Default" : room.type,
-  );
+  const roomColors = getRoomTypeDetails(room.type === "Building" ? "Default" : room.type);
 
   return (
     <div

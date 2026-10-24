@@ -53,6 +53,5 @@ const liveCursorSlice = createSlice({
 });
 
 export const { selectCursorInfos } = liveCursorSlice.selectors;
-export const { setLiveUsers, pushCursorInfo, setCursorInfos } =
-  liveCursorSlice.actions;
+export const { setLiveUsers, pushCursorInfo, setCursorInfos } = liveCursorSlice.actions;
 export default liveCursorSlice.reducer;

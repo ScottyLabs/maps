@@ -1,11 +1,12 @@
-import { createAuthClient } from "better-auth/react";
-import { env } from "@/env.ts";
+import { useQuery } from "@tanstack/react-query";
 
-// https://www.better-auth.com/docs/installation#create-client-instance
-const auth = createAuthClient({
-  // biome-ignore lint/style/useNamingConvention: defined by better-auth
-  baseURL: env.VITE_SERVER_URL,
-});
+export interface User {
+  id: number;
+  name: string;
+  andrewId: string;
+  oidcSubject: string;
+  groups: string[];
+}
 
 const POST_LOGIN_CALLBACK_URL_KEY = "postLoginCallbackURL";
 
@@ -22,9 +23,7 @@ const sanitizeCallbackUrl = (callbackUrl: string): string => {
 };
 
 const consumePostLoginCallbackUrl = (): string | null => {
-  const postLoginCallbackUrl = sessionStorage.getItem(
-    POST_LOGIN_CALLBACK_URL_KEY,
-  );
+  const postLoginCallbackUrl = sessionStorage.getItem(POST_LOGIN_CALLBACK_URL_KEY);
   if (!postLoginCallbackUrl) {
     return null;
   }
@@ -34,10 +33,7 @@ const consumePostLoginCallbackUrl = (): string | null => {
 };
 
 export const setPostLoginCallbackUrl = (callbackUrl: string) => {
-  sessionStorage.setItem(
-    POST_LOGIN_CALLBACK_URL_KEY,
-    sanitizeCallbackUrl(callbackUrl),
-  );
+  sessionStorage.setItem(POST_LOGIN_CALLBACK_URL_KEY, sanitizeCallbackUrl(callbackUrl));
 };
 
 export const clearPostLoginCallbackUrl = () => {
@@ -45,28 +41,30 @@ export const clearPostLoginCallbackUrl = () => {
 };
 
 export const signIn = () => {
-  const callbackUrl = sanitizeCallbackUrl(
-    consumePostLoginCallbackUrl() ?? window.location.href,
-  );
-
-  auth.signIn
-    .social({
-      provider: "keycloak",
-      // biome-ignore lint/style/useNamingConvention: defined by better-auth
-      callbackURL: callbackUrl,
-    })
-    .then((result) => {
-      if (result.error) {
-        console.error(result.error);
-      }
-    });
+  setPostLoginCallbackUrl(consumePostLoginCallbackUrl() ?? window.location.href);
+  window.location.href = "/api/auth/login";
 };
+
 export const signOut = () => {
-  auth.signOut().then((result) => {
-    if (result.error) {
-      console.error(result.error);
-    }
-  });
+  window.location.href = "/api/auth/logout";
 };
 
-export const { useSession } = auth;
+export const useSession = () => {
+  const { data, isPending } = useQuery({
+    queryKey: ["session"],
+    queryFn: async (): Promise<User | null> => {
+      const response = await fetch("/api/me", { credentials: "include" });
+      if (response.status === 401) {
+        return null;
+      }
+      if (!response.ok) {
+        throw new Error(`Failed to load session (${response.status})`);
+      }
+      return (await response.json()) as User;
+    },
+    retry: false,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  return { data: data ?? null, isPending };
+};

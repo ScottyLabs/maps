@@ -1,20 +1,29 @@
-import { z } from "zod";
+// Built in a sandbox with no secrets, so the server hands these over at boot
+// from GET /api/config.
 
-// Define the schema as an object with all of the env variables and their types
-const envSchema = z.object({
-  VITE_SERVER_URL: z.url(),
-  VITE_CLERK_PUBLISHABLE_KEY: z.string(),
-  VITE_MAPKIT_TOKEN: z.string().optional(),
-});
-
-// Validate `process.env` against our schema and return the result
-const parsed = envSchema.safeParse(import.meta.env);
-
-if (!parsed.success) {
-  throw new Error("Invalid environment variables");
+interface RuntimeConfig {
+  mapkitToken: string | null;
 }
 
-const env = parsed.data;
+let config: RuntimeConfig = { mapkitToken: null };
 
-// Export the result so we can use it in the project
+export async function loadConfig(): Promise<void> {
+  try {
+    const response = await fetch("/api/config", { credentials: "include" });
+    if (response.ok) {
+      config = (await response.json()) as RuntimeConfig;
+    } else {
+      console.error(`Failed to load /api/config: ${response.status}`);
+    }
+  } catch (error) {
+    console.error("Failed to load /api/config", error);
+  }
+}
+
+const env = {
+  get mapkitToken(): string | undefined {
+    return config.mapkitToken ?? undefined;
+  },
+};
+
 export default env;

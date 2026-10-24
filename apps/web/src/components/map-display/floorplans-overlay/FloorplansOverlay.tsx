@@ -9,8 +9,7 @@ const FloorplansOverlay = () => {
 
   // Authenticated users can see all floorplans.
   // Unauthenticated users can only see public building floorplans.
-  const canShowFloorplans =
-    user || isPublicBuilding(focusedFloor?.buildingCode);
+  const canShowFloorplans = user || isPublicBuilding(focusedFloor?.buildingCode);
 
   // Only show floorplans if a floor is focused
   if (!(focusedFloor && canShowFloorplans)) {

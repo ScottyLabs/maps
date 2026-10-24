@@ -31,25 +31,28 @@ class ApiClient:
     TIMEOUT = 10
     SUCCESS_STATUS_CODE = 200
 
-    TOKEN_URL = (
-        "https://idp.scottylabs.org/realms/scottylabs/protocol/openid-connect/token"  # noqa: S105
-    )
-
     def __init__(self) -> None:
         self.logger = get_app_logger()
 
-        # Load required environment-specific variables
+        # Operator-run job: these come from apps/dataflow/.env, not secretspec.
         self.server_url = os.getenv("SERVER_URL")
-        self.auth_client_id = os.getenv("AUTH_CLIENT_ID")
-        self.auth_client_secret = os.getenv("AUTH_CLIENT_SECRET")
+        self.client_id = os.getenv("OIDC_CLIENT_ID")
+        self.client_secret = os.getenv("OIDC_CLIENT_SECRET")
+
+        keycloak_url = os.getenv("KEYCLOAK_URL", "https://idp.scottylabs.org")
+        keycloak_realm = os.getenv("KEYCLOAK_REALM", "scottylabs")
+        self.token_url = (
+            f"{keycloak_url.rstrip('/')}/realms/{keycloak_realm}"
+            "/protocol/openid-connect/token"
+        )
 
         if not self.server_url:
             msg = "SERVER_URL must be set"
             self.logger.critical(msg)
             raise ValueError(msg)
 
-        if not self.auth_client_id or not self.auth_client_secret:
-            msg = "AUTH_CLIENT_ID and AUTH_CLIENT_SECRET must be set"
+        if not self.client_id or not self.client_secret:
+            msg = "OIDC_CLIENT_ID and OIDC_CLIENT_SECRET must be set"
             self.logger.critical(msg)
             raise ValueError(msg)
 
@@ -62,11 +65,11 @@ class ApiClient:
 
         data = {
             "grant_type": "client_credentials",
-            "client_id": self.auth_client_id,
-            "client_secret": self.auth_client_secret,
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
         }
 
-        response = requests.post(self.TOKEN_URL, data=data, timeout=self.TIMEOUT)
+        response = requests.post(self.token_url, data=data, timeout=self.TIMEOUT)
         response.raise_for_status()
         token_data = response.json()
 
@@ -81,7 +84,7 @@ class ApiClient:
     def drop_tables(self, table_names: list[TableName]) -> bool:
         """Drop specified tables."""
         response = requests.delete(
-            f"{self.server_url}/drop-tables",
+            f"{self.server_url}/api/drop-tables",
             json={"tableNames": table_names},
             headers={"Authorization": f"Bearer {self._get_token()}"},
             timeout=self.TIMEOUT,
@@ -91,7 +94,7 @@ class ApiClient:
     def populate_table(self, table_name: TableName, data: list[dict[str, Any]]) -> bool:
         """Populate a table with the given data."""
         response = requests.post(
-            f"{self.server_url}/populate-table/{table_name}",
+            f"{self.server_url}/api/populate-table/{table_name.lower()}",
             json=data,
             headers={"Authorization": f"Bearer {self._get_token()}"},
             timeout=self.TIMEOUT,
@@ -102,6 +105,7 @@ class ApiClient:
             raise RuntimeError(msg)
 
         return True
+
 
 @lru_cache(maxsize=1)
 def get_api_client_singleton() -> ApiClient:

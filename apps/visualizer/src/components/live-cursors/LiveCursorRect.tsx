@@ -18,10 +18,7 @@ const CursorNameRect = ({ user, cursorPos, scale }: CursorNameRectProps) => {
   const namePadding = 10;
 
   return (
-    <Group
-      x={cursorPos.x + nameOffset.x / scale}
-      y={cursorPos.y + nameOffset.y / scale}
-    >
+    <Group x={cursorPos.x + nameOffset.x / scale} y={cursorPos.y + nameOffset.y / scale}>
       <Rect
         width={textWidth + namePadding / scale}
         height={textHeight + namePadding / scale}

@@ -19,17 +19,9 @@ const FloorSwitcherDisplayDesktop = ({ building, floor }: Props) => {
       <RoundelButton building={building} />
       {hasFloorplan ? (
         showFloorPicker ? (
-          <FloorPicker
-            building={building}
-            floor={floor}
-            setShowFloorPicker={setShowFloorPicker}
-          />
+          <FloorPicker building={building} floor={floor} setShowFloorPicker={setShowFloorPicker} />
         ) : (
-          <DefaultView
-            building={building}
-            floor={floor}
-            setShowFloorPicker={setShowFloorPicker}
-          />
+          <DefaultView building={building} floor={floor} setShowFloorPicker={setShowFloorPicker} />
         )
       ) : (
         <LockedView building={building} />

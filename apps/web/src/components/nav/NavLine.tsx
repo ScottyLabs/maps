@@ -72,9 +72,7 @@ const NavLine = ({ map }: Props) => {
   const isNavigating = useBoundStore((state) => state.isNavigating);
   const selectedPath = useBoundStore((state) => state.selectedPath);
   const setIsZooming = useBoundStore((state) => state.setIsZooming);
-  const setQueuedZoomRegion = useBoundStore(
-    (state) => state.setQueuedZoomRegion,
-  );
+  const setQueuedZoomRegion = useBoundStore((state) => state.setQueuedZoomRegion);
   const focusFloor = useBoundStore((state) => state.focusFloor);
 
   const path = navPaths?.[selectedPath]?.path.path ?? [];
@@ -96,13 +94,7 @@ const NavLine = ({ map }: Props) => {
         focusFloor(node.floor);
       }
       if (node?.coordinate) {
-        zoomOnPoint(
-          map,
-          node.coordinate,
-          0.0004,
-          setIsZooming,
-          setQueuedZoomRegion,
-        );
+        zoomOnPoint(map, node.coordinate, 0.0004, setIsZooming, setQueuedZoomRegion);
       }
     }
   }, [
@@ -125,9 +117,7 @@ const NavLine = ({ map }: Props) => {
       const newUnfinishedPath: Node[] = [];
 
       const currentNodeid =
-        instructionIndex > 0
-          ? instructions[instructionIndex - 1]?.nodeId
-          : path[0]?.id;
+        instructionIndex > 0 ? instructions[instructionIndex - 1]?.nodeId : path[0]?.id;
 
       let reachedCurrentNode = false;
       for (const node of path) {
@@ -146,12 +136,7 @@ const NavLine = ({ map }: Props) => {
       setCompletedPath(newFinishedPath);
       setUncompletedPath(newUnfinishedPath);
     }
-  }, [
-    instructionIndex,
-    instructions[instructionIndex]?.nodeId,
-    isNavigating,
-    path,
-  ]);
+  }, [instructionIndex, instructions[instructionIndex]?.nodeId, isNavigating, path]);
 
   useEffect(() => {
     const newPathOverlays: mapkit.PolylineOverlay[] = [];
@@ -160,11 +145,7 @@ const NavLine = ({ map }: Props) => {
       if (completedPath) {
         const curFloorPathOverlay = new mapkit.PolylineOverlay(
           completedPath.map(
-            (n) =>
-              new mapkit.Coordinate(
-                n.coordinate.latitude,
-                n.coordinate.longitude,
-              ),
+            (n) => new mapkit.Coordinate(n.coordinate.latitude, n.coordinate.longitude),
           ),
           {
             style: new mapkit.Style({
@@ -181,11 +162,7 @@ const NavLine = ({ map }: Props) => {
       if (uncompletedPath) {
         const restPathOverlay = new mapkit.PolylineOverlay(
           uncompletedPath.map(
-            (n) =>
-              new mapkit.Coordinate(
-                n.coordinate.latitude,
-                n.coordinate.longitude,
-              ),
+            (n) => new mapkit.Coordinate(n.coordinate.latitude, n.coordinate.longitude),
           ),
           {
             style: new mapkit.Style({
@@ -211,11 +188,7 @@ const NavLine = ({ map }: Props) => {
 
       const selectedPathOverlay = new mapkit.PolylineOverlay(
         selectedNavPath.path.path.map(
-          (n) =>
-            new mapkit.Coordinate(
-              n.coordinate.latitude,
-              n.coordinate.longitude,
-            ),
+          (n) => new mapkit.Coordinate(n.coordinate.latitude, n.coordinate.longitude),
         ),
         { style: new mapkit.Style(style) },
       );
@@ -225,13 +198,7 @@ const NavLine = ({ map }: Props) => {
     } else {
       setPathOverlay([]);
     }
-  }, [
-    recommendedPath,
-    completedPath,
-    isNavigating,
-    uncompletedPath,
-    selectedPath,
-  ]);
+  }, [recommendedPath, completedPath, isNavigating, uncompletedPath, selectedPath]);
 
   // render the polylines so they stay on top
   // biome-ignore lint/correctness/useExhaustiveDependencies: Re-render whenever new floor is focused so line is not covered
@@ -262,9 +229,9 @@ const NavLine = ({ map }: Props) => {
       if (!path[0]) return;
       newIconInfos.push({
         coordinate: path[0].coordinate,
-        icon: PathInstructionIcons[
-          instructionIndex === 0 ? "Start" : "StartCompleted"
-        ] ?? { icon: "" },
+        icon: PathInstructionIcons[instructionIndex === 0 ? "Start" : "StartCompleted"] ?? {
+          icon: "",
+        },
       });
 
       const lastIndex = path.length - 1;
@@ -290,9 +257,7 @@ const NavLine = ({ map }: Props) => {
               longitude: coord.longitude,
             },
             icon: PathInstructionIcons[
-              isCompleted
-                ? `${instruction.action}Completed`
-                : instruction.action
+              isCompleted ? `${instruction.action}Completed` : instruction.action
             ] ?? { icon: "" },
           });
         }
@@ -305,13 +270,7 @@ const NavLine = ({ map }: Props) => {
     addStartEndIcons();
 
     setIconInfos(newIconInfos);
-  }, [
-    path.length,
-    path[0],
-    recommendedPath,
-    instructions.forEach,
-    instructionIndex,
-  ]);
+  }, [path.length, path[0], recommendedPath, instructions.forEach, instructionIndex]);
 
   if (!(isNavOpen && map)) {
     return;

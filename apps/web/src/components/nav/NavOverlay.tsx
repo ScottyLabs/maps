@@ -7,11 +7,7 @@ import { useBoundStore } from "@/store/index.ts";
 import type { Node } from "@/types/navTypes.ts";
 import { isPublicBuilding } from "@/utils/authUtils.ts";
 
-const NavOverlay = ({
-  mapRef,
-}: {
-  mapRef: React.RefObject<mapkit.Map | null>;
-}) => {
+const NavOverlay = ({ mapRef }: { mapRef: React.RefObject<mapkit.Map | null> }) => {
   const isMobile = useIsMobile();
 
   const isNavigating = useBoundStore((state) => state.isNavigating);
@@ -21,14 +17,7 @@ const NavOverlay = ({
   const selectedPath = useBoundStore((state) => state.selectedPath);
   const showLogin = useBoundStore((state) => state.showLogin);
 
-  const {
-    navPaths,
-    isNavOpen,
-    dstType,
-    srcType,
-    srcBuildingCode,
-    dstBuildingCode,
-  } = useNavPaths();
+  const { navPaths, isNavOpen, dstType, srcType, srcBuildingCode, dstBuildingCode } = useNavPaths();
   const user = useUser();
 
   // Process instructions
@@ -131,13 +120,7 @@ const NavOverlay = ({
   }
 
   if (isMobile) {
-    return (
-      <NavOverlayMobile
-        mapRef={mapRef}
-        isNavigating={isNavigating}
-        startNav={startNav}
-      />
-    );
+    return <NavOverlayMobile mapRef={mapRef} isNavigating={isNavigating} startNav={startNav} />;
   }
 };
 

@@ -9,21 +9,10 @@ import { CURSOR_UPDATE_RATE } from "../../hooks/useCursorTracker.ts";
 import useSavePolygonEdit from "../../hooks/useSavePolygonEdit.ts";
 import { pushCursorInfo } from "../../store/features/liveCursor/liveCursorSlice.ts";
 import type { CursorInfoOnDragVertex } from "../../store/features/liveCursor/liveCursorTypes.ts";
-import {
-  POLYGON_DELETE_VERTEX,
-  POLYGON_SELECT,
-  setMode,
-} from "../../store/features/modeSlice.ts";
-import {
-  releaseVertex,
-  setDragVertexInfo,
-} from "../../store/features/mouseEventSlice.ts";
+import { POLYGON_DELETE_VERTEX, POLYGON_SELECT, setMode } from "../../store/features/modeSlice.ts";
+import { releaseVertex, setDragVertexInfo } from "../../store/features/mouseEventSlice.ts";
 import { useAppDispatch, useAppSelector } from "../../store/hooks.ts";
-import {
-  getCursorPos,
-  getDragObjectPos,
-  setCursor,
-} from "../../utils/canvasUtils.ts";
+import { getCursorPos, getDragObjectPos, setCursor } from "../../utils/canvasUtils.ts";
 
 interface Props {
   floorCode: string;
@@ -34,21 +23,12 @@ interface Props {
   scale: number;
 }
 
-const PolygonEditor = ({
-  floorCode,
-  roomId,
-  polygon,
-  nodeSize,
-  offset,
-  scale,
-}: Props) => {
+const PolygonEditor = ({ floorCode, roomId, polygon, nodeSize, offset, scale }: Props) => {
   const dispatch = useAppDispatch();
   const mode = useAppSelector((state) => state.mode.mode);
   const ringIndex = useAppSelector((state) => state.polygon.ringIndex);
   const savePolygonEdit = useSavePolygonEdit(floorCode, roomId);
-  const dragVertexInfo = useAppSelector(
-    (state) => state.mouseEvent.dragVertexInfo,
-  );
+  const dragVertexInfo = useAppSelector((state) => state.mouseEvent.dragVertexInfo);
 
   const lines = useMemo(() => {
     const lines: Position[][] = [];
@@ -56,39 +36,24 @@ const PolygonEditor = ({
       // use the dragged vertex info for display
       if (dragVertexInfo && dragVertexInfo.ringIndex === ringIndex) {
         if (dragVertexInfo.vertexIndex === i) {
-          lines.push([
-            dragVertexInfo.vertexPos,
-            polygon.coordinates[ringIndex][i + 1],
-          ]);
+          lines.push([dragVertexInfo.vertexPos, polygon.coordinates[ringIndex][i + 1]]);
           continue;
         }
         if (dragVertexInfo.vertexIndex === i + 1) {
-          lines.push([
-            polygon.coordinates[ringIndex][i],
-            dragVertexInfo.vertexPos,
-          ]);
+          lines.push([polygon.coordinates[ringIndex][i], dragVertexInfo.vertexPos]);
           continue;
         }
       }
 
-      lines.push([
-        polygon.coordinates[ringIndex][i],
-        polygon.coordinates[ringIndex][i + 1],
-      ]);
+      lines.push([polygon.coordinates[ringIndex][i], polygon.coordinates[ringIndex][i + 1]]);
     }
     return lines;
   }, [dragVertexInfo, polygon.coordinates, ringIndex]);
 
-  const handleOnDragEnd = async (
-    e: Konva.KonvaEventObject<DragEvent>,
-    index: number,
-  ) => {
+  const handleOnDragEnd = async (e: Konva.KonvaEventObject<DragEvent>, index: number) => {
     const newPolygon: Polygon = JSON.parse(JSON.stringify(polygon));
     const coords = newPolygon.coordinates[ringIndex];
-    const newPos = [
-      Number(e.target.x().toFixed(2)),
-      Number(e.target.y().toFixed(2)),
-    ];
+    const newPos = [Number(e.target.x().toFixed(2)), Number(e.target.y().toFixed(2))];
     coords[index] = newPos;
     // first and last point need to stay the same
     if (index === 0) {
@@ -122,10 +87,7 @@ const PolygonEditor = ({
     }
   };
 
-  const handleOnDragStart = (
-    e: Konva.KonvaEventObject<DragEvent>,
-    vertexIndex: number,
-  ) => {
+  const handleOnDragStart = (e: Konva.KonvaEventObject<DragEvent>, vertexIndex: number) => {
     const vertexPdfCoords = getDragObjectPos(e);
     const vertexPos = [vertexPdfCoords.x, vertexPdfCoords.y];
     dispatch(setDragVertexInfo({ roomId, ringIndex, vertexIndex, vertexPos }));

@@ -10,8 +10,7 @@ interface Props {
 
 const FloorSwitcher = ({ floorCode }: Props) => {
   const [fullDisplayMode, setFullDisplayMode] = useState<boolean>(false);
-  const { buildingCode, floorLevel: floorLevelSelected } =
-    useFloorInfo(floorCode);
+  const { buildingCode, floorLevel: floorLevelSelected } = useFloorInfo(floorCode);
 
   const { data: floorLevels } = useGetBuildingFloorsQuery(buildingCode);
 
@@ -114,9 +113,7 @@ const FloorSwitcher = ({ floorCode }: Props) => {
         <table>
           <tbody>
             <tr className="flex">
-              {fullDisplayMode
-                ? renderFullDisplayMode()
-                : renderNotFullDisplayMode()}
+              {fullDisplayMode ? renderFullDisplayMode() : renderNotFullDisplayMode()}
             </tr>
           </tbody>
         </table>

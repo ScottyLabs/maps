@@ -21,10 +21,8 @@ export const createNavSlice: StateCreator<NavSlice> = (set) => ({
   navInstructionIndex: 0,
   navInstructions: undefined,
   selectedPath: "Fastest",
-  setNavInstructionIndex: (index: number) =>
-    set({ navInstructionIndex: index }),
-  setNavInstructions: (instructions: Instruction[]) =>
-    set({ navInstructions: instructions }),
+  setNavInstructionIndex: (index: number) => set({ navInstructionIndex: index }),
+  setNavInstructions: (instructions: Instruction[]) => set({ navInstructions: instructions }),
   setNavPaths: (path: NavPaths) => set({ navPaths: path }),
   setSelectedPath: (path: NavPathType) => set({ selectedPath: path }),
   startNav: () => set({ isNavigating: true }),

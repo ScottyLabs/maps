@@ -36,17 +36,9 @@ const historySlice = createSlice({
       const { batchId, edit, reverseEdit } = action.payload;
 
       // Update the history arrays with the new edit
-      state.batchIds = getUpdatedHistory(
-        state.batchIds,
-        batchId,
-        state.editIndex + 1,
-      );
+      state.batchIds = getUpdatedHistory(state.batchIds, batchId, state.editIndex + 1);
 
-      state.editHistory = getUpdatedHistory(
-        state.editHistory,
-        edit,
-        state.editIndex + 1,
-      );
+      state.editHistory = getUpdatedHistory(state.editHistory, edit, state.editIndex + 1);
 
       state.reversedEditHistory = getUpdatedHistory(
         state.reversedEditHistory,

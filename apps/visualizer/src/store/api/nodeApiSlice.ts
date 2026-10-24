@@ -1,8 +1,4 @@
-import type {
-  CreateNodePayload,
-  DeleteNodePayload,
-  UpdateNodePayload,
-} from "@cmumaps/websocket";
+import type { CreateNodePayload, DeleteNodePayload, UpdateNodePayload } from "@cmumaps/websocket";
 
 import { toast } from "react-toastify";
 
@@ -26,53 +22,41 @@ export const createNode =
   (floorCode: string, { nodeId, nodeInfo }: CreateNodePayload) =>
   (dispatch: AppDispatch) =>
     dispatch(
-      floorDataApiSlice.util.updateQueryData(
-        "getFloorGraph",
-        floorCode,
-        (draft) => {
-          draft[nodeId] = nodeInfo;
-          // create edges to neighbors if they don't already exist
-          for (const neighborId in nodeInfo.neighbors) {
-            draft[neighborId].neighbors[nodeId] = {};
-          }
-        },
-      ),
+      floorDataApiSlice.util.updateQueryData("getFloorGraph", floorCode, (draft) => {
+        draft[nodeId] = nodeInfo;
+        // create edges to neighbors if they don't already exist
+        for (const neighborId in nodeInfo.neighbors) {
+          draft[neighborId].neighbors[nodeId] = {};
+        }
+      }),
     );
 
 export const deleteNode =
   (floorCode: string, { nodeId }: DeleteNodePayload) =>
   (dispatch: AppDispatch) =>
     dispatch(
-      floorDataApiSlice.util.updateQueryData(
-        "getFloorGraph",
-        floorCode,
-        (draft) => {
-          // the node could be deleted when receiving websocket message
-          if (!draft[nodeId]) {
-            return;
-          }
+      floorDataApiSlice.util.updateQueryData("getFloorGraph", floorCode, (draft) => {
+        // the node could be deleted when receiving websocket message
+        if (!draft[nodeId]) {
+          return;
+        }
 
-          // delete edges connected to the node
-          for (const neighborId in draft[nodeId].neighbors) {
-            delete draft[neighborId].neighbors[nodeId];
-          }
+        // delete edges connected to the node
+        for (const neighborId in draft[nodeId].neighbors) {
+          delete draft[neighborId].neighbors[nodeId];
+        }
 
-          delete draft[nodeId];
-        },
-      ),
+        delete draft[nodeId];
+      }),
     );
 
 export const updateNode =
   (floorCode: string, { nodeId, nodeInfo }: UpdateNodePayload) =>
   (dispatch: AppDispatch) =>
     dispatch(
-      floorDataApiSlice.util.updateQueryData(
-        "getFloorGraph",
-        floorCode,
-        (draft) => {
-          draft[nodeId] = nodeInfo;
-        },
-      ),
+      floorDataApiSlice.util.updateQueryData("getFloorGraph", floorCode, (draft) => {
+        draft[nodeId] = nodeInfo;
+      }),
     );
 
 export const nodeApiSlice = apiSlice.injectEndpoints({
@@ -94,9 +78,7 @@ export const nodeApiSlice = apiSlice.injectEndpoints({
             dispatch(addEditToHistory(editPair));
           }
           // optimistic update
-          const { undo } = dispatch(
-            createNode(floorCode, { nodeId, nodeInfo }),
-          );
+          const { undo } = dispatch(createNode(floorCode, { nodeId, nodeInfo }));
           handleQueryError(queryFulfilled, undo);
         } catch (e) {
           toast.error("Check the Console for detailed error.");
@@ -116,12 +98,7 @@ export const nodeApiSlice = apiSlice.injectEndpoints({
           // add to history
           if (batchId) {
             const getStore = getState as () => RootState;
-            const editPair = await buildDeleteNodeEditPair(
-              batchId,
-              arg,
-              getStore,
-              dispatch,
-            );
+            const editPair = await buildDeleteNodeEditPair(batchId, arg, getStore, dispatch);
             dispatch(addEditToHistory(editPair));
           }
           // optimistic update
@@ -146,18 +123,11 @@ export const nodeApiSlice = apiSlice.injectEndpoints({
           // add to history
           if (batchId) {
             const getStore = getState as () => RootState;
-            const editPair = await buildUpdateNodeEditPair(
-              batchId,
-              arg,
-              getStore,
-              dispatch,
-            );
+            const editPair = await buildUpdateNodeEditPair(batchId, arg, getStore, dispatch);
             dispatch(addEditToHistory(editPair));
           }
           // optimistic update
-          const { undo } = dispatch(
-            updateNode(floorCode, { nodeId, nodeInfo }),
-          );
+          const { undo } = dispatch(updateNode(floorCode, { nodeId, nodeInfo }));
           handleQueryError(queryFulfilled, undo);
         } catch (e) {
           toast.error("Check the Console for detailed error.");
@@ -168,8 +138,4 @@ export const nodeApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const {
-  useCreateNodeMutation,
-  useDeleteNodeMutation,
-  useUpdateNodeMutation,
-} = nodeApiSlice;
+export const { useCreateNodeMutation, useDeleteNodeMutation, useUpdateNodeMutation } = nodeApiSlice;

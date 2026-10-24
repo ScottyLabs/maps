@@ -22,63 +22,42 @@ import { floorDataApiSlice } from "./floorDataApiSlice.ts";
 
 export type CreateEdgeArg = BaseMutationArg & CreateEdgePayload;
 export type DeleteEdgeArg = BaseMutationArg & DeleteEdgePayload;
-export type CreateEdgeAcrossFloorsArg = BaseMutationArg &
-  CreateEdgeAcrossFloorsPayload;
-export type DeleteEdgeAcrossFloorsArg = BaseMutationArg &
-  DeleteEdgeAcrossFloorsPayload;
+export type CreateEdgeAcrossFloorsArg = BaseMutationArg & CreateEdgeAcrossFloorsPayload;
+export type DeleteEdgeAcrossFloorsArg = BaseMutationArg & DeleteEdgeAcrossFloorsPayload;
 
 export const createEdge =
   (floorCode: string, { inNodeId, outNodeId }: CreateEdgePayload) =>
   (dispatch: AppDispatch) =>
     dispatch(
-      floorDataApiSlice.util.updateQueryData(
-        "getFloorGraph",
-        floorCode,
-        (draft) => {
-          draft[inNodeId].neighbors[outNodeId] = {};
-          draft[outNodeId].neighbors[inNodeId] = {};
-        },
-      ),
+      floorDataApiSlice.util.updateQueryData("getFloorGraph", floorCode, (draft) => {
+        draft[inNodeId].neighbors[outNodeId] = {};
+        draft[outNodeId].neighbors[inNodeId] = {};
+      }),
     );
 
 export const deleteEdge =
   (floorCode: string, { inNodeId, outNodeId }: CreateEdgePayload) =>
   (dispatch: AppDispatch) =>
     dispatch(
-      floorDataApiSlice.util.updateQueryData(
-        "getFloorGraph",
-        floorCode,
-        (draft) => {
-          delete draft[inNodeId].neighbors[outNodeId];
-          delete draft[outNodeId].neighbors[inNodeId];
-        },
-      ),
+      floorDataApiSlice.util.updateQueryData("getFloorGraph", floorCode, (draft) => {
+        delete draft[inNodeId].neighbors[outNodeId];
+        delete draft[outNodeId].neighbors[inNodeId];
+      }),
     );
 
 export const createEdgeAcrossFloors =
-  (
-    floorCode: string,
-    { outFloorCode, inNodeId, outNodeId }: CreateEdgeAcrossFloorsPayload,
-  ) =>
+  (floorCode: string, { outFloorCode, inNodeId, outNodeId }: CreateEdgeAcrossFloorsPayload) =>
   (dispatch: AppDispatch) => {
     const { undo: inUndo } = dispatch(
-      floorDataApiSlice.util.updateQueryData(
-        "getFloorGraph",
-        floorCode,
-        (draft) => {
-          draft[inNodeId].neighbors[outNodeId] = { outFloorCode };
-        },
-      ),
+      floorDataApiSlice.util.updateQueryData("getFloorGraph", floorCode, (draft) => {
+        draft[inNodeId].neighbors[outNodeId] = { outFloorCode };
+      }),
     );
 
     const { undo: outUndo } = dispatch(
-      floorDataApiSlice.util.updateQueryData(
-        "getFloorGraph",
-        outFloorCode,
-        (draft) => {
-          draft[outNodeId].neighbors[inNodeId] = { outFloorCode: floorCode };
-        },
-      ),
+      floorDataApiSlice.util.updateQueryData("getFloorGraph", outFloorCode, (draft) => {
+        draft[outNodeId].neighbors[inNodeId] = { outFloorCode: floorCode };
+      }),
     );
 
     return {
@@ -90,29 +69,18 @@ export const createEdgeAcrossFloors =
   };
 
 export const deleteEdgeAcrossFloors =
-  (
-    floorCode: string,
-    { outFloorCode, inNodeId, outNodeId }: DeleteEdgeAcrossFloorsPayload,
-  ) =>
+  (floorCode: string, { outFloorCode, inNodeId, outNodeId }: DeleteEdgeAcrossFloorsPayload) =>
   (dispatch: AppDispatch) => {
     const { undo: inUndo } = dispatch(
-      floorDataApiSlice.util.updateQueryData(
-        "getFloorGraph",
-        floorCode,
-        (draft) => {
-          delete draft[inNodeId].neighbors[outNodeId];
-        },
-      ),
+      floorDataApiSlice.util.updateQueryData("getFloorGraph", floorCode, (draft) => {
+        delete draft[inNodeId].neighbors[outNodeId];
+      }),
     );
 
     const { undo: outUndo } = dispatch(
-      floorDataApiSlice.util.updateQueryData(
-        "getFloorGraph",
-        outFloorCode,
-        (draft) => {
-          delete draft[outNodeId].neighbors[inNodeId];
-        },
-      ),
+      floorDataApiSlice.util.updateQueryData("getFloorGraph", outFloorCode, (draft) => {
+        delete draft[outNodeId].neighbors[inNodeId];
+      }),
     );
 
     return {
@@ -142,9 +110,7 @@ export const edgeApiSlice = apiSlice.injectEndpoints({
             dispatch(addEditToHistory(editPair));
           }
           // optimistic update
-          const { undo } = dispatch(
-            createEdge(floorCode, { inNodeId, outNodeId }),
-          );
+          const { undo } = dispatch(createEdge(floorCode, { inNodeId, outNodeId }));
           handleQueryError(queryFulfilled, undo);
         } catch (e) {
           toast.error("Check the Console for detailed error.");
@@ -168,9 +134,7 @@ export const edgeApiSlice = apiSlice.injectEndpoints({
             dispatch(addEditToHistory(editPair));
           }
           // optimistic update
-          const { undo } = dispatch(
-            deleteEdge(floorCode, { inNodeId, outNodeId }),
-          );
+          const { undo } = dispatch(deleteEdge(floorCode, { inNodeId, outNodeId }));
           handleQueryError(queryFulfilled, undo);
         } catch (e) {
           toast.error("Check the Console for detailed error.");
@@ -178,10 +142,7 @@ export const edgeApiSlice = apiSlice.injectEndpoints({
         }
       },
     }),
-    createEdgeAcrossFloors: builder.mutation<
-      Response,
-      CreateEdgeAcrossFloorsArg
-    >({
+    createEdgeAcrossFloors: builder.mutation<Response, CreateEdgeAcrossFloorsArg>({
       query: ({ floorCode, outFloorCode, inNodeId, outNodeId }) => ({
         url: "edge/across-floors",
         method: "POST",
@@ -211,10 +172,7 @@ export const edgeApiSlice = apiSlice.injectEndpoints({
         }
       },
     }),
-    deleteEdgeAcrossFloors: builder.mutation<
-      Response,
-      DeleteEdgeAcrossFloorsArg
-    >({
+    deleteEdgeAcrossFloors: builder.mutation<Response, DeleteEdgeAcrossFloorsArg>({
       query: ({ floorCode, outFloorCode, inNodeId, outNodeId }) => ({
         url: "edge/across-floors",
         method: "DELETE",

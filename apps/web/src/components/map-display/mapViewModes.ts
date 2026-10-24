@@ -13,10 +13,7 @@ export const MAP_VIEW_OPTIONS: MapViewOption[] = [
   { mode: "photorealistic3d", label: "Photorealistic 3D" },
 ];
 
-export const MAPKIT_MAP_TYPE_BY_MODE: Record<
-  Exclude<MapViewMode, "photorealistic3d">,
-  MapType
-> = {
+export const MAPKIT_MAP_TYPE_BY_MODE: Record<Exclude<MapViewMode, "photorealistic3d">, MapType> = {
   standard: MapType.Standard,
   hybrid: MapType.Hybrid,
   satellite: MapType.Satellite,

@@ -1,11 +1,7 @@
 import type { Rooms } from "@cmumaps/common";
 
 import { floorDataApiSlice } from "../../api/floorDataApiSlice.ts";
-import type {
-  CreateRoomArg,
-  DeleteRoomArg,
-  UpdateRoomArg,
-} from "../../api/roomApiSlice.ts";
+import type { CreateRoomArg, DeleteRoomArg, UpdateRoomArg } from "../../api/roomApiSlice.ts";
 import type { AppDispatch, RootState } from "../../store.ts";
 import type { Edit, EditPair } from "./historyTypes.ts";
 
@@ -14,23 +10,16 @@ const getRooms = async (
   getStore: () => RootState,
   dispatch: AppDispatch,
 ): Promise<Rooms> => {
-  let rooms = floorDataApiSlice.endpoints.getFloorRooms.select(floorCode)(
-    getStore(),
-  ).data;
+  let rooms = floorDataApiSlice.endpoints.getFloorRooms.select(floorCode)(getStore()).data;
 
   if (!rooms) {
-    rooms = await dispatch(
-      floorDataApiSlice.endpoints.getFloorRooms.initiate(floorCode),
-    ).unwrap();
+    rooms = await dispatch(floorDataApiSlice.endpoints.getFloorRooms.initiate(floorCode)).unwrap();
   }
 
   return rooms;
 };
 
-export const buildCreateRoomEditPair = (
-  batchId: string,
-  arg: CreateRoomArg,
-): EditPair => {
+export const buildCreateRoomEditPair = (batchId: string, arg: CreateRoomArg): EditPair => {
   const { floorCode, roomId } = arg;
   const edit: Edit = {
     endpoint: "createRoom",

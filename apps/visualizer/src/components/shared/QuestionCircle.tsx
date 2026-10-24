@@ -10,10 +10,7 @@ const QuestionCircle = ({ url, style }: Props) => {
   return (
     <a href={url} target="_blank" rel="noreferrer">
       <FaRegQuestionCircle
-        className={twMerge(
-          "cursor-pointer rounded-full text-2xl hover:text-blue-600",
-          style,
-        )}
+        className={twMerge("cursor-pointer rounded-full text-2xl hover:text-blue-600", style)}
       />
     </a>
   );

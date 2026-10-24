@@ -4,10 +4,7 @@ import React from "react";
 
 import useValidatedFloorParams from "../../hooks/useValidatedFloorParams.ts";
 import { GRAPH_SELECT, setMode } from "../../store/features/modeSlice.ts";
-import {
-  setEditRoomLabel,
-  setInfoDisplayActiveTabIndex,
-} from "../../store/features/uiSlice.ts";
+import { setEditRoomLabel, setInfoDisplayActiveTabIndex } from "../../store/features/uiSlice.ts";
 import { useAppDispatch, useAppSelector } from "../../store/hooks.ts";
 import GraphInfoDisplay from "./graph/GraphInfoDisplay.tsx";
 import PoiInfoDisplay from "./poi/PoiInfoDisplay.tsx";
@@ -24,9 +21,7 @@ interface Props {
 
 const InfoDisplay = ({ floorCode, graph, rooms, pois }: Props) => {
   const dispatch = useAppDispatch();
-  const activeTabIndex = useAppSelector(
-    (state) => state.ui.infoDisplayActiveTabIndex,
-  );
+  const activeTabIndex = useAppSelector((state) => state.ui.infoDisplayActiveTabIndex);
 
   const result = useValidatedFloorParams(floorCode);
   if ("error" in result) {
@@ -42,15 +37,11 @@ const InfoDisplay = ({ floorCode, graph, rooms, pois }: Props) => {
   const renderRoomInfoDisplay = () => {
     // One of these conditions should always occur since we checked that one of the ids is available and we can retrieve nodeId from poiId
     if (roomId) {
-      return (
-        <RoomInfoDisplay floorCode={floorCode} roomId={roomId} rooms={rooms} />
-      );
+      return <RoomInfoDisplay floorCode={floorCode} roomId={roomId} rooms={rooms} />;
     }
 
     if (nodeId) {
-      return (
-        <RoomlessDisplay floorCode={floorCode} nodeId={nodeId} graph={graph} />
-      );
+      return <RoomlessDisplay floorCode={floorCode} nodeId={nodeId} graph={graph} />;
     }
   };
 
@@ -68,9 +59,7 @@ const InfoDisplay = ({ floorCode, graph, rooms, pois }: Props) => {
   const renderGraphInfoDisplay = () => {
     // This condition should always occur since we check nodeId is available
     if (nodeId) {
-      return (
-        <GraphInfoDisplay floorCode={floorCode} nodeId={nodeId} graph={graph} />
-      );
+      return <GraphInfoDisplay floorCode={floorCode} nodeId={nodeId} graph={graph} />;
     }
   };
 

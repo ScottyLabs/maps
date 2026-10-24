@@ -12,7 +12,6 @@
     "@types/react-dom": "npm:@types/react-dom@^19.2.2",
     "@vitejs/plugin-react": "npm:@vitejs/plugin-react@^5.1.1",
     "babel-plugin-react-compiler": "npm:babel-plugin-react-compiler@^1.0.0",
-    "better-auth": "npm:better-auth@^1.4.18",
     "lodash": "npm:lodash@^4.17.21",
     "mapkit-react": "npm:mapkit-react@^1.16.1",
     "motion": "npm:motion@^12.23.6",
@@ -32,15 +31,13 @@
     "zod": "npm:zod@^4.1.12",
     "zustand": "npm:zustand@^5.0.6"
   },
+  "tasks": {
+    "build": "deno run -A npm:vite@^7.0.4 build",
+    "dev": "deno run -A npm:vite@^7.0.4"
+  },
   "compilerOptions": {
-    "lib": [
-      "ESNext",
-      "DOM",
-      "DOM.Iterable"
-    ],
-    "types": [
-      "@types/apple-mapkit-js-browser"
-    ],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "types": ["@types/apple-mapkit-js-browser"],
     "jsx": "react-jsx",
     "module": "Preserve",
     "moduleResolution": "bundler",

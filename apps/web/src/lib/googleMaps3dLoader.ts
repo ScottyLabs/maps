@@ -30,19 +30,13 @@ const loadGoogleMaps3D = (apiKey: string): Promise<GoogleMapsApiNamespace> => {
     window[MAPS_CALLBACK] = () => {
       const googleMaps = window.google;
       if (!googleMaps?.maps?.importLibrary) {
-        reject(
-          new Error(
-            "Google Maps script loaded, but maps.importLibrary is unavailable.",
-          ),
-        );
+        reject(new Error("Google Maps script loaded, but maps.importLibrary is unavailable."));
         return;
       }
       resolve(googleMaps);
     };
 
-    const existingScript = document.querySelector(
-      MAPS_SCRIPT_SELECTOR,
-    ) as HTMLScriptElement | null;
+    const existingScript = document.querySelector(MAPS_SCRIPT_SELECTOR) as HTMLScriptElement | null;
 
     if (existingScript) {
       existingScript.addEventListener(
@@ -50,11 +44,7 @@ const loadGoogleMaps3D = (apiKey: string): Promise<GoogleMapsApiNamespace> => {
         () => {
           const googleMaps = window.google;
           if (!googleMaps?.maps?.importLibrary) {
-            reject(
-              new Error(
-                "Google Maps script loaded, but maps.importLibrary is unavailable.",
-              ),
-            );
+            reject(new Error("Google Maps script loaded, but maps.importLibrary is unavailable."));
             return;
           }
           resolve(googleMaps);

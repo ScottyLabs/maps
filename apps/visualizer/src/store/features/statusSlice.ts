@@ -40,10 +40,6 @@ const statusSlice = createSlice({
   },
 });
 
-export const {
-  startLoading,
-  finishLoading,
-  failedLoading,
-  setShortcutsDisabled,
-} = statusSlice.actions;
+export const { startLoading, finishLoading, failedLoading, setShortcutsDisabled } =
+  statusSlice.actions;
 export default statusSlice.reducer;

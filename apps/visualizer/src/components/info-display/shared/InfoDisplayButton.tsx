@@ -11,10 +11,7 @@ const InfoDisplayButton = ({ text, handleClick, style }: Props) => {
     <div>
       <button
         type="button"
-        className={twMerge(
-          "rounded bg-slate-500 px-2 py-1 text-sm hover:bg-slate-700",
-          style,
-        )}
+        className={twMerge("rounded bg-slate-500 px-2 py-1 text-sm hover:bg-slate-700", style)}
         onClick={handleClick}
       >
         {text}

@@ -96,14 +96,7 @@ const EdgesDisplay = ({ floorCode, graph }: Props) => {
   }
 
   return edges.map(([points, color], index: number) => {
-    return (
-      <Line
-        key={index}
-        points={points}
-        stroke={color}
-        strokeWidth={nodeSize / 2}
-      />
-    );
+    return <Line key={index} points={points} stroke={color} strokeWidth={nodeSize / 2} />;
   });
 };
 

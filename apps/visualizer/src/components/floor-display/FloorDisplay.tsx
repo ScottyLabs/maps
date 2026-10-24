@@ -45,12 +45,7 @@ const FloorDisplay = ({
   // custom hooks
   useKeyboardShortcuts(floorCode, graph, rooms);
   const { roomId } = useValidatedFloorParams(floorCode);
-  const handleStageClick = useStageClickHandler(
-    floorCode,
-    rooms,
-    scale,
-    offset,
-  );
+  const handleStageClick = useStageClickHandler(floorCode, rooms, scale, offset);
   const handleMouseMove = useCursorTracker(offset, scale);
 
   // Disable panning when dragging node, vertex, or label
@@ -107,9 +102,7 @@ const FloorDisplay = ({
           />
         )}
         <LabelsDisplay floorCode={floorCode} graph={graph} rooms={rooms} />
-        {LIVE_CURSORS_ENABLED && (
-          <LiveCursors floorCode={floorCode} scale={scale} />
-        )}
+        {LIVE_CURSORS_ENABLED && <LiveCursors floorCode={floorCode} scale={scale} />}
       </Layer>
     </Stage>
   );

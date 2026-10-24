@@ -5,11 +5,7 @@ import { BiHide } from "react-icons/bi";
 import { toast } from "react-toastify";
 
 import { setMst } from "../../store/features/dataSlice.ts";
-import {
-  ADD_DOOR_NODE,
-  ADD_NODE,
-  setMode,
-} from "../../store/features/modeSlice.ts";
+import { ADD_DOOR_NODE, ADD_NODE, setMode } from "../../store/features/modeSlice.ts";
 import { useAppDispatch } from "../../store/hooks.ts";
 import { calcMst } from "../../utils/graphUtils.ts";
 import QuestionCircle from "../shared/QuestionCircle.tsx";
@@ -28,14 +24,8 @@ const GraphTab = ({ graph, rooms }: Props) => {
 
   const renderAddNodeButtonsRow = () => (
     <>
-      <SidePanelButton
-        text="Add Node"
-        handleClick={() => dispatch(setMode(ADD_NODE))}
-      />
-      <SidePanelButton
-        text="Add Door Node"
-        handleClick={() => dispatch(setMode(ADD_DOOR_NODE))}
-      />
+      <SidePanelButton text="Add Node" handleClick={() => dispatch(setMode(ADD_NODE))} />
+      <SidePanelButton text="Add Door Node" handleClick={() => dispatch(setMode(ADD_DOOR_NODE))} />
     </>
   );
 

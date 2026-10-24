@@ -5,10 +5,7 @@ export interface UserPositionSlice {
   setUserPosition: (userPosition: GeolocationPosition | null) => void;
 }
 
-export const createUserPositionSlice: StateCreator<UserPositionSlice> = (
-  set,
-) => ({
+export const createUserPositionSlice: StateCreator<UserPositionSlice> = (set) => ({
   userPosition: null,
-  setUserPosition: (userPosition: GeolocationPosition | null) =>
-    set({ userPosition }),
+  setUserPosition: (userPosition: GeolocationPosition | null) => set({ userPosition }),
 });

@@ -36,11 +36,7 @@ const GraphInfoDisplay = ({ nodeId, floorCode, graph }: Props) => {
         neighbors={neighbors}
         differentFloorNeighbors={differentFloorNeighbors}
       />
-      <CrossFloorEdgeSection
-        floorCode={floorCode}
-        nodeId={nodeId}
-        graph={graph}
-      />
+      <CrossFloorEdgeSection floorCode={floorCode} nodeId={nodeId} graph={graph} />
     </div>
   );
 };

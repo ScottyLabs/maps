@@ -43,22 +43,12 @@ const NavHeader = ({ isNavigating, mapRef, children }: NavHeaderProps) => {
     Exit: "Exit",
   };
 
-  const {
-    isNavOpen,
-    srcName,
-    dstName,
-    dstShortName,
-    srcType,
-    dstType,
-    setSrc,
-  } = useNavPaths();
+  const { isNavOpen, srcName, dstName, dstShortName, srcType, dstType, setSrc } = useNavPaths();
 
   const instructions = useBoundStore((state) => state.navInstructions) ?? [];
   const instructionIndex = useBoundStore((state) => state.navInstructionIndex);
 
-  const setInstructionIndex = useBoundStore(
-    (state) => state.setNavInstructionIndex,
-  );
+  const setInstructionIndex = useBoundStore((state) => state.setNavInstructionIndex);
 
   const distance = instructions[instructionIndex]?.distance;
   const action = instructions[instructionIndex]?.action;
@@ -141,16 +131,10 @@ const NavHeader = ({ isNavigating, mapRef, children }: NavHeaderProps) => {
   const renderInstructionHeader = () => (
     <div className="flex flex-col bg-button-green">
       <div className="flex h-[111px] gap-4 px-8 pt-5 pb-3">
-        <img
-          src={instructionIcons[action || "Forward"]}
-          alt="forward"
-          className="my-2"
-        />
+        <img src={instructionIcons[action || "Forward"]} alt="forward" className="my-2" />
         <div className="w-full flex-col">
           <div className="font-inter font-lato font-semibold text-[2.25rem] text-white">
-            {distance === 0
-              ? "<1ft"
-              : `${action === "Forward" ? "for" : ""} ${distance} ft`}
+            {distance === 0 ? "<1ft" : `${action === "Forward" ? "for" : ""} ${distance} ft`}
           </div>
           <div className="-translate-y-2 pl-[2px] font-lato font-semibold text-[15px] text-white">
             {instructionTitles[action || "Forward"]}
@@ -168,32 +152,18 @@ const NavHeader = ({ isNavigating, mapRef, children }: NavHeaderProps) => {
             setInstructionIndex(Math.max(0, instructionIndex - 1));
           }}
         >
-          <img
-            className="w-6 rotate-180"
-            src={nextInstructionIcon}
-            alt="next instruction"
-          />
-          <div className="px-2 font-inter font-semibold text-[1rem] text-white">
-            Prev
-          </div>
+          <img className="w-6 rotate-180" src={nextInstructionIcon} alt="next instruction" />
+          <div className="px-2 font-inter font-semibold text-[1rem] text-white">Prev</div>
         </button>
         <button
           className={`flex ${instructionIndex < instructions.length - 1 ? "" : "disabled opacity-0"}`}
           type="button"
           onClick={() => {
-            setInstructionIndex(
-              Math.min(instructions.length - 1, instructionIndex + 1),
-            );
+            setInstructionIndex(Math.min(instructions.length - 1, instructionIndex + 1));
           }}
         >
-          <div className="px-2 font-inter font-semibold text-[1rem] text-white">
-            Next
-          </div>
-          <img
-            src={nextInstructionIcon}
-            className="w-6"
-            alt="next instruction"
-          />
+          <div className="px-2 font-inter font-semibold text-[1rem] text-white">Next</div>
+          <img src={nextInstructionIcon} className="w-6" alt="next instruction" />
         </button>
       </div>
     </div>
@@ -219,14 +189,8 @@ const NavHeader = ({ isNavigating, mapRef, children }: NavHeaderProps) => {
             setInstructionIndex(Math.max(0, instructionIndex - 1));
           }}
         >
-          <img
-            className="rotate-180"
-            src={nextInstructionIcon}
-            alt="next instruction"
-          />
-          <div className="px-2 font-bold font-lato text-[1rem] text-white">
-            Prev
-          </div>
+          <img className="rotate-180" src={nextInstructionIcon} alt="next instruction" />
+          <div className="px-2 font-bold font-lato text-[1rem] text-white">Prev</div>
         </button>
       </div>
     </div>

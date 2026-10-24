@@ -14,7 +14,7 @@ const useFocusedFloorParam = () => {
   });
   const focusedFloor = useBoundStore((state) => state.focusedFloor);
   const focusFloor = useBoundStore((state) => state.focusFloor);
-  const { data: buildings } = $api.useQuery("get", "/buildings");
+  const { data: buildings } = $api.useQuery("get", "/api/buildings");
 
   const restored = useRef(false);
 
@@ -31,8 +31,7 @@ const useFocusedFloorParam = () => {
     const level = floorParam.slice(dash + 1);
     if (
       buildings[buildingCode]?.floors.includes(level) &&
-      (focusedFloor?.buildingCode !== buildingCode ||
-        focusedFloor?.level !== level)
+      (focusedFloor?.buildingCode !== buildingCode || focusedFloor?.level !== level)
     ) {
       focusFloor({ buildingCode, level });
     }
@@ -47,9 +46,7 @@ const useFocusedFloorParam = () => {
       }
       return;
     }
-    const next = focusedFloor
-      ? `${focusedFloor.buildingCode}-${focusedFloor.level}`
-      : null;
+    const next = focusedFloor ? `${focusedFloor.buildingCode}-${focusedFloor.level}` : null;
     if (next !== floorParam) {
       setFloorParam(next);
     }

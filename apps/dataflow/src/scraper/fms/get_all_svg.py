@@ -39,11 +39,9 @@ DEFAULT_PARAMS = {
 }
 
 # Paste your session cookies and headers here (copied from your browser)
-cookies: dict[str, str] = {
-}
+cookies: dict[str, str] = {}
 
-headers: dict[str, str] = {
-}
+headers: dict[str, str] = {}
 
 
 def slugify(name: str) -> str:

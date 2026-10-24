@@ -104,16 +104,8 @@ const PlacementPanel = ({ floorCode, placement, setPlacement }: Props) => {
 
     return (
       <>
-        {renderInput(
-          "Latitude",
-          placement.geoCenter.latitude,
-          handleLatitudeChange,
-        )}
-        {renderInput(
-          "Longitude",
-          placement.geoCenter.longitude,
-          handleLongitudeChange,
-        )}
+        {renderInput("Latitude", placement.geoCenter.latitude, handleLatitudeChange)}
+        {renderInput("Longitude", placement.geoCenter.longitude, handleLongitudeChange)}
       </>
     );
   };

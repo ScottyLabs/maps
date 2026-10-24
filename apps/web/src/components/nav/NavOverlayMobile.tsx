@@ -18,11 +18,7 @@ interface NavOverlayMobileProps {
   mapRef: React.RefObject<mapkit.Map | null>;
 }
 
-const NavOverlayMobile = ({
-  isNavigating,
-  startNav,
-  mapRef,
-}: NavOverlayMobileProps) => {
+const NavOverlayMobile = ({ isNavigating, startNav, mapRef }: NavOverlayMobileProps) => {
   const [listShown, setListShown] = useState(false);
 
   const { dstShortName } = useNavPaths();
@@ -55,8 +51,7 @@ const NavOverlayMobile = ({
   const scrollRef = useRef<HTMLDivElement>(null);
   // biome-ignore lint/correctness/useExhaustiveDependencies: must adjust scroll position once the direction list is shown
   useEffect(() => {
-    if (scrollRef.current)
-      scrollRef.current.scrollTop = 44 * (instructionIndex - 1);
+    if (scrollRef.current) scrollRef.current.scrollTop = 44 * (instructionIndex - 1);
   }, [instructionIndex, listShown]);
 
   useEffect(() => {
@@ -85,11 +80,7 @@ const NavOverlayMobile = ({
           >
             <div className="mx-4 flex flex-col rounded-xl bg-button-green">
               <div className="flex h-[111px] gap-4 px-8 pt-4 pb-3">
-                <img
-                  src={instructionIcons[action || "Forward"]}
-                  alt="forward"
-                  className="my-2"
-                />
+                <img src={instructionIcons[action || "Forward"]} alt="forward" className="my-2" />
                 <div className="w-full flex-col">
                   <div className="font-inter font-lato font-semibold text-[36px] text-white">
                     {distance === 0
@@ -105,10 +96,7 @@ const NavOverlayMobile = ({
                 </div>
               </div>
             </div>
-            <div
-              className="mb-30 h-auto overflow-y-scroll pb-2"
-              ref={scrollRef}
-            >
+            <div className="mb-30 h-auto overflow-y-scroll pb-2" ref={scrollRef}>
               <NavDirectionsList />
             </div>
           </DraggableSheet>

@@ -39,8 +39,7 @@ export const calcMst = (
   };
 
   // pick a random node to start Prim's
-  const randomNode =
-    Object.keys(graph)[Math.floor(Math.random() * Object.keys(graph).length)];
+  const randomNode = Object.keys(graph)[Math.floor(Math.random() * Object.keys(graph).length)];
   addEdgesToQueue(randomNode);
   visited.add(randomNode);
 
@@ -80,8 +79,7 @@ export const calcMst = (
       const room = rooms[graph[nodeId].roomId];
       if (room.type !== "Inaccessible") {
         const curDist = Array.from(visited).reduce(
-          (min, visitedNodeId) =>
-            Math.min(min, dist(graph[nodeId].pos, graph[visitedNodeId].pos)),
+          (min, visitedNodeId) => Math.min(min, dist(graph[nodeId].pos, graph[visitedNodeId].pos)),
           Number.POSITIVE_INFINITY,
         );
         if (!nodeNotInMst || curDist < minDist) {

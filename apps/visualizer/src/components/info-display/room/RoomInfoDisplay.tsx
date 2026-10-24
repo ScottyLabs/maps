@@ -1,21 +1,10 @@
-import {
-  type RoomInfo,
-  type Rooms,
-  type RoomType,
-  RoomTypes,
-} from "@cmumaps/common";
+import { type RoomInfo, type Rooms, type RoomType, RoomTypes } from "@cmumaps/common";
 import { useDispatch } from "react-redux";
 import type { SingleValue } from "react-select";
 import { v4 as uuidv4 } from "uuid";
 
-import {
-  useDeleteRoomMutation,
-  useUpdateRoomMutation,
-} from "../../../store/api/roomApiSlice.ts";
-import {
-  selectEditPolygon,
-  toggleEditPolygon,
-} from "../../../store/features/modeSlice.ts";
+import { useDeleteRoomMutation, useUpdateRoomMutation } from "../../../store/api/roomApiSlice.ts";
+import { selectEditPolygon, toggleEditPolygon } from "../../../store/features/modeSlice.ts";
 import {
   SidePanelTabIndex,
   setSidePanelActiveTabIndex,
@@ -60,11 +49,7 @@ const RoomInfoDisplay = ({ floorCode, roomId, rooms }: Props) => {
     return (
       <tr>
         <TableCell text="Name" />
-        <EditCell
-          property="name"
-          value={room.name}
-          handleSave={handleSaveName}
-        />
+        <EditCell property="name" value={room.name} handleSave={handleSaveName} />
       </tr>
     );
   };
@@ -126,8 +111,7 @@ const RoomInfoDisplay = ({ floorCode, roomId, rooms }: Props) => {
     );
   };
 
-  const deleteRoomHelper = () =>
-    deleteRoom({ floorCode, roomId, batchId: uuidv4() });
+  const deleteRoomHelper = () => deleteRoom({ floorCode, roomId, batchId: uuidv4() });
 
   return (
     <>

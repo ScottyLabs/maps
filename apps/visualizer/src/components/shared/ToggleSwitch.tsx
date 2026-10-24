@@ -7,9 +7,7 @@ const ToggleSwitch = ({ isOn, handleToggle }: Props) => {
   return (
     <button
       type="button"
-      className={`h-8 w-14 cursor-pointer rounded-full ${
-        isOn ? "bg-blue-500" : "bg-gray-300"
-      }`}
+      className={`h-8 w-14 cursor-pointer rounded-full ${isOn ? "bg-blue-500" : "bg-gray-300"}`}
       onClick={handleToggle}
     >
       <div

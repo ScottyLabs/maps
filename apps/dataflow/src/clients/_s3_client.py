@@ -18,6 +18,7 @@ SCHEMA_VALIDATORS: dict[str, type[BaseModel]] = {
     "all-graph.json": Graph,
 }
 
+
 class S3Client:
     BUCKET_NAME = "cmumaps"
 
@@ -49,7 +50,9 @@ class S3Client:
         return SCHEMA_VALIDATORS.get(basename)
 
     def _validate_json_data(
-        self, json_data: dict[str, Any], validator: type[BaseModel],
+        self,
+        json_data: dict[str, Any],
+        validator: type[BaseModel],
     ) -> bool:
         """Validate JSON data against a Pydantic model. Returns True if valid."""
         try:
@@ -80,7 +83,8 @@ class S3Client:
 
             if not self._validate_json_data(json_data, validator):
                 self.logger.error(
-                    "Validation failed for %s, not uploading", local_file_path,
+                    "Validation failed for %s, not uploading",
+                    local_file_path,
                 )
                 return False
 
@@ -119,6 +123,7 @@ class S3Client:
             return None
 
         return cast("dict[str, Any]", json_data)
+
 
 @lru_cache(maxsize=1)
 def get_s3_client_singleton() -> S3Client:

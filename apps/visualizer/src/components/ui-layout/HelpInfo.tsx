@@ -75,23 +75,21 @@ const HelpInfo = () => {
           <span className="text-gray-600">Gray</span>: inaccessible
         </p>
         <p>
-          <span className="text-lime-600">Lime</span>: the room type goes across
-          floors
+          <span className="text-lime-600">Lime</span>: the room type goes across floors
         </p>
         <p>
-          <span className="text-red-600">Red</span>: doesn't have a room or a
-          room polygon
+          <span className="text-red-600">Red</span>: doesn't have a room or a room polygon
         </p>
         <p className="text-pink-600">Pink:</p>
         <ul className="ml-5 list-disc">
           <li>doesn't have a room type </li>
           <li>
-            the room type goes across floors and it doesn't have a neighbor to
-            another floor (not including outside)
+            the room type goes across floors and it doesn't have a neighbor to another floor (not
+            including outside)
           </li>
           <li>
-            the room type doesn't goes across floors and it does have a neighbor
-            to another floor (not including outside)
+            the room type doesn't goes across floors and it does have a neighbor to another floor
+            (not including outside)
           </li>
         </ul>
       </div>
@@ -107,13 +105,11 @@ const HelpInfo = () => {
       <div>
         <h1 className="font-bold">Doors</h1>
         <p>
-          <span className="text-purple-600">Purple</span>: connects exactly two
-          rooms
+          <span className="text-purple-600">Purple</span>: connects exactly two rooms
         </p>
         <p>Black: connects no room</p>
         <p>
-          <span className="text-red-600">Red</span>: connects one room or more
-          than two rooms
+          <span className="text-red-600">Red</span>: connects one room or more than two rooms
         </p>
       </div>
     </div>

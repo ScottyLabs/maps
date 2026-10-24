@@ -26,9 +26,7 @@ interface Params {
 const FLOOR_WAYPOINT_PREFIX = "floor:";
 
 const getPathFromWaypointParam = (point: string) =>
-  point.startsWith(FLOOR_WAYPOINT_PREFIX)
-    ? point.slice(FLOOR_WAYPOINT_PREFIX.length)
-    : point;
+  point.startsWith(FLOOR_WAYPOINT_PREFIX) ? point.slice(FLOOR_WAYPOINT_PREFIX.length) : point;
 
 const getWaypointParams = (
   point: string,
@@ -42,7 +40,7 @@ const getWaypointParams = (
   error?: string;
 } => {
   const normalizedPoint = getPathFromWaypointParam(point);
-  const { data: buildings } = $api.useQuery("get", "/buildings");
+  const { data: buildings } = $api.useQuery("get", "/api/buildings");
   const pointSplit = normalizedPoint.split("-");
   const [buildingCode] = pointSplit;
   const roomName = pointSplit.slice(1).join("-");
@@ -54,7 +52,7 @@ const getWaypointParams = (
   const floorCode = buildFloorCode(buildingCode, floorName);
   const { data: rooms } = $api.useQuery(
     "get",
-    "/floors/{floorCode}/floorplan",
+    "/api/floors/{floorCode}/floorplan",
     { params: { path: { floorCode: floorCode ?? "" } } },
     { enabled: Boolean(floorCode) },
   );
@@ -98,8 +96,7 @@ const getWaypointParams = (
     }
 
     const isFloorWaypoint =
-      point.startsWith(FLOOR_WAYPOINT_PREFIX) ||
-      building.floors.includes(roomName);
+      point.startsWith(FLOOR_WAYPOINT_PREFIX) || building.floors.includes(roomName);
     if (isFloorWaypoint) {
       if (!building.floors.includes(roomName)) {
         return { error: `Invalid Floor Waypoint ${roomName}` };
@@ -122,8 +119,7 @@ const getWaypointParams = (
     if (!room) return { error: `Invalid Room Waypoint ${roomName}` };
 
     const label =
-      room.alias ||
-      `${buildings[room.floor?.buildingCode ?? buildingCode]?.name} ${roomName}`;
+      room.alias || `${buildings[room.floor?.buildingCode ?? buildingCode]?.name} ${roomName}`;
     const labelShort = `${buildingCode} ${roomName}`;
     return {
       query: room.id,
@@ -178,14 +174,12 @@ const useNavPaths = (): Params => {
     error: dstError,
   } = getWaypointParams(dst ?? "");
 
-  const hasValidQuery = Boolean(
-    srcQuery && dstQuery && srcQuery !== "" && dstQuery !== "",
-  );
+  const hasValidQuery = Boolean(srcQuery && dstQuery && srcQuery !== "" && dstQuery !== "");
 
   // Use authenticated endpoint when user is logged in
   const { data: authNavPaths } = $api.useQuery(
     "get",
-    "/path",
+    "/api/path",
     {
       params: {
         query: {
@@ -202,7 +196,7 @@ const useNavPaths = (): Params => {
   // Use public endpoint when user is not logged in (only allows CUC + outside)
   const { data: publicNavPaths } = $api.useQuery(
     "get",
-    "/path/public",
+    "/api/path/public",
     {
       params: {
         query: {

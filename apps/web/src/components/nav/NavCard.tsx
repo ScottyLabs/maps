@@ -22,12 +22,7 @@ interface NavHeaderProps {
   listShown: boolean;
 }
 
-const NavCard = ({
-  isNavigating,
-  startNav,
-  toggleListShown,
-  listShown,
-}: NavHeaderProps) => {
+const NavCard = ({ isNavigating, startNav, toggleListShown, listShown }: NavHeaderProps) => {
   const navigationOptions: {
     id: "Fastest" | "Accessible" | "Inside" | "Outside";
     selectedIcon: string;
@@ -67,34 +62,25 @@ const NavCard = ({
 
   const distance = Math.round(navPaths?.[selectedPath]?.path.distance ?? 0);
   const time = Math.round((navPaths?.[selectedPath]?.path.distance ?? 0) / 100);
-  const endTime = new Date(Date.now() + time * 60 * 1000).toLocaleTimeString(
-    "en-US",
-    {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    },
-  );
+  const endTime = new Date(Date.now() + time * 60 * 1000).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
 
   const renderPathInfo = () => (
     <div className="h-9">
       <div className="flex gap-7">
         <div className="flex-col">
-          <div className="w-full font-bold text-[min(1.25rem,5vw)] text-black">
-            {endTime}
-          </div>
+          <div className="w-full font-bold text-[min(1.25rem,5vw)] text-black">{endTime}</div>
           <div className="w-full -translate-y-2">arrival</div>
         </div>
         <div className="flex-col">
-          <div className="w-full font-bold text-[min(1.25rem,5vw)] text-black">
-            {time}
-          </div>
+          <div className="w-full font-bold text-[min(1.25rem,5vw)] text-black">{time}</div>
           <div className="w-full -translate-y-2">min</div>
         </div>
         <div className="flex-col">
-          <div className="w-full font-bold text-[min(1.25rem,5vw)] text-black">
-            {distance}
-          </div>
+          <div className="w-full font-bold text-[min(1.25rem,5vw)] text-black">{distance}</div>
           <div className="w-full -translate-y-2">ft</div>
         </div>
       </div>
@@ -162,9 +148,7 @@ const NavCard = ({
             startNav();
           }}
         >
-          <span className="text-center font-inter font-semibold text-[20px] text-white">
-            GO
-          </span>
+          <span className="text-center font-inter font-semibold text-[20px] text-white">GO</span>
         </button>
       </div>
     </div>
@@ -181,9 +165,7 @@ const NavCard = ({
           setSrc(null);
         }}
       >
-        <span className="text-center font-inter font-semibold text-[20px] text-white">
-          End
-        </span>
+        <span className="text-center font-inter font-semibold text-[20px] text-white">End</span>
       </button>
     </div>
   );

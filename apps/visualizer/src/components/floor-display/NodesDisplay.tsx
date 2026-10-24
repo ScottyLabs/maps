@@ -15,10 +15,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { CURSOR_UPDATE_RATE } from "../../hooks/useCursorTracker.ts";
 import useValidatedFloorParams from "../../hooks/useValidatedFloorParams.ts";
-import {
-  useCreateEdgeMutation,
-  useDeleteEdgeMutation,
-} from "../../store/api/edgeApiSlice.ts";
+import { useCreateEdgeMutation, useDeleteEdgeMutation } from "../../store/api/edgeApiSlice.ts";
 import { useUpdateNodeMutation } from "../../store/api/nodeApiSlice.ts";
 import { pushCursorInfo } from "../../store/features/liveCursor/liveCursorSlice.ts";
 import type { CursorInfoOnDragNode } from "../../store/features/liveCursor/liveCursorTypes.ts";
@@ -30,17 +27,9 @@ import {
   selectEditPolygon,
   setMode,
 } from "../../store/features/modeSlice.ts";
-import {
-  dragNode,
-  releaseNode,
-  setDragNodePos,
-} from "../../store/features/mouseEventSlice.ts";
+import { dragNode, releaseNode, setDragNodePos } from "../../store/features/mouseEventSlice.ts";
 import { useAppDispatch, useAppSelector } from "../../store/hooks.ts";
-import {
-  getCursorPos,
-  getDragObjectPos,
-  setCursor,
-} from "../../utils/canvasUtils.ts";
+import { getCursorPos, getDragObjectPos, setCursor } from "../../utils/canvasUtils.ts";
 import { posToRoomId } from "../../utils/roomUtils.ts";
 
 interface Props {
@@ -51,13 +40,7 @@ interface Props {
   scale: number;
 }
 
-const NodesDisplay = ({
-  floorCode,
-  graph,
-  rooms,
-  offset,
-  scale,
-}: Props) => {
+const NodesDisplay = ({ floorCode, graph, rooms, offset, scale }: Props) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate({ from: "/floors/$floorCode" });
 
@@ -91,8 +74,7 @@ const NodesDisplay = ({
     }
 
     // colors for cross floor edges
-    const isValidCrossFloorEdgeType =
-      room?.type && ValidCrossFloorEdgeTypes.includes(room.type);
+    const isValidCrossFloorEdgeType = room?.type && ValidCrossFloorEdgeTypes.includes(room.type);
 
     const crossFloorEdges = Object.values(graph[nodeId].neighbors).filter(
       (neighbor) => neighbor.outFloorCode,
@@ -107,9 +89,7 @@ const NodesDisplay = ({
     }
 
     if (crossFloorEdges.length > 0) {
-      if (
-        crossFloorEdges.every((neighbor) => neighbor.outFloorCode === "outside")
-      ) {
+      if (crossFloorEdges.every((neighbor) => neighbor.outFloorCode === "outside")) {
         return "lime";
       }
       return "pink";
@@ -206,22 +186,21 @@ const NodesDisplay = ({
       });
     }, CURSOR_UPDATE_RATE);
 
-  const handleOnDragEnd =
-    (nodeId: string) => (e: Konva.KonvaEventObject<DragEvent>) => {
-      // create new node
-      const nodeInfo: NodeInfo = { ...graph[nodeId] };
-      nodeInfo.pos = getDragObjectPos(e);
+  const handleOnDragEnd = (nodeId: string) => (e: Konva.KonvaEventObject<DragEvent>) => {
+    // create new node
+    const nodeInfo: NodeInfo = { ...graph[nodeId] };
+    nodeInfo.pos = getDragObjectPos(e);
 
-      // locate new room id
-      nodeInfo.roomId = posToRoomId(nodeInfo.pos, rooms);
+    // locate new room id
+    nodeInfo.roomId = posToRoomId(nodeInfo.pos, rooms);
 
-      // update node
-      const batchId = uuidv4();
-      updateNode({ floorCode, batchId, nodeId, nodeInfo });
+    // update node
+    const batchId = uuidv4();
+    updateNode({ floorCode, batchId, nodeId, nodeInfo });
 
-      // release the node after updating the position to prevent position flickering
-      dispatch(releaseNode());
-    };
+    // release the node after updating the position to prevent position flickering
+    dispatch(releaseNode());
+  };
 
   return Object.entries(graph).map(
     ([nodeId, node]: [string, NodeInfo], index: number) =>

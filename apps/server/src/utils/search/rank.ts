@@ -25,8 +25,7 @@ export function BM25Term(
   const n = numDocs;
 
   const idfPart = Math.log((n - df + 0.5) / (df + 0.5) + 1.0);
-  const tfPart =
-    (tf * (k + 1.0)) / (tf + k * (1.0 - b + (b * docLen) / Math.max(1, avgDl)));
+  const tfPart = (tf * (k + 1.0)) / (tf + k * (1.0 - b + (b * docLen) / Math.max(1, avgDl)));
 
   return idfPart * tfPart;
 }
@@ -54,11 +53,7 @@ export function distanceWeightedScore(
  * @param n - Number of top items to return
  * @param sort - Whether to sort results by score descending (default: false)
  */
-export function topN(
-  rankList: [string, number][],
-  n: number,
-  sort = false,
-): [string, number][] {
+export function topN(rankList: [string, number][], n: number, sort = false): [string, number][] {
   let result: [string, number][];
 
   if (rankList.length <= n) {

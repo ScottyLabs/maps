@@ -29,11 +29,7 @@ import { useAppDispatch, useAppSelector } from "../store/hooks.ts";
 import { calcMst } from "../utils/graphUtils.ts";
 import useValidatedFloorParams from "./useValidatedFloorParams.ts";
 
-const useKeyboardShortcuts = (
-  floorCode: string,
-  graph: Graph,
-  rooms: Rooms,
-) => {
+const useKeyboardShortcuts = (floorCode: string, graph: Graph, rooms: Rooms) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate({ from: "/floors/$floorCode" });
 
@@ -43,9 +39,7 @@ const useKeyboardShortcuts = (
   const { nodeId: selectedNodeId } = useValidatedFloorParams(floorCode);
 
   const editPolygon = useAppSelector(selectEditPolygon);
-  const shortcutsDisabled = useAppSelector(
-    (state) => state.status.shortcutsDisabled,
-  );
+  const shortcutsDisabled = useAppSelector((state) => state.status.shortcutsDisabled);
 
   useEffect(() => {
     if (shortcutsDisabled) {

@@ -1,4 +1,8 @@
-import type { Buildings, GeoCoordinate, RoomType } from "../../../../../packages/common/src/index.ts";
+import type {
+  Buildings,
+  GeoCoordinate,
+  RoomType,
+} from "../../../../../packages/common/src/index.ts";
 import { prisma } from "../../../prisma/index.ts";
 import { buildingService } from "../../services/buildingService.ts";
 import { parseQuery } from "./parse.ts";
@@ -205,10 +209,7 @@ function insertTerms(index: SearchIndex, terms: string[], docId: string): void {
   }
 }
 
-export function buildSearchIndex(
-  floorplans: FloorPlans,
-  buildingMap: Buildings,
-) {
+export function buildSearchIndex(floorplans: FloorPlans, buildingMap: Buildings) {
   const startTime = Date.now();
   const index: SearchIndex = {};
 

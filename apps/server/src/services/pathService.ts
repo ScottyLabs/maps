@@ -1,11 +1,7 @@
 /** biome-ignore-all lint/style/useNamingConvention: TODO: use the right naming convention */
 import type { GeoNodes, PreciseRoute } from "../../../../packages/common/src/index.ts";
 import { prisma } from "../../prisma/index.ts";
-import {
-  getRoute,
-  parseWaypoint,
-  waypointToNodes,
-} from "../utils/path/pathfinder.ts";
+import { getRoute, parseWaypoint, waypointToNodes } from "../utils/path/pathfinder.ts";
 
 export type Buildings = Awaited<ReturnType<typeof prisma.building.findMany>>;
 
@@ -34,10 +30,7 @@ async function getOrBuildGraph(): Promise<GeoNodes> {
         const out = edge.outNode;
         const outFloorCode = `${out.buildingCode ?? "outside"}-${out.floorLevel ?? "outside"}`;
         neighbors[edge.outNodeId] = {};
-        if (
-          out.buildingCode !== node.buildingCode ||
-          out.floorLevel !== node.floorLevel
-        ) {
+        if (out.buildingCode !== node.buildingCode || out.floorLevel !== node.floorLevel) {
           neighbors[edge.outNodeId].outFloorCode = outFloorCode;
         }
       }
@@ -78,10 +71,7 @@ async function getOrBuildGraph(): Promise<GeoNodes> {
 const PUBLIC_ALLOWED_BUILDINGS = new Set(["outside", "CUC"]);
 
 export const pathService = {
-  async calculatePath(
-    start: string,
-    end: string,
-  ): Promise<Record<string, PreciseRoute>> {
+  async calculatePath(start: string, end: string): Promise<Record<string, PreciseRoute>> {
     if (!(start && end)) {
       throw new Error("Invalid start or end waypoint format");
     }
@@ -112,13 +102,9 @@ export const pathService = {
     // Calculate the fastest route (no outside penalty)
     const fastestRoute = getRoute(startNodes, endNodes, graph, 1);
 
-    // Calculate the inside route with a higher outside cost multiplier to incentivize finding indoor paths
-    const insideRoute = getRoute(
-      startNodes,
-      endNodes,
-      graph,
-      OUTSIDE_MULTIPLIER,
-    );
+    // Calculate the inside route with a higher outside cost multiplier
+    // to incentivize finding indoor paths
+    const insideRoute = getRoute(startNodes, endNodes, graph, OUTSIDE_MULTIPLIER);
 
     const result: Record<string, PreciseRoute> = {
       Fastest: fastestRoute,
@@ -127,10 +113,7 @@ export const pathService = {
     return result;
   },
 
-  async calculatePublicPath(
-    start: string,
-    end: string,
-  ): Promise<Record<string, PreciseRoute>> {
+  async calculatePublicPath(start: string, end: string): Promise<Record<string, PreciseRoute>> {
     if (!(start && end)) {
       throw new Error("Invalid start or end waypoint format");
     }
@@ -159,13 +142,7 @@ export const pathService = {
     }
 
     // Calculate the fastest route with building restrictions (outside + CUC only)
-    const fastestRoute = getRoute(
-      startNodes,
-      endNodes,
-      graph,
-      1,
-      PUBLIC_ALLOWED_BUILDINGS,
-    );
+    const fastestRoute = getRoute(startNodes, endNodes, graph, 1, PUBLIC_ALLOWED_BUILDINGS);
 
     // Calculate the inside route with building restrictions
     const insideRoute = getRoute(

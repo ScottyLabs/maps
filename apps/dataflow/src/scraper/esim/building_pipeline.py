@@ -86,8 +86,9 @@ def main() -> None:
 
     # Step 1: Fetch from ArcGIS
     if not args.skip_arcgis:
-        _run([python, str(script_dir / "arc_gis_query.py"), "--output",
-              str(query_json)])
+        _run(
+            [python, str(script_dir / "arc_gis_query.py"), "--output", str(query_json)]
+        )
     elif not query_json.is_file():
         logger.error(
             "--skip-arcgis requires %s to exist, but the file was not found.",
@@ -98,7 +99,9 @@ def main() -> None:
     # In dry-run mode, write parsed buildings to a temp file so we never overwrite the real output.
     if args.dry_run:
         tmp_fd, tmp_path = tempfile.mkstemp(
-            dir=work_dir, suffix=".json", prefix="buildings_dry_",
+            dir=work_dir,
+            suffix=".json",
+            prefix="buildings_dry_",
         )
         os.close(tmp_fd)
         parsed_output = Path(tmp_path)
@@ -127,19 +130,25 @@ def main() -> None:
         _run([python, str(script_dir / "osm_building_to_json.py")], env=env_parse)
 
         # Step 5: Build sign mapping
-        _run([
-            python,
-            str(script_dir / "sign_abbrev_mapping.py"),
-            "--query", str(query_json),
-            "--output", str(sign_mapping_json),
-        ])
+        _run(
+            [
+                python,
+                str(script_dir / "sign_abbrev_mapping.py"),
+                "--query",
+                str(query_json),
+                "--output",
+                str(sign_mapping_json),
+            ]
+        )
 
         # Step 6: Add FMS IDs
         cmd = [
             python,
             str(script_dir / "add_fms_id.py"),
-            "--buildings", str(parsed_output),
-            "--mapping", str(sign_mapping_json),
+            "--buildings",
+            str(parsed_output),
+            "--mapping",
+            str(sign_mapping_json),
         ]
         if args.dry_run:
             cmd.append("--dry-run")

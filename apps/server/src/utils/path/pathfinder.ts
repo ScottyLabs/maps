@@ -61,11 +61,7 @@ export const parseWaypoint = (s: string): WayPoint => {
   return { type: "Room", roomId: waypoint };
 };
 
-export const waypointToNodes = (
-  waypoint: WayPoint,
-  graph: GeoNodes,
-  buildings: Buildings,
-) => {
+export const waypointToNodes = (waypoint: WayPoint, graph: GeoNodes, buildings: Buildings) => {
   const nodes: string[] = [];
   switch (waypoint.type) {
     case "Room": {
@@ -84,10 +80,7 @@ export const waypointToNodes = (
       }
 
       for (const node of Object.values(graph)) {
-        if (
-          node.floor?.buildingCode === buildingCode &&
-          node.floor?.level === level
-        ) {
+        if (node.floor?.buildingCode === buildingCode && node.floor?.level === level) {
           nodes.push(node.id);
         }
       }
@@ -117,9 +110,7 @@ export const waypointToNodes = (
         }
       }
       if (nodes.length === 0) {
-        const building = buildings.find(
-          (x) => x.buildingCode === waypoint.buildingCode,
-        );
+        const building = buildings.find((x) => x.buildingCode === waypoint.buildingCode);
         if (building) {
           // If a node with the building code as its ID already exists in the graph (e.g., from a previous dummy node creation), reuse it instead of creating a new one
           if (graph[building.buildingCode]) {
@@ -327,13 +318,7 @@ export const getRoute = (
   outsideCostMul = 1,
   allowedBuildingCodes?: Set<string>,
 ): PreciseRoute => {
-  const found = findPath(
-    startNodes,
-    endNodes,
-    graph,
-    outsideCostMul,
-    allowedBuildingCodes,
-  );
+  const found = findPath(startNodes, endNodes, graph, outsideCostMul, allowedBuildingCodes);
   if (!found) {
     throw new Error("No path found");
   }

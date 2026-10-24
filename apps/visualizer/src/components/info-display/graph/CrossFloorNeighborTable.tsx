@@ -36,9 +36,7 @@ const DifferentFloorNeighborTable = ({
     deleteEdgeAcrossFloors(arg);
   };
 
-  const renderDifferentFloorNeighbors = (
-    differentFloorNeighbors: Record<string, EdgeInfo>,
-  ) => {
+  const renderDifferentFloorNeighbors = (differentFloorNeighbors: Record<string, EdgeInfo>) => {
     const getLink = (neighborId: string, neighbor: EdgeInfo) => {
       if (neighbor.outFloorCode === "outside") {
         return (
@@ -67,22 +65,20 @@ const DifferentFloorNeighborTable = ({
       );
     };
 
-    return Object.entries(differentFloorNeighbors).map(
-      ([neighborId, neighbor]) => (
-        <tr key={neighborId}>
-          <td className="border p-2">{getLink(neighborId, neighbor)}</td>
-          <td className="border p-2">
-            <button
-              type="button"
-              className="whitespace-nowrap border px-1 hover:bg-sky-700"
-              onClick={handleDeleteAcrossFloors(neighborId)}
-            >
-              delete
-            </button>
-          </td>
-        </tr>
-      ),
-    );
+    return Object.entries(differentFloorNeighbors).map(([neighborId, neighbor]) => (
+      <tr key={neighborId}>
+        <td className="border p-2">{getLink(neighborId, neighbor)}</td>
+        <td className="border p-2">
+          <button
+            type="button"
+            className="whitespace-nowrap border px-1 hover:bg-sky-700"
+            onClick={handleDeleteAcrossFloors(neighborId)}
+          >
+            delete
+          </button>
+        </td>
+      </tr>
+    ));
   };
 
   if (Object.keys(differentFloorNeighbors).length === 0) {

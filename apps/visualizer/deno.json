@@ -1,8 +1,10 @@
 {
+  "tasks": {
+    "build": "deno run -A npm:vite@^7.0.4 build",
+    "dev": "deno run -A npm:vite@^7.0.4"
+  },
   "imports": {
     "@/": "./src/",
-    "@clerk/clerk-react": "npm:@clerk/clerk-react@^5.52.0",
-    "@clerk/types": "npm:@clerk/types@^4.93.0",
     "@datastructures-js/priority-queue": "npm:@datastructures-js/priority-queue@^6.3.3",
     "@deno/vite-plugin": "npm:@deno/vite-plugin@^2.0.2",
     "@reduxjs/toolkit": "npm:@reduxjs/toolkit@^2.8.2",
@@ -33,7 +35,6 @@
     "react-redux": "npm:react-redux@^9.2.0",
     "react-select": "npm:react-select@^5.10.2",
     "react-toastify": "npm:react-toastify@^11.0.5",
-    "socket.io-client": "npm:socket.io-client@^4.8.1",
     "tailwind-merge": "npm:tailwind-merge@^3.3.1",
     "tailwindcss": "npm:tailwindcss@^4.1.11",
     "uuid": "npm:uuid@^11.1.0",
@@ -41,14 +42,8 @@
     "zod": "npm:zod@^4.1.12"
   },
   "compilerOptions": {
-    "lib": [
-      "ESNext",
-      "DOM",
-      "DOM.Iterable"
-    ],
-    "types": [
-      "@types/apple-mapkit-js-browser"
-    ],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "types": ["@types/apple-mapkit-js-browser"],
     "jsx": "react-jsx",
     "module": "Preserve",
     "moduleResolution": "bundler",

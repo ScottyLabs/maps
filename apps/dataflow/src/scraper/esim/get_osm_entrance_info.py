@@ -88,11 +88,13 @@ def main() -> None:
             node_id_str = str(node_id)
             if node_id_str in osm_nodes:
                 lat, lon = osm_nodes[node_id_str]
-                entrances.append({
-                    "osmNodeId": node_id_str,
-                    "latitude": lat,
-                    "longitude": lon,
-                })
+                entrances.append(
+                    {
+                        "osmNodeId": node_id_str,
+                        "latitude": lat,
+                        "longitude": lon,
+                    }
+                )
             else:
                 logger.warning(
                     "Entrance node %s for building %s not found in OSM data",

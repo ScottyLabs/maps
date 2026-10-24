@@ -32,7 +32,7 @@ interface Props {
 
 const MapDisplay = ({ mapRef }: Props) => {
   // Query data
-  const { data: buildings } = $api.useQuery("get", "/buildings");
+  const { data: buildings } = $api.useQuery("get", "/api/buildings");
 
   // Global state
   const hideSearch = useBoundStore((state) => state.hideSearch);
@@ -41,9 +41,7 @@ const MapDisplay = ({ mapRef }: Props) => {
   const setCardStatus = useBoundStore((state) => state.setCardStatus);
   const setIsZooming = useBoundStore((state) => state.setIsZooming);
   const queuedZoomRegion = useBoundStore((state) => state.queuedZoomRegion);
-  const setQueuedZoomRegion = useBoundStore(
-    (state) => state.setQueuedZoomRegion,
-  );
+  const setQueuedZoomRegion = useBoundStore((state) => state.setQueuedZoomRegion);
   const isNavigating = useBoundStore((state) => state.isNavigating);
   const focusedFloor = useBoundStore((state) => state.focusedFloor);
   const mapViewMode = useBoundStore((state) => state.mapViewMode);
@@ -54,8 +52,7 @@ const MapDisplay = ({ mapRef }: Props) => {
   const [usedPanning, setUsedPanning] = useState<boolean>(false);
 
   // Custom hooks
-  const { onRegionChangeStart, onRegionChangeEnd, showFloor } =
-    useMapRegionChange(mapRef);
+  const { onRegionChangeStart, onRegionChangeEnd, showFloor } = useMapRegionChange(mapRef);
   const { initialRegion, writeViewport } = useViewportParams(mapRef);
   useFocusedFloorParam();
   const navigate = useNavigateLocationParams();
@@ -67,7 +64,7 @@ const MapDisplay = ({ mapRef }: Props) => {
       : null;
   const { data: rooms } = $api.useQuery(
     "get",
-    "/floors/{floorCode}/floorplan",
+    "/api/floors/{floorCode}/floorplan",
     { params: { path: { floorCode: floorCode ?? "" } } },
     { enabled: Boolean(floorCode) },
   );
@@ -113,13 +110,7 @@ const MapDisplay = ({ mapRef }: Props) => {
           if (!mapRef.current) {
             return;
           }
-          zoomOnPoint(
-            mapRef.current,
-            point,
-            offset,
-            setIsZooming,
-            setQueuedZoomRegion,
-          );
+          zoomOnPoint(mapRef.current, point, offset, setIsZooming, setQueuedZoomRegion);
         },
       });
     }
@@ -203,7 +194,7 @@ const MapDisplay = ({ mapRef }: Props) => {
   return (
     <MapkitMap
       ref={mapRef}
-      token={env.VITE_MAPKIT_TOKEN || ""}
+      token={env.mapkitToken || ""}
       initialRegion={initialRegion ?? INITIAL_REGION}
       includedPOICategories={[]}
       cameraBoundary={CAMERA_BOUNDARY}
@@ -229,10 +220,7 @@ const MapDisplay = ({ mapRef }: Props) => {
       }}
       onRegionChangeEnd={() => {
         if (queuedZoomRegion) {
-          mapRef.current?.setRegionAnimated(
-            queuedZoomRegion,
-            !prefersReducedMotion(),
-          );
+          mapRef.current?.setRegionAnimated(queuedZoomRegion, !prefersReducedMotion());
           setQueuedZoomRegion(null);
           setIsZooming(true);
         } else {

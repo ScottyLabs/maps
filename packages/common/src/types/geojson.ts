@@ -1,5 +1,4 @@
-// This file is a copy of the @types/geojson/index.d.ts file. Can't use the
-// @types/geojson package because it's not compatible with the tsoa package.
+// Minimal copy of @types/geojson, which pulls in a DOM-dependent global.
 
 export type Position = number[];
 

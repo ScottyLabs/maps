@@ -564,9 +564,7 @@ class GraphBuilder:
             if u == goal:
                 return path
             for v, w, edge_dir in adj[u]:
-                new_turns = turns + (
-                    0 if direction in ("", edge_dir) else 1
-                )
+                new_turns = turns + (0 if direction in ("", edge_dir) else 1)
                 if (v, edge_dir) not in seen:
                     item: tuple[float, int, int, str, list[int]] = (
                         dist + w,

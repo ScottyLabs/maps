@@ -5,25 +5,24 @@ import type {
   DeleteEdgeAcrossFloorsPayload,
   DeleteEdgePayload,
 } from "./edgeTypes.ts";
+import type { CreateNodePayload, DeleteNodePayload, UpdateNodePayload } from "./nodeTypes.ts";
+import type { CreatePoiPayload, DeletePoiPayload, UpdatePoiPayload } from "./poiTypes.ts";
+import type { CreateRoomPayload, DeleteRoomPayload, UpdateRoomPayload } from "./roomTypes.ts";
 import type {
-  CreateNodePayload,
-  DeleteNodePayload,
-  UpdateNodePayload,
-} from "./nodeTypes.ts";
-import type {
-  CreatePoiPayload,
-  DeletePoiPayload,
-  UpdatePoiPayload,
-} from "./poiTypes.ts";
-import type {
-  CreateRoomPayload,
-  DeleteRoomPayload,
-  UpdateRoomPayload,
-} from "./roomTypes.ts";
+  BroadcastPayload,
+  ConnectedPayload,
+  JoinFloorPayload,
+  LeaveFloorPayload,
+} from "./transportTypes.ts";
 import type { SyncUserPayload } from "./userTypes.ts";
 
 // Define all WebSocket event names as string literals
 export const WebSocketEvents = {
+  CONNECTED: "connected",
+  JOIN_FLOOR: "join-floor",
+  LEAVE_FLOOR: "leave-floor",
+  BROADCAST: "broadcast",
+
   SYNC_USERS: "sync-users",
 
   CREATE_NODE: "create-node",
@@ -45,11 +44,15 @@ export const WebSocketEvents = {
 } as const;
 
 // Create a type from the values
-export type WebSocketEventType =
-  (typeof WebSocketEvents)[keyof typeof WebSocketEvents];
+export type WebSocketEventType = (typeof WebSocketEvents)[keyof typeof WebSocketEvents];
 
 // Define payload types for each event
 export interface WebSocketPayloads {
+  [WebSocketEvents.CONNECTED]: ConnectedPayload;
+  [WebSocketEvents.JOIN_FLOOR]: JoinFloorPayload;
+  [WebSocketEvents.LEAVE_FLOOR]: LeaveFloorPayload;
+  [WebSocketEvents.BROADCAST]: BroadcastPayload;
+
   [WebSocketEvents.SYNC_USERS]: SyncUserPayload;
 
   [WebSocketEvents.CREATE_NODE]: CreateNodePayload;
@@ -68,4 +71,10 @@ export interface WebSocketPayloads {
   [WebSocketEvents.CREATE_POI]: CreatePoiPayload;
   [WebSocketEvents.DELETE_POI]: DeletePoiPayload;
   [WebSocketEvents.UPDATE_POI]: UpdatePoiPayload;
+}
+
+/** Wire format for every frame, in both directions. */
+export interface WebSocketFrame<E extends keyof WebSocketPayloads = keyof WebSocketPayloads> {
+  event: E;
+  payload: WebSocketPayloads[E];
 }

@@ -52,13 +52,15 @@ def click_building_and_all_floors(
     global building_count, floor_count  # noqa: PLW0603
 
     floor_links = wait.until(
-        ec.presence_of_all_elements_located((
-            By.XPATH,
-            # Find floors for this building in the nav tree
-            f"//a[contains(normalize-space(.), '{building_label}')]"
-            "/ancestor::div[1]/following-sibling::ul"
-            "//div[contains(@class,'fmi-nav-floorplan')]/a[contains(@class,'rtIn')]",
-        )),
+        ec.presence_of_all_elements_located(
+            (
+                By.XPATH,
+                # Find floors for this building in the nav tree
+                f"//a[contains(normalize-space(.), '{building_label}')]"
+                "/ancestor::div[1]/following-sibling::ul"
+                "//div[contains(@class,'fmi-nav-floorplan')]/a[contains(@class,'rtIn')]",
+            )
+        ),
     )
 
     if (not floor_links) or (len(floor_links) == 0):

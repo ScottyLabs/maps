@@ -20,12 +20,7 @@ interface Props {
   setPlacement: (placement: Placement) => void;
 }
 
-const MapDisplay = ({
-  floorCode,
-  building,
-  placement,
-  setPlacement,
-}: Props) => {
+const MapDisplay = ({ floorCode, building, placement, setPlacement }: Props) => {
   const mapRef = useRef<mapkit.Map | null>(null);
   const [usedPanning, setUsedPanning] = useState(false);
 
@@ -41,7 +36,7 @@ const MapDisplay = ({
     <div className="relative h-dvh">
       <MapkitMap
         ref={mapRef}
-        token={env.VITE_MAPKIT_TOKEN || ""}
+        token={env.mapkitToken || ""}
         initialRegion={INITIAL_REGION}
         includedPOICategories={[]}
         cameraBoundary={CAMERA_BOUNDARY}

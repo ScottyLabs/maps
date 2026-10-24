@@ -1,13 +1,10 @@
 import {
-  type LiveUser,
+  type ConnectedPayload,
   WebSocketEvents,
-  type WebSocketEventType,
+  type WebSocketFrame,
   type WebSocketPayloads,
 } from "@cmumaps/websocket";
 import type { Action, Middleware } from "@reduxjs/toolkit";
-import { io, type Socket } from "socket.io-client";
-import env from "../../env.ts";
-import { getClerkToken } from "../api/apiSlice.ts";
 import {
   createEdge,
   createEdgeAcrossFloors,
@@ -17,10 +14,7 @@ import {
 import { createNode, deleteNode, updateNode } from "../api/nodeApiSlice.ts";
 import { createPoi, deletePoi, updatePoi } from "../api/poiApiSlice.ts";
 import { createRoom, deleteRoom, updateRoom } from "../api/roomApiSlice.ts";
-import {
-  setCursorInfos,
-  setLiveUsers,
-} from "../features/liveCursor/liveCursorSlice.ts";
+import { setCursorInfos, setLiveUsers } from "../features/liveCursor/liveCursorSlice.ts";
 import type { AppDispatch } from "../store.ts";
 import {
   type BroadcastMessage,
@@ -32,11 +26,14 @@ import {
   WEBSOCKET_LEAVE,
 } from "./webSocketActions.ts";
 
-// Socket instance
-let socket: Socket | null = null;
+let socket: WebSocket | null = null;
+let socketId: string | undefined;
+
+// frames queued while the socket is still connecting
+let pendingFrames: string[] = [];
 
 // acceptable approach since the socket id won't change
-export const getSocketId = () => socket?.id;
+export const getSocketId = () => socketId;
 
 interface ParamsType {
   dispatch: AppDispatch;
@@ -47,190 +44,189 @@ const getFloorCode = () => {
   return window.location.pathname.split("/")[1];
 };
 
-// Create socket connection
-const createSocket = async (user: LiveUser, dispatch: AppDispatch) => {
-  const token = await getClerkToken();
-  const socket = io(env.VITE_SERVER_URL, {
-    query: {
-      userName: user.userName,
-      userColor: user.color,
-    },
-    auth: { token },
-    reconnectionAttempts: 1,
-  });
+const send = <E extends keyof WebSocketPayloads>(event: E, payload: WebSocketPayloads[E]) => {
+  if (socket === null) {
+    return;
+  }
 
-  socket.on("connect", () => {
-    console.log("Connected to server");
-  });
+  const frame = JSON.stringify({ event, payload } satisfies WebSocketFrame<E>);
+  if (socket.readyState === WebSocket.OPEN) {
+    socket.send(frame);
+  } else if (socket.readyState === WebSocket.CONNECTING) {
+    pendingFrames.push(frame);
+  }
+};
 
-  socket.on("connect_error", (err) => {
-    console.error("WebSocket connection error:", err.message);
-  });
+const handleFrame = (frame: WebSocketFrame, dispatch: AppDispatch) => {
+  const floorCode = getFloorCode();
 
-  socket.on("disconnect", () => {
-    console.log("Disconnected from server");
-  });
-
-  socket.on("broadcast", (message) => {
-    const { event, payload } = message as BroadcastMessage;
-    if (event === "sync-cursors") {
-      const { socketId, cursorInfos } = payload;
-      dispatch(setCursorInfos({ socketId, cursorInfos }));
+  switch (frame.event) {
+    case WebSocketEvents.CONNECTED: {
+      socketId = (frame.payload as ConnectedPayload).socketId;
+      break;
     }
-  });
 
-  // Handle sync users event
-  socket.on<WebSocketEventType>(
-    WebSocketEvents.SYNC_USERS,
-    (message: WebSocketPayloads["sync-users"]) => {
-      dispatch(setLiveUsers(message.users));
-    },
-  );
-
-  // Handle create node event
-  socket.on<WebSocketEventType>(
-    WebSocketEvents.CREATE_NODE,
-    (message: WebSocketPayloads["create-node"]) => {
-      const floorCode = getFloorCode();
-      if (floorCode) {
-        dispatch(createNode(floorCode, message));
+    case WebSocketEvents.BROADCAST: {
+      const { event, payload } = frame.payload as BroadcastMessage;
+      if (event === "sync-cursors") {
+        const { socketId: senderId, cursorInfos } = payload;
+        dispatch(setCursorInfos({ socketId: senderId, cursorInfos }));
       }
-    },
-  );
+      break;
+    }
 
-  // Handle delete node event
-  socket.on<WebSocketEventType>(
-    WebSocketEvents.DELETE_NODE,
-    (message: WebSocketPayloads["delete-node"]) => {
-      const floorCode = getFloorCode();
+    case WebSocketEvents.SYNC_USERS: {
+      const payload = frame.payload as WebSocketPayloads["sync-users"];
+      dispatch(setLiveUsers(payload.users));
+      break;
+    }
+
+    case WebSocketEvents.CREATE_NODE: {
       if (floorCode) {
-        dispatch(deleteNode(floorCode, message));
+        dispatch(createNode(floorCode, frame.payload as WebSocketPayloads["create-node"]));
       }
-    },
-  );
+      break;
+    }
 
-  // Handle update node event
-  socket.on<WebSocketEventType>(
-    WebSocketEvents.UPDATE_NODE,
-    (message: WebSocketPayloads["update-node"]) => {
-      const floorCode = getFloorCode();
+    case WebSocketEvents.DELETE_NODE: {
       if (floorCode) {
-        dispatch(updateNode(floorCode, message));
+        dispatch(deleteNode(floorCode, frame.payload as WebSocketPayloads["delete-node"]));
       }
-    },
-  );
+      break;
+    }
 
-  // Handle create edge event
-  socket.on<WebSocketEventType>(
-    WebSocketEvents.CREATE_EDGE,
-    (message: WebSocketPayloads["create-edge"]) => {
-      const floorCode = getFloorCode();
+    case WebSocketEvents.UPDATE_NODE: {
       if (floorCode) {
-        dispatch(createEdge(floorCode, message));
+        dispatch(updateNode(floorCode, frame.payload as WebSocketPayloads["update-node"]));
       }
-    },
-  );
+      break;
+    }
 
-  // Handle delete edge event
-  socket.on<WebSocketEventType>(
-    WebSocketEvents.DELETE_EDGE,
-    (message: WebSocketPayloads["delete-edge"]) => {
-      const floorCode = getFloorCode();
+    case WebSocketEvents.CREATE_EDGE: {
       if (floorCode) {
-        dispatch(deleteEdge(floorCode, message));
+        dispatch(createEdge(floorCode, frame.payload as WebSocketPayloads["create-edge"]));
       }
-    },
-  );
+      break;
+    }
 
-  // Handle create edge across floors event
-  socket.on<WebSocketEventType>(
-    WebSocketEvents.CREATE_EDGE_ACROSS_FLOORS,
-    (message: WebSocketPayloads["create-edge-across-floors"]) => {
-      const floorCode = getFloorCode();
+    case WebSocketEvents.DELETE_EDGE: {
       if (floorCode) {
-        dispatch(createEdgeAcrossFloors(floorCode, message));
+        dispatch(deleteEdge(floorCode, frame.payload as WebSocketPayloads["delete-edge"]));
       }
-    },
-  );
+      break;
+    }
 
-  // Handle delete edge across floors event
-  socket.on<WebSocketEventType>(
-    WebSocketEvents.DELETE_EDGE_ACROSS_FLOORS,
-    (message: WebSocketPayloads["delete-edge-across-floors"]) => {
-      const floorCode = getFloorCode();
+    case WebSocketEvents.CREATE_EDGE_ACROSS_FLOORS: {
       if (floorCode) {
-        dispatch(deleteEdgeAcrossFloors(floorCode, message));
+        dispatch(
+          createEdgeAcrossFloors(
+            floorCode,
+            frame.payload as WebSocketPayloads["create-edge-across-floors"],
+          ),
+        );
       }
-    },
-  );
+      break;
+    }
 
-  // Handle create room
-  socket.on<WebSocketEventType>(
-    WebSocketEvents.CREATE_ROOM,
-    (message: WebSocketPayloads["create-room"]) => {
-      const floorCode = getFloorCode();
+    case WebSocketEvents.DELETE_EDGE_ACROSS_FLOORS: {
       if (floorCode) {
-        dispatch(createRoom(floorCode, message));
+        dispatch(
+          deleteEdgeAcrossFloors(
+            floorCode,
+            frame.payload as WebSocketPayloads["delete-edge-across-floors"],
+          ),
+        );
       }
-    },
-  );
+      break;
+    }
 
-  // Handle delete room
-  socket.on<WebSocketEventType>(
-    WebSocketEvents.DELETE_ROOM,
-    (message: WebSocketPayloads["delete-room"]) => {
-      const floorCode = getFloorCode();
+    case WebSocketEvents.CREATE_ROOM: {
       if (floorCode) {
-        dispatch(deleteRoom(floorCode, message));
+        dispatch(createRoom(floorCode, frame.payload as WebSocketPayloads["create-room"]));
       }
-    },
-  );
+      break;
+    }
 
-  // Handle update room
-  socket.on<WebSocketEventType>(
-    WebSocketEvents.UPDATE_ROOM,
-    (message: WebSocketPayloads["update-room"]) => {
-      const floorCode = getFloorCode();
+    case WebSocketEvents.DELETE_ROOM: {
       if (floorCode) {
-        dispatch(updateRoom(floorCode, message));
+        dispatch(deleteRoom(floorCode, frame.payload as WebSocketPayloads["delete-room"]));
       }
-    },
-  );
+      break;
+    }
 
-  // Handle create poi
-  socket.on<WebSocketEventType>(
-    WebSocketEvents.CREATE_POI,
-    (message: WebSocketPayloads["create-poi"]) => {
-      const floorCode = getFloorCode();
+    case WebSocketEvents.UPDATE_ROOM: {
       if (floorCode) {
-        dispatch(createPoi(floorCode, message));
+        dispatch(updateRoom(floorCode, frame.payload as WebSocketPayloads["update-room"]));
       }
-    },
-  );
+      break;
+    }
 
-  // Handle delete poi
-  socket.on<WebSocketEventType>(
-    WebSocketEvents.DELETE_POI,
-    (message: WebSocketPayloads["delete-poi"]) => {
-      const floorCode = getFloorCode();
+    case WebSocketEvents.CREATE_POI: {
       if (floorCode) {
-        dispatch(deletePoi(floorCode, message));
+        dispatch(createPoi(floorCode, frame.payload as WebSocketPayloads["create-poi"]));
       }
-    },
-  );
+      break;
+    }
 
-  // Handle update poi
-  socket.on<WebSocketEventType>(
-    WebSocketEvents.UPDATE_POI,
-    (message: WebSocketPayloads["update-poi"]) => {
-      const floorCode = getFloorCode();
+    case WebSocketEvents.DELETE_POI: {
       if (floorCode) {
-        dispatch(updatePoi(floorCode, message));
+        dispatch(deletePoi(floorCode, frame.payload as WebSocketPayloads["delete-poi"]));
       }
-    },
-  );
+      break;
+    }
 
-  return socket;
+    case WebSocketEvents.UPDATE_POI: {
+      if (floorCode) {
+        dispatch(updatePoi(floorCode, frame.payload as WebSocketPayloads["update-poi"]));
+      }
+      break;
+    }
+
+    default:
+      break;
+  }
+};
+
+// Create socket connection
+const createSocket = (dispatch: AppDispatch) => {
+  // same-origin, so the session cookie rides along with the upgrade
+  const url = `${location.origin.replace(/^http/u, "ws")}/api/ws`;
+  const ws = new WebSocket(url);
+
+  ws.onopen = () => {
+    console.log("Connected to server");
+    for (const frame of pendingFrames) {
+      ws.send(frame);
+    }
+    pendingFrames = [];
+  };
+
+  ws.onerror = () => {
+    console.error("WebSocket connection error");
+  };
+
+  ws.onclose = () => {
+    console.log("Disconnected from server");
+    if (socket === ws) {
+      socket = null;
+      socketId = undefined;
+      pendingFrames = [];
+    }
+  };
+
+  ws.onmessage = (event) => {
+    if (typeof event.data !== "string") {
+      return;
+    }
+
+    try {
+      handleFrame(JSON.parse(event.data) as WebSocketFrame, dispatch);
+    } catch (error) {
+      console.error("Failed to handle WebSocket frame:", error);
+    }
+  };
+
+  return ws;
 };
 
 // Socket middleware
@@ -244,17 +240,17 @@ const webSocketMiddleware: Middleware = (params) => (next) => (action) => {
       const { payload } = action as JoinWebSocketAction;
       const { user } = payload;
 
-      // Connect to socket
-      (async () => {
-        if (socket === null) {
-          socket = await createSocket(user, dispatch);
-        }
+      const stale =
+        socket === null ||
+        socket.readyState === WebSocket.CLOSING ||
+        socket.readyState === WebSocket.CLOSED;
+      if (stale) {
+        socket = createSocket(dispatch);
+      }
 
-        // Join room after socket creation
-        if (floorCode && socket) {
-          socket.emit("join", floorCode);
-        }
-      })();
+      if (floorCode) {
+        send(WebSocketEvents.JOIN_FLOOR, { floorCode, user });
+      }
 
       break;
     }
@@ -263,7 +259,7 @@ const webSocketMiddleware: Middleware = (params) => (next) => (action) => {
       const { payload } = action as LeaveWebSocketAction;
       const { floorCode } = payload;
       if (socket && floorCode) {
-        socket.emit("leave", floorCode);
+        send(WebSocketEvents.LEAVE_FLOOR, { floorCode });
       }
       break;
     }
@@ -271,9 +267,7 @@ const webSocketMiddleware: Middleware = (params) => (next) => (action) => {
     // broadcast through socket
     case WEBSOCKET_BROADCAST: {
       const { payload } = action as BroadcastWebSocketAction;
-      if (socket !== null) {
-        socket.emit("broadcast", payload);
-      }
+      send(WebSocketEvents.BROADCAST, payload);
       break;
     }
 

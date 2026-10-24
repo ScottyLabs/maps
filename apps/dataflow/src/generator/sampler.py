@@ -160,8 +160,7 @@ class Triangulator:
         if len(valid_indices) == 0:
             center = poly.centroid
             dists = np.sqrt(
-                (centroids[:, 0] - center.x) ** 2
-                + (centroids[:, 1] - center.y) ** 2,
+                (centroids[:, 0] - center.x) ** 2 + (centroids[:, 1] - center.y) ** 2,
             )
             valid_indices = [int(np.argmin(dists))]
         centroids = centroids[valid_indices]
@@ -310,8 +309,7 @@ class UniformSampler:
         if len(valid) == 0:
             center = poly.centroid
             dists = np.sqrt(
-                (points[:, 0] - center.x) ** 2
-                + (points[:, 1] - center.y) ** 2,
+                (points[:, 0] - center.x) ** 2 + (points[:, 1] - center.y) ** 2,
             )
             valid = [int(np.argmin(dists))]
         return points[valid]

@@ -22,7 +22,4 @@ export interface CursorInfoOnDragVertex extends BaseCursorInfo {
 
 type CursorInfoOnMove = BaseCursorInfo;
 
-export type CursorInfo =
-  | CursorInfoOnDragNode
-  | CursorInfoOnDragVertex
-  | CursorInfoOnMove;
+export type CursorInfo = CursorInfoOnDragNode | CursorInfoOnDragVertex | CursorInfoOnMove;

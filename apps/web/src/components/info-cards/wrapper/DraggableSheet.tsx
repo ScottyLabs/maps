@@ -15,12 +15,7 @@ interface Props {
   onCollapse?: () => void;
 }
 
-const DraggableSheet = ({
-  snapPoints,
-  children,
-  onClose,
-  onCollapse,
-}: Props) => {
+const DraggableSheet = ({ snapPoints, children, onClose, onCollapse }: Props) => {
   // Library hooks
   const navigate = useNavigate();
   const controls = useAnimation();
@@ -34,10 +29,7 @@ const DraggableSheet = ({
   const focusedFloor = useBoundStore((state) => state.focusedFloor);
 
   // Local state
-  const snapIndex = useMemo(
-    () => CardStatesList.indexOf(cardStatus),
-    [cardStatus],
-  );
+  const snapIndex = useMemo(() => CardStatesList.indexOf(cardStatus), [cardStatus]);
 
   // Custom hooks
   const { isCardOpen, floor, coordinate, buildingCode } = useLocationParams();
@@ -68,11 +60,7 @@ const DraggableSheet = ({
   }, [controls]);
 
   useEffect(() => {
-    if (
-      focusedFloor &&
-      focusedFloor.buildingCode !== buildingCode &&
-      !isZooming
-    ) {
+    if (focusedFloor && focusedFloor.buildingCode !== buildingCode && !isZooming) {
       navigate(`/${focusedFloor.buildingCode}`);
       setCardStatus(CardStates.COLLAPSED);
     }
@@ -84,15 +72,11 @@ const DraggableSheet = ({
   //   return;
   // }
 
-  const handleDragEnd = (
-    _e: MouseEvent | TouchEvent | PointerEvent,
-    info: PanInfo,
-  ) => {
+  const handleDragEnd = (_e: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     // find the closest snap point based on the velocity and offset
     if (snapPoints[snapIndex]) {
       const newPos = snapPoints[snapIndex] - info.offset.y;
-      const newPosAdj =
-        newPos - Math.min(300, Math.max(-300, 400 * info.velocity.y));
+      const newPosAdj = newPos - Math.min(300, Math.max(-300, 400 * info.velocity.y));
       const closestSnap = snapPoints.reduce((prev, curr) =>
         Math.abs(curr - newPosAdj) < Math.abs(prev - newPosAdj) ? curr : prev,
       );
@@ -120,10 +104,7 @@ const DraggableSheet = ({
   };
 
   // extend the height of the card based on the drag
-  const handleDrag = (
-    _e: MouseEvent | TouchEvent | PointerEvent,
-    info: PanInfo,
-  ) => {
+  const handleDrag = (_e: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     if (snapPoints[snapIndex]) {
       const newPos = snapPoints[snapIndex] - info.offset.y;
       // controls.set({ height: newPos + window.innerHeight });

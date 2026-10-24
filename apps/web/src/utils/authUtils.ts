@@ -9,9 +9,7 @@ const PUBLIC_BUILDING_CODES = ["CUC"];
  * @param buildingCode - The building code to check
  * @returns true if the building is publicly accessible
  */
-export const isPublicBuilding = (
-  buildingCode: string | undefined | null,
-): boolean => {
+export const isPublicBuilding = (buildingCode: string | undefined | null): boolean => {
   if (!buildingCode) return false;
   return PUBLIC_BUILDING_CODES.includes(buildingCode);
 };

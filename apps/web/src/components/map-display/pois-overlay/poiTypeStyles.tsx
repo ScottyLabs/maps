@@ -1,13 +1,7 @@
 import type { PoiType } from "@cmumaps/common";
 import { FaPhoneAlt, FaPrint } from "react-icons/fa";
 import { GiVendingMachine } from "react-icons/gi";
-import {
-  MdLocalDrink,
-  MdMonitorHeart,
-  MdPedalBike,
-  MdWc,
-  MdQuestionMark,
-} from "react-icons/md";
+import { MdLocalDrink, MdMonitorHeart, MdPedalBike, MdWc, MdQuestionMark } from "react-icons/md";
 
 interface PoiTypeStyle {
   background: string;

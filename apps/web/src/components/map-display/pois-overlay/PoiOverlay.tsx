@@ -12,7 +12,7 @@ const PoiOverlay = ({ floor }: Props) => {
   const floorCode = getFloorCode(floor);
   const { data: pois } = $api.useQuery(
     "get",
-    "/floors/{floorCode}/pois",
+    "/api/floors/{floorCode}/pois",
     { params: { path: { floorCode: floorCode ?? "" } } },
     { enabled: Boolean(floorCode) },
   );

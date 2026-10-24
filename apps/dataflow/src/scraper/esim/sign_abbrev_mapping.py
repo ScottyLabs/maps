@@ -127,7 +127,9 @@ def _build_sign_mapping(features: Iterable[dict[str, Any]]) -> MappingResult:
             ):
                 mapping_logger.warning(
                     "Conflicting mapping for '%s': existing=%s, new=%s; keeping first",
-                    label, existing, entry,
+                    label,
+                    existing,
+                    entry,
                 )
                 continue
 

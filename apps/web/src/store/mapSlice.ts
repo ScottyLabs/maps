@@ -1,10 +1,6 @@
 import type { StateCreator } from "zustand";
 
-export type MapViewMode =
-  | "standard"
-  | "hybrid"
-  | "satellite"
-  | "photorealistic3d";
+export type MapViewMode = "standard" | "hybrid" | "satellite" | "photorealistic3d";
 
 export interface MapCoordinate {
   latitude: number;
@@ -27,6 +23,5 @@ export const createMapSlice: StateCreator<MapSlice> = (set) => ({
   mapViewMode: "standard",
   setMapViewMode: (mapViewMode: MapViewMode) => set({ mapViewMode }),
   mapController: null,
-  setMapController: (mapController: MapController | null) =>
-    set({ mapController }),
+  setMapController: (mapController: MapController | null) => set({ mapController }),
 });

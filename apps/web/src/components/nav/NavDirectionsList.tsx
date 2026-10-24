@@ -70,20 +70,11 @@ const NavDirectionsList = () => {
 
   const { navPaths } = useNavPaths();
 
-  const renderDirectionEntry = (
-    { distance, action, id }: DirectionProps,
-    i: number,
-  ) => {
-    const color =
-      instructionIndex === i
-        ? "Green"
-        : i > instructionIndex
-          ? "Black"
-          : "Grey";
+  const renderDirectionEntry = ({ distance, action, id }: DirectionProps, i: number) => {
+    const color = instructionIndex === i ? "Green" : i > instructionIndex ? "Black" : "Grey";
 
-    const buildingCode = navPaths?.[selectedPath]?.path.path.find(
-      (n) => n.id === id,
-    )?.floor?.buildingCode;
+    const buildingCode = navPaths?.[selectedPath]?.path.path.find((n) => n.id === id)?.floor
+      ?.buildingCode;
 
     const buildingName = buildingCode === "outside" ? "Outside" : buildingCode;
 
@@ -100,15 +91,11 @@ const NavDirectionsList = () => {
             height={26}
             className="mr-5"
           />
-          <div
-            className={`mr-5 font-inter font-medium text-[1.5rem] ${textColors[color]}`}
-          >
+          <div className={`mr-5 font-inter font-medium text-[1.5rem] ${textColors[color]}`}>
             {distance} ft
           </div>
 
-          <div
-            className={`ml-auto font-inter font-medium text-[1.125rem] ${textColors[color]}`}
-          >
+          <div className={`ml-auto font-inter font-medium text-[1.125rem] ${textColors[color]}`}>
             {buildingName}
           </div>
         </div>

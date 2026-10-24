@@ -26,11 +26,11 @@ const FloorplanOverlay = ({ floor }: Props) => {
   const floorCode = getFloorCode(floor);
   const { data: rooms } = $api.useQuery(
     "get",
-    "/floors/{floorCode}/floorplan",
+    "/api/floors/{floorCode}/floorplan",
     { params: { path: { floorCode: floorCode ?? "" } } },
     { enabled: Boolean(floorCode) },
   );
-  const { data: buildings } = $api.useQuery("get", "/buildings");
+  const { data: buildings } = $api.useQuery("get", "/api/buildings");
 
   // Custom hooks
   const { roomName: selectedRoomName } = useLocationParams();
@@ -45,9 +45,7 @@ const FloorplanOverlay = ({ floor }: Props) => {
     const { floor } = room;
 
     if (
-      !buildings?.[floor.buildingCode]?.floors.includes(
-        getFloorLevelFromRoomName(roomName) ?? "",
-      )
+      !buildings?.[floor.buildingCode]?.floors.includes(getFloorLevelFromRoomName(roomName) ?? "")
     ) {
       return;
     }
@@ -72,9 +70,7 @@ const FloorplanOverlay = ({ floor }: Props) => {
           <div className="text-center text-sm leading-[1.1] tracking-wide">
             {showRoomNames && <p>{roomName}</p>}
             {/** biome-ignore lint/nursery/noLeakedRender: TODO: fix the leaked render */}
-            {room.alias && (
-              <p className="w-16 text-wrap italic">{room.alias}</p>
-            )}
+            {room.alias && <p className="w-16 text-wrap italic">{room.alias}</p>}
           </div>
         );
       }

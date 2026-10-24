@@ -1,11 +1,7 @@
 import type { Pois } from "@cmumaps/common";
 
 import { floorDataApiSlice } from "../../api/floorDataApiSlice.ts";
-import type {
-  CreatePoiArg,
-  DeletePoiArg,
-  UpdatePoiArg,
-} from "../../api/poiApiSlice.ts";
+import type { CreatePoiArg, DeletePoiArg, UpdatePoiArg } from "../../api/poiApiSlice.ts";
 import type { AppDispatch, RootState } from "../../store.ts";
 import type { Edit, EditPair } from "./historyTypes.ts";
 
@@ -14,23 +10,16 @@ const getPois = async (
   getStore: () => RootState,
   dispatch: AppDispatch,
 ): Promise<Pois> => {
-  let pois = floorDataApiSlice.endpoints.getFloorPois.select(floorCode)(
-    getStore(),
-  ).data;
+  let pois = floorDataApiSlice.endpoints.getFloorPois.select(floorCode)(getStore()).data;
 
   if (!pois) {
-    pois = await dispatch(
-      floorDataApiSlice.endpoints.getFloorPois.initiate(floorCode),
-    ).unwrap();
+    pois = await dispatch(floorDataApiSlice.endpoints.getFloorPois.initiate(floorCode)).unwrap();
   }
 
   return pois;
 };
 
-export const buildCreatePoiEditPair = (
-  batchId: string,
-  arg: CreatePoiArg,
-): EditPair => {
+export const buildCreatePoiEditPair = (batchId: string, arg: CreatePoiArg): EditPair => {
   const { floorCode, poiId } = arg;
   const edit: Edit = {
     endpoint: "createPoi",

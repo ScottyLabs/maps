@@ -29,8 +29,7 @@ export function isInPolygon(point: Coordinate, vertices: GeoCoordinate[]) {
     const xj = vj.longitude;
     const yj = vj.latitude;
 
-    const intersect =
-      yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
+    const intersect = yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
     if (intersect) {
       inside = !inside;
     }

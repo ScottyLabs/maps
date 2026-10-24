@@ -50,9 +50,7 @@ interface Google3dElement extends HTMLElement {
   flyCameraTo?: (options: Record<string, unknown>) => void;
 }
 
-type Google3dElementConstructor = new (
-  options?: Record<string, unknown>,
-) => Google3dElement;
+type Google3dElementConstructor = new (options?: Record<string, unknown>) => Google3dElement;
 
 interface GoogleMaps3dLibrary {
   Map3DElement?: Google3dElementConstructor;
@@ -99,9 +97,7 @@ const getCameraRangeForPoints = (points: MapCoordinate[]): number => {
   return Math.max(180, Math.min(2800, inferredRange));
 };
 
-const getCoordinateFrom3dClick = (
-  event: GoogleMaps3dClickEvent,
-): MapCoordinate | null => {
+const getCoordinateFrom3dClick = (event: GoogleMaps3dClickEvent): MapCoordinate | null => {
   const candidate =
     event.position ??
     event.latLngAltitude ??
@@ -144,20 +140,13 @@ const GooglePhotorealisticMap = () => {
 
   const [isMapReady, setIsMapReady] = useState(false);
   const [isLibraryReady, setIsLibraryReady] = useState(false);
-  const [prevCoordinate, setPrevCoordinate] = useState<MapCoordinate | null>(
-    null,
-  );
+  const [prevCoordinate, setPrevCoordinate] = useState<MapCoordinate | null>(null);
 
   const navigate = useNavigateLocationParams();
   const user = useUser();
 
-  const { data: buildings } = $api.useQuery("get", "/buildings");
-  const {
-    buildingCode,
-    roomName,
-    coordinate,
-    error: locationParamError,
-  } = useLocationParams();
+  const { data: buildings } = $api.useQuery("get", "/api/buildings");
+  const { buildingCode, roomName, coordinate, error: locationParamError } = useLocationParams();
   const { setSrc, setDst, isNavOpen, navPaths } = useNavPaths();
 
   const selectedBuilding = useBoundStore((state) => state.selectedBuilding);
@@ -182,7 +171,7 @@ const GooglePhotorealisticMap = () => {
       : null;
   const { data: roomFocusRooms } = $api.useQuery(
     "get",
-    "/floors/{floorCode}/floorplan",
+    "/api/floors/{floorCode}/floorplan",
     { params: { path: { floorCode: roomFocusFloorCode ?? "" } } },
     { enabled: Boolean(roomFocusFloorCode) },
   );
@@ -192,13 +181,12 @@ const GooglePhotorealisticMap = () => {
     : null;
   const { data: focusedFloorRooms } = $api.useQuery(
     "get",
-    "/floors/{floorCode}/floorplan",
+    "/api/floors/{floorCode}/floorplan",
     { params: { path: { floorCode: focusedFloorCode ?? "" } } },
     { enabled: Boolean(focusedFloorCode) },
   );
 
-  const canShowFloorplans =
-    Boolean(user) || isPublicBuilding(focusedFloor?.buildingCode);
+  const canShowFloorplans = Boolean(user) || isPublicBuilding(focusedFloor?.buildingCode);
 
   const stopZoomingSoon = useCallback(() => {
     if (zoomTimeoutRef.current !== null) {
@@ -274,16 +262,14 @@ const GooglePhotorealisticMap = () => {
   );
 
   useEffect(() => {
-    if (!env.GOOGLE_MAPS_API_KEY) {
+    if (!env.googleMapsApiKey) {
       return;
     }
 
     let isCancelled = false;
     const initialize = async () => {
       try {
-        const googleMaps = await loadGoogleMaps3D(
-          env.GOOGLE_MAPS_API_KEY ?? "",
-        );
+        const googleMaps = await loadGoogleMaps3D(env.googleMapsApiKey ?? "");
         const importLibrary = googleMaps.maps?.importLibrary;
         if (!importLibrary) {
           throw new Error("Google Maps importLibrary is unavailable.");
@@ -316,10 +302,7 @@ const GooglePhotorealisticMap = () => {
   useEffect(() => {
     const mapContainer = mapContainerRef.current;
     const maps3dLibrary = maps3dLibraryRef.current;
-    if (
-      !(mapContainer && maps3dLibrary?.Map3DElement) ||
-      mapElementRef.current
-    ) {
+    if (!(mapContainer && maps3dLibrary?.Map3DElement) || mapElementRef.current) {
       return;
     }
 
@@ -410,8 +393,7 @@ const GooglePhotorealisticMap = () => {
   useEffect(() => {
     const map = mapElementRef.current;
     const maps3dLibrary = maps3dLibraryRef.current;
-    const Polygon3dInteractiveElement =
-      maps3dLibrary?.Polygon3DInteractiveElement;
+    const Polygon3dInteractiveElement = maps3dLibrary?.Polygon3DInteractiveElement;
     if (!(map && Polygon3dInteractiveElement && buildings)) {
       return;
     }
@@ -439,11 +421,7 @@ const GooglePhotorealisticMap = () => {
         lng: point.longitude,
         altitude: 0,
       }));
-      applyBuildingPolygonStyle(
-        polygon,
-        building,
-        selectedBuilding?.code === building.code,
-      );
+      applyBuildingPolygonStyle(polygon, building, selectedBuilding?.code === building.code);
 
       polygon.addEventListener("gmp-click", (event) => {
         event.stopPropagation();
@@ -487,11 +465,7 @@ const GooglePhotorealisticMap = () => {
       if (!building) {
         continue;
       }
-      applyBuildingPolygonStyle(
-        polygon,
-        building,
-        selectedBuilding?.code === building.code,
-      );
+      applyBuildingPolygonStyle(polygon, building, selectedBuilding?.code === building.code);
     }
   }, [applyBuildingPolygonStyle, buildings, selectedBuilding?.code]);
 
@@ -523,9 +497,7 @@ const GooglePhotorealisticMap = () => {
 
       deselectBuilding();
 
-      const clickCoordinate = getCoordinateFrom3dClick(
-        event as GoogleMaps3dClickEvent,
-      );
+      const clickCoordinate = getCoordinateFrom3dClick(event as GoogleMaps3dClickEvent);
       if (clickCoordinate && (event as MouseEvent).altKey && isNavOpen) {
         setDst(`${clickCoordinate.latitude},${clickCoordinate.longitude}`);
         navigate(`/${clickCoordinate.latitude},${clickCoordinate.longitude}`);
@@ -535,9 +507,7 @@ const GooglePhotorealisticMap = () => {
     };
 
     const handleLongPress = (event: Event) => {
-      const clickCoordinate = getCoordinateFrom3dClick(
-        event as GoogleMaps3dClickEvent,
-      );
+      const clickCoordinate = getCoordinateFrom3dClick(event as GoogleMaps3dClickEvent);
       if (!clickCoordinate) {
         return;
       }
@@ -621,10 +591,7 @@ const GooglePhotorealisticMap = () => {
     const node =
       instructionIndex === 0
         ? navPath[0]
-        : navPath.find(
-            (navNode) =>
-              navNode.id === instructions[instructionIndex - 1]?.nodeId,
-          );
+        : navPath.find((navNode) => navNode.id === instructions[instructionIndex - 1]?.nodeId);
 
     if (!(isNavigating && node?.coordinate)) {
       return;
@@ -634,14 +601,7 @@ const GooglePhotorealisticMap = () => {
       focusFloor(node.floor);
     }
     zoomToPoint(node.coordinate, 0.0004);
-  }, [
-    focusFloor,
-    instructionIndex,
-    instructions,
-    isNavigating,
-    navPath,
-    zoomToPoint,
-  ]);
+  }, [focusFloor, instructionIndex, instructions, isNavigating, navPath, zoomToPoint]);
 
   useEffect(() => {
     const map = mapElementRef.current;
@@ -660,11 +620,7 @@ const GooglePhotorealisticMap = () => {
       return;
     }
 
-    const addLine = (
-      nodes: Node[],
-      strokeColor: string,
-      strokeWidth: number,
-    ) => {
+    const addLine = (nodes: Node[], strokeColor: string, strokeWidth: number) => {
       if (nodes.length < 2) {
         return;
       }
@@ -694,9 +650,7 @@ const GooglePhotorealisticMap = () => {
       const completedNodes: Node[] = [];
       const remainingNodes: Node[] = [];
       const currentNodeId =
-        instructionIndex > 0
-          ? instructions[instructionIndex - 1]?.nodeId
-          : navPath[0]?.id;
+        instructionIndex > 0 ? instructions[instructionIndex - 1]?.nodeId : navPath[0]?.id;
 
       let reachedCurrentNode = false;
       for (const node of navPath) {
@@ -729,8 +683,7 @@ const GooglePhotorealisticMap = () => {
   useEffect(() => {
     const map = mapElementRef.current;
     const maps3dLibrary = maps3dLibraryRef.current;
-    const Polygon3dInteractiveElement =
-      maps3dLibrary?.Polygon3DInteractiveElement;
+    const Polygon3dInteractiveElement = maps3dLibrary?.Polygon3DInteractiveElement;
     if (!(map && Polygon3dInteractiveElement)) {
       return;
     }
@@ -814,7 +767,7 @@ const GooglePhotorealisticMap = () => {
     setSrc,
   ]);
 
-  if (!env.GOOGLE_MAPS_API_KEY) {
+  if (!env.googleMapsApiKey) {
     return (
       <div className="relative h-full w-full bg-gray-100">
         <div className="absolute inset-0 flex items-center justify-center px-4 text-center text-foreground-neutral-secondary">
