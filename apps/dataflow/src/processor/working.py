@@ -52,9 +52,39 @@ class WorkingFloor(WorkingModel):
     warnings: list[str] = Field(default_factory=list)
 
 
+class ReferencePlacement(WorkingModel):
+    """One manual geographic anchor for a building's physical drawing frame."""
+
+    reference_floor: str
+    origin: Point
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
+    angle: float = 0
+    scale: float = Field(default=1, gt=0)
+
+
+class GeographicPoint(WorkingModel):
+    """Geographic location in degrees, distinct from drawing-frame metres."""
+
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
+
+
+class SourceBuilding(WorkingModel):
+    """Fresh public name and footprint associated through the FMS identifier."""
+
+    name: str
+    label_position: GeographicPoint
+    shapes: list[list[GeographicPoint]]
+    source_url: str
+    source_abbreviation: str | None = None
+
+
 class WorkingDataset(WorkingModel):
     """The saved editable state, shared by every pipeline entry point."""
 
     version: Literal[1] = 1
     capture_digest: str
     floors: dict[str, dict[str, WorkingFloor]]
+    anchors: dict[str, ReferencePlacement] = Field(default_factory=dict)
+    buildings: dict[str, SourceBuilding] = Field(default_factory=dict)

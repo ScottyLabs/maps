@@ -1,4 +1,4 @@
-# ruff: noqa: PT009
+# ruff: noqa: PT009, PT027
 """Captured source to editable working data, without legacy processed JSONs."""
 
 import tempfile
@@ -7,6 +7,7 @@ from pathlib import Path
 
 from shapely.geometry import Polygon
 
+from processor.store import EditConflictError, WorkspaceStore
 from processor.workspace import normalize_workspace, save_working
 from scraper.fms.capture import capture_floors
 from tests.test_fms_capture import SOURCE, source_session
@@ -88,7 +89,8 @@ class WorkingDataTests(unittest.TestCase):
             save_working(workspace, working)
             reopened = normalize_workspace(workspace)
             self.assertEqual(
-                reopened.floors["AN"]["1"].spaces[room.id].name, "Reviewed room",
+                reopened.floors["AN"]["1"].spaces[room.id].name,
+                "Reviewed room",
             )
 
     def test_curved_room_boundary_preserves_its_area(self) -> None:
@@ -103,3 +105,22 @@ class WorkingDataTests(unittest.TestCase):
             room = next(iter(floor.spaces.values()))
             footprint = Polygon([(p.x, p.y) for p in room.rings[0]])
             self.assertAlmostEqual(footprint.area, 0.050671, delta=0.001)
+
+    def test_stale_editor_cannot_overwrite_newer_saved_corrections(self) -> None:
+        """Conflicting saves preserve the already saved working JSON."""
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            workspace = root / "example"
+            capture_floors(workspace, [SOURCE], source_session(DRAWING))
+            store = WorkspaceStore(root)
+            first = store.normalize("example")
+            stale = store.read("example")
+            room_id = next(iter(first.working.floors["AN"]["1"].spaces))
+            first.working.floors["AN"]["1"].spaces[room_id].name = "Saved correction"
+            store.save("example", first.working, expected_revision=first.revision)
+            with self.assertRaises(EditConflictError):
+                store.save("example", stale.working, expected_revision=stale.revision)
+            self.assertEqual(
+                store.read("example").working.floors["AN"]["1"].spaces[room_id].name,
+                "Saved correction",
+            )
