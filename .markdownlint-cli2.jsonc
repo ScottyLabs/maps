@@ -4,9 +4,10 @@
 
   // Scan all Markdown files
   "globs": ["**/*.md"],
+  "ignores": ["**/node_modules/**", "**/.devenv/**", "**/.venv/**", "uploads/**"],
 
-  // Skip gitignore file
-  "gitignore": true,
+  // Read the root ignore file without searching generated dependency trees.
+  "gitignore": ".gitignore",
 
   "config": {
     // Use dashes for lists

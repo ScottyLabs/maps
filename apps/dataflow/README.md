@@ -10,6 +10,21 @@ script using the following command:
 uv run --env-file <ENV_FILE> <SCRIPT_NAME>
 ```
 
+## Fresh FMS capture
+
+From the repository root, use the minimal Nix-managed capture environment:
+
+```sh
+devenv shell -- bash scripts/dev/fms.sh --workspace uploads/pipeline/ansys-v1 --building AN=116
+```
+
+Complete CMU/Duo login in Chrome. Source floors, filenames, bounds, and layer
+roles are discovered automatically. Rerun the same command to resume or reuse
+verified source artifacts offline. Use a new workspace for a fresh capture.
+The [capture guide](../../docs/src/FMS-Capture.md) documents selection, stored
+artifacts, source findings, and current limits. This stage does not populate the
+app or publish data; the old manual-cookie downloader has been replaced.
+
 ## Local database import
 
 Follow the [running guide](../../docs/src/Setup.md). The host launcher downloads the
@@ -48,7 +63,7 @@ The minimal `populate` group avoids installing the full scraper toolchain.
 Inside `devenv shell`, run from this directory:
 
 ```sh
-uv sync --locked --only-group populate --group dev
+uv sync --locked --only-group populate --group fms --group dev
 PYTHONPATH=src uv run --no-sync python -m unittest discover -s tests -v
 PYTHONPATH=src uv run --no-sync python -c "from linter import main; main()"
 ```

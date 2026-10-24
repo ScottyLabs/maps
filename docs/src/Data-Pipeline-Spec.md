@@ -1,6 +1,6 @@
 # Fresh-source data pipeline: v1 specification
 
-Status: workflow agreed through the design interview; implementation not started.
+Status: workflow agreed through the design interview; implementation in progress.
 Date: October 24, 2026.
 
 ## Goal

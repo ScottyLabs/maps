@@ -8,6 +8,7 @@ manual commands, and troubleshooting.
 | `dev.py` | Host entry point: secrets, startup, population, shell, logs, stop |
 | `app.sh` | Inside devenv: check services, install dependencies, generate code, apply schema, start app |
 | `populate.sh` | Inside devenv: run the minimal Python importer against the local API |
+| `fms.sh` | Inside devenv: interactive source capture and verified resume, using a minimal Python environment |
 
 `devenv.nix` imports the pinned Kennel module and enables its PostgreSQL and
 Ricochet features. Native processes replace the former development containers.

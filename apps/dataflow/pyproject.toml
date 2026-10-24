@@ -24,6 +24,13 @@ dependencies = [
 ]
 
 [dependency-groups]
+# Interactive capture needs no ArcGIS SDK or legacy graph-generator toolchain.
+fms = [
+  "defusedxml>=0.7.1",
+  "pydantic>=2.12.5",
+  "requests>=2.32.5",
+  "selenium>=4.0.0",
+]
 # The population CLI does not need the scraper's platform-specific GIS packages.
 populate = [
   "colorama>=0.4.6",
@@ -64,7 +71,7 @@ packages = [
 populate-database = "deserializer:main"
 process-25live = "_25live:main"
 lint = "linter:main"
-scrape-fms = "scraper.fms:main"
+scrape-fms = "scraper.fms.cli:main"
 scrape-osm-pois = "scraper.osm:scrape_pois"
 
 # Supported rules https://github.com/charliermarsh/ruff/#supported-rules

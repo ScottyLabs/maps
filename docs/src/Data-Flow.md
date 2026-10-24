@@ -5,6 +5,15 @@ The agreed replacement workflow is documented in the
 complete fresh-scrape-to-app loop; the source-processing notes below describe
 existing scripts and do not imply that all stages are currently connected.
 
+## Fresh-source pipeline status
+
+[Fresh FMS capture](FMS-Capture.md) now discovers selected building floors,
+captures drawings/bounds/additional layers, and supports verified offline resume.
+The live validation captured all six ANSYS floors without the old processed JSONs.
+Normalization, visualizer working-JSON edits, generation, and atomic preview
+activation remain the next implementation stages. The import below still loads
+the shared baseline; raw capture is not a generated application dataset.
+
 ## Local development import
 
 The [running guide](Setup.md#populate-the-local-database) describes the
