@@ -40,7 +40,8 @@ python3 scripts/dev/dev.py stop
 python3 scripts/dev/dev.py start --skip-secrets
 ```
 
-Open [localhost:5173](http://localhost:5173). On later sessions, use
+Open [localhost:5173](http://localhost:5173). The visualizer runs at
+[localhost:5174](http://localhost:5174) and uses the same Keycloak session. On later sessions, use
 `start --skip-secrets`. Populate again only when refreshing your local dataset.
 The explicit `stop` also handles a process manager left running in the background.
 
@@ -87,7 +88,7 @@ services. `devenv up` shows live process output. `stop` stops the stack and pres
 Use one process manager per checkout; stop it before changing the Nix service
 configuration and starting again.
 
-The web app requires port 5173 and the API uses 8080, so startup needs no root
+The web app requires port 5173, the visualizer 5174, and the API 8080. Startup needs no root
 privileges. Ricochet uses Kennel's fixed loopback port 8090. PostgreSQL uses a
 private Unix socket rather than a TCP port. Stop other applications using these
 HTTP ports before startup; Vite will fail rather than silently choose another.
@@ -96,14 +97,14 @@ HTTP ports before startup; Vite will fail rather than silently choose another.
 
 1. Checks for devenv and, unless `--skip-secrets` is supplied, your OpenBao login.
 2. Fetches six app entries and `TEMP_DEV_S3`. It validates all values before
-   replacing server/web/dataflow `.env` and `.env.local` files. Refreshing replaces
-   local edits in those six files.
+   replacing server/web/visualizer/dataflow `.env` and `.env.local` files. Refreshing replaces
+   local edits in those eight files.
 3. Runs `devenv up`. Kennel starts PostgreSQL and Ricochet as native processes.
 4. The app helper waits for both services, then runs `bun install --frozen-lockfile`.
 5. Runs `bun run sync` to generate Prisma, tsoa, and OpenAPI artifacts, followed by
    `prisma db push --skip-generate`. It does not accept destructive schema changes
    automatically.
-6. Starts the backend and Vite. Importing campus data remains a separate command.
+6. Starts the backend and both Vite applications. Importing campus data remains a separate command.
 
 Code generation makes the server's database client and API types available.
 Applying the schema creates tables; population is the later JSON-to-database
@@ -147,6 +148,9 @@ The backend wraps the return URL in OAuth state and binds it to a signed cookie.
 Kennel enables Ricochet with `scottylabs.ricochet.enable`; its native loopback
 binding needs no override or Docker forwarding. Use the relay URL from OpenBao.
 Changing local settings does not register a new redirect with Keycloak.
+The visualizer returns through the same relay/API callback to its own local
+origin. `AUTH_TRUSTED_ORIGINS` allows that additional frontend origin. API
+requests and sockets use the Better Auth session cookie; Clerk is not required.
 
 Population uses a Keycloak service-account token through `client_credentials`.
 Its `groups` claim must contain `/projects/maps/admins`. The backend validates
@@ -226,7 +230,7 @@ PostgreSQL and relay health, and executes:
 bun install --frozen-lockfile
 bun run sync
 (cd apps/server && bunx prisma db push --skip-generate)
-bunx turbo dev --env-mode=loose --filter=@cmumaps/web --filter=@cmumaps/server
+bunx turbo dev --env-mode=loose --filter=@cmumaps/web --filter=@cmumaps/server --filter=@cmumaps/visualizer
 ```
 
 The helper supplies the local API port/URLs and an explicit database user in the

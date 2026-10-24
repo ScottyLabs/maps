@@ -4,7 +4,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 
 : "${DEVENV_RUNTIME:?Run with devenv up or inside devenv shell}"
 
-for app in server web; do
+for app in server web visualizer; do
   if [[ ! -s "apps/$app/.env" ]]; then
     echo "Missing apps/$app/.env. Run python3 scripts/dev/dev.py secrets first." >&2
     exit 1
@@ -30,7 +30,7 @@ python3 - <<'PY'
 import socket
 import sys
 
-for port in (8080, 5173):
+for port in (8080, 5173, 5174):
     with socket.socket() as listener:
         try:
             listener.bind(("127.0.0.1", port))
@@ -57,6 +57,6 @@ bun install --frozen-lockfile
 bun run sync
 (cd apps/server && bunx prisma db push --skip-generate)
 
-echo "Starting web at http://localhost:5173 and API at http://localhost:8080"
+echo "Starting web at http://localhost:5173 API at http://localhost:8080, and visualizer at http://localhost:5174"
 export TURBO_UI=stream
-exec bunx turbo dev --env-mode=loose --filter=@cmumaps/web --filter=@cmumaps/server
+exec bunx turbo dev --env-mode=loose --filter=@cmumaps/web --filter=@cmumaps/server --filter=@cmumaps/visualizer

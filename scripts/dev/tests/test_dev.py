@@ -26,7 +26,7 @@ class LauncherTests(unittest.TestCase):
         self.addCleanup(platform_patch.stop)
         self.temporary = tempfile.TemporaryDirectory(prefix="maps test ")
         self.root = Path(self.temporary.name).resolve()
-        for app in ("server", "web", "dataflow"):
+        for app in ("server", "web", "visualizer", "dataflow"):
             (self.root / "apps" / app).mkdir(parents=True)
         self.root_patch = patch.object(dev, "ROOT", self.root)
         self.root_patch.start()
@@ -80,7 +80,7 @@ class LauncherTests(unittest.TestCase):
         ):
             dev.pull_secrets()
         self.assertNotIn(self.values["OIDC_CLIENT_SECRET"], output.getvalue())
-        for app in ("server", "web", "dataflow"):
+        for app in ("server", "web", "visualizer", "dataflow"):
             path = self.root / "apps" / app / ".env"
             self.assertEqual(
                 path.read_bytes(), path.with_name(".env.local").read_bytes()
@@ -90,7 +90,7 @@ class LauncherTests(unittest.TestCase):
                 self.assertEqual(path.stat().st_mode & 0o777, 0o600)
 
     def test_failed_last_secret_preserves_all_existing_files(self):
-        for app in ("server", "web", "dataflow"):
+        for app in ("server", "web", "visualizer", "dataflow"):
             for name in (".env", ".env.local"):
                 (self.root / "apps" / app / name).write_text("old\n")
         self.values["OAUTH_RELAY_URL"] = None

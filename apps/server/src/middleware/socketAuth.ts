@@ -1,8 +1,8 @@
-import process from "node:process";
-import { verifyToken } from "@clerk/express";
+import { fromNodeHeaders } from "better-auth/node";
 import type { NextFunction, Request, Response } from "express";
 import type { Socket } from "socket.io";
 import { env } from "../env.ts";
+import { auth } from "../lib/auth.ts";
 
 // auth middleware for socket.io
 export const socketAuth = async (
@@ -14,17 +14,11 @@ export const socketAuth = async (
   }
 
   try {
-    const { token } = socket.handshake.auth;
-    if (!token) {
-      console.error("Socket authentication error: No token provided");
-      return next(new Error("Authentication failed: No token provided"));
-    }
-
-    const session = await verifyToken(token, {
-      secretKey: process.env.CLERK_SECRET_KEY,
+    const session = await auth.api.getSession({
+      headers: fromNodeHeaders(socket.request.headers),
     });
 
-    if (!session) {
+    if (!session?.user) {
       console.error("Socket authentication error: Invalid token");
       return next(new Error("Authentication failed: Invalid token"));
     }

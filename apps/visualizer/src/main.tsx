@@ -1,28 +1,14 @@
-import {
-  ClerkLoaded,
-  ClerkProvider,
-  RedirectToSignIn,
-  SignedIn,
-  SignedOut,
-} from "@clerk/clerk-react";
-import type { Clerk } from "@clerk/types";
-import { StrictMode } from "react";
+import { StrictMode, useState } from "react";
 import { Provider } from "react-redux";
 import "./index.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import ReactDOM from "react-dom/client";
+import { auth, signIn } from "./auth";
 import env from "./env";
 import { routeTree } from "./routeTree.gen";
 import { USE_STRICT_MODE } from "./settings";
 import { store } from "./store/store";
-
-// https://clerk.com/docs/components/control/clerk-loaded
-declare global {
-  interface Window {
-    Clerk: Clerk;
-  }
-}
 
 // Create a query client
 const queryClient = new QueryClient();
@@ -37,25 +23,36 @@ declare module "@tanstack/react-router" {
   }
 }
 
-const AppContent = () => (
-  <ClerkProvider
-    publishableKey={env.VITE_CLERK_PUBLISHABLE_KEY}
-    afterSignOutUrl="/"
-  >
-    <ClerkLoaded>
-      <Provider store={store}>
-        <QueryClientProvider client={queryClient}>
-          <SignedIn>
-            <RouterProvider router={router} />
-          </SignedIn>
-        </QueryClientProvider>
-        <SignedOut>
-          <RedirectToSignIn />
-        </SignedOut>
-      </Provider>
-    </ClerkLoaded>
-  </ClerkProvider>
-);
+function AppContent() {
+  const { data: session, isPending } = auth.useSession();
+  const [error, setError] = useState("");
+  if (!env.VITE_IGNORE_LOGIN && isPending) return <p>Checking session…</p>;
+  if (!env.VITE_IGNORE_LOGIN && !session) {
+    return (
+      <main className="m-auto max-w-lg space-y-5 p-10">
+        <h1 className="font-semibold text-2xl">CMU Maps visualizer</h1>
+        <p>Sign in with your ScottyLabs account to edit map data.</p>
+        <button
+          type="button"
+          className="rounded bg-blue-700 px-4 py-2 text-white"
+          onClick={() => {
+            signIn().catch((cause: Error) => setError(cause.message));
+          }}
+        >
+          Sign in with Keycloak
+        </button>
+        {error && <p role="alert">{error}</p>}
+      </main>
+    );
+  }
+  return (
+    <Provider store={store}>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </Provider>
+  );
+}
 
 // Render the app
 const rootElement = document.getElementById("root") as HTMLElement;

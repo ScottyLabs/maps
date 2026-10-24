@@ -10,7 +10,10 @@ const callbackURL = `${env.SERVER_URL.replace(/\/$/u, "")}/api/auth/oauth2/callb
 // https://www.better-auth.com/docs/plugins/generic-oauth#pre-configured-provider-helpers
 export const auth = betterAuth({
   baseURL: env.SERVER_URL,
-  trustedOrigins: [env.BETTER_AUTH_URL],
+  trustedOrigins: [
+    env.BETTER_AUTH_URL,
+    ...(env.AUTH_TRUSTED_ORIGINS?.split(",") ?? []),
+  ],
   plugins: [
     genericOAuth({
       config: [

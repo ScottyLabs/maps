@@ -14,7 +14,7 @@ manual commands, and troubleshooting.
 Ricochet features. Native processes replace the former development containers.
 Nix supplies Bun, Node, Python 3.12, uv, and Linux Prisma libraries. PostgreSQL 18
 uses Kennel's private socket; the app adds an explicit database user for Prisma.
-The web app uses port 5173, API 8080, and relay 8090.
+The web app uses port 5173, visualizer 5174, API 8080, and relay 8090.
 
 OpenBao runs in the developer's terminal. The launcher validates all app entries
 and the grouped `secret/secretspec/maps/dev/TEMP_DEV_S3` record before replacing

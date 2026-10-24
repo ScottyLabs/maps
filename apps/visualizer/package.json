@@ -2,7 +2,6 @@
   "name": "@cmumaps/visualizer",
   "version": "0.0.0",
   "dependencies": {
-    "@clerk/clerk-react": "^5.52.0",
     "@cmumaps/common": "workspace:*",
     "@cmumaps/ui": "workspace:*",
     "@cmumaps/websocket": "workspace:*",
@@ -15,6 +14,7 @@
     "@tanstack/zod-adapter": "^1.128.3",
     "@turf/simplify": "^7.2.0",
     "@turf/turf": "^7.2.0",
+    "better-auth": "^1.4.18",
     "konva": "^9.3.22",
     "lodash": "^4.17.21",
     "mapkit-react": "^1.16.1",
@@ -34,7 +34,6 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@clerk/types": "^4.93.0",
     "@tailwindcss/vite": "^4.1.11",
     "@tanstack/router-plugin": "^1.128.3",
     "@types/apple-mapkit-js-browser": "^5.78.1",
@@ -51,6 +50,7 @@
   "private": true,
   "scripts": {
     "build": "vite build",
+    "check": "tsc -b",
     "dev": "vite",
     "preview": "vite preview",
     "tsc": "tsc -b"

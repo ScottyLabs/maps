@@ -8,27 +8,12 @@ export interface BaseMutationArg {
   // if null, it won't be added to the history
 }
 
-export const getClerkToken = async () => {
-  if (window.Clerk?.session) {
-    const token = await window.Clerk.session.getToken();
-    return token;
-  }
-};
-
 export const apiSlice = createApi({
   reducerPath: "api",
   tagTypes: ["Graph", "Rooms", "Pois"],
   baseQuery: fetchBaseQuery({
     baseUrl: `${env.VITE_SERVER_URL}/`,
-    prepareHeaders: async (headers) => {
-      if (window.Clerk?.session) {
-        const token = await getClerkToken();
-        if (token) {
-          headers.set("authorization", `Bearer ${token}`);
-        }
-      }
-      return headers;
-    },
+    credentials: "include",
   }),
   endpoints: () => ({}),
 });

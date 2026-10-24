@@ -1,15 +1,13 @@
-# CMU Maps Web
+# CMU Maps visualizer
 
-## Overview
+Use the [native setup guide](../../docs/src/Setup.md). `python3 scripts/dev/dev.py start`
+starts the visualizer at [localhost:5174](http://localhost:5174), alongside the API
+and web app. Log in with Keycloak; the API and sockets share the Better Auth
+session. No Clerk account or Clerk credentials are needed.
 
-The [CMU Maps visualizer](https://floorplans.scottylabs.org) is a tool to help visualize the CMU Maps data.
+For manual startup inside the pinned environment, use `bun run dev:visualizer`
+with the API's native database environment configured as described in the guide.
+Do not start a second API over the all-in-one launcher.
 
-## Development
-
-### Running the Visualizer
-
-Run the visualizer with the server by running the following command in the root directory:
-
-```zsh
-bun run dev:visualizer
-```
+The [fresh-source pipeline specification](../../docs/src/Data-Pipeline-Spec.md)
+defines the working-JSON editing and explicit preview workflow being implemented.

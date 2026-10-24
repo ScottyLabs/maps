@@ -1,5 +1,3 @@
-/// <reference types="@clerk/express/env" />
-
 declare global {
   // biome-ignore lint/style/noNamespace: Express uses global namespace
   namespace Express {

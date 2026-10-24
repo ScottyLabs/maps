@@ -68,13 +68,14 @@ def dotenv(values):
 def secret_environments(values, storage):
     issuer = values["KEYCLOAK_URL"].rstrip("/") + "/realms/" + values["KEYCLOAK_REALM"]
     server = {
-        "ALLOWED_ORIGINS_REGEX": "^http://(localhost|127[.]0[.]0[.]1):5173$",
+        "ALLOWED_ORIGINS_REGEX": "^http://(localhost|127[.]0[.]0[.]1):517[34]$",
         "AUTH_CLIENT_ID": values["OIDC_CLIENT_ID"],
         "AUTH_CLIENT_SECRET": values["OIDC_CLIENT_SECRET"],
         "AUTH_ISSUER": issuer,
         "AUTH_JWKS_URI": issuer + "/protocol/openid-connect/certs",
         "OAUTH_RELAY_URL": values["OAUTH_RELAY_URL"],
         "BETTER_AUTH_URL": "http://localhost:5173",
+        "AUTH_TRUSTED_ORIGINS": "http://localhost:5174",
         "SERVER_PORT": "8080",
         "SERVER_URL": "http://localhost:8080",
     }
@@ -82,7 +83,12 @@ def secret_environments(values, storage):
         "VITE_SERVER_URL": "http://localhost:8080",
         "VITE_MAPKIT_TOKEN": values["MAPKIT_TOKEN"],
     }
-    return {"server": dotenv(server), "web": dotenv(web), "dataflow": dotenv(storage)}
+    return {
+        "server": dotenv(server),
+        "web": dotenv(web),
+        "visualizer": dotenv(web),
+        "dataflow": dotenv(storage),
+    }
 
 
 def write_env(path, content):
@@ -182,7 +188,7 @@ def pull_secrets():
         for filename in (".env", ".env.local"):
             write_env(ROOT / "apps" / app / filename, content)
     print(
-        "Updated server/web/dataflow .env and .env.local. OpenBao login stays on the host.",
+        "Updated server/web/visualizer/dataflow .env and .env.local. OpenBao login stays on the host.",
         flush=True,
     )
 
@@ -198,7 +204,7 @@ def start(args):
                 f"Missing apps/{app}/.env. Run without --skip-secrets after OpenBao login."
             )
     print(
-        "Starting native PostgreSQL, Ricochet, API, and web with devenv...", flush=True
+        "Starting native PostgreSQL, Ricochet, API, web, and visualizer with devenv...", flush=True
     )
     run(["devenv", "up"])
 

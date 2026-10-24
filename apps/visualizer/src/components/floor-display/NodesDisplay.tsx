@@ -8,7 +8,6 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import type Konva from "konva";
 import { throttle } from "lodash";
-import { useMemo } from "react";
 import { Circle } from "react-konva";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";

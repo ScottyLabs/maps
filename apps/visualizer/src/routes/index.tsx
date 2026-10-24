@@ -1,4 +1,4 @@
-import { UserButton } from "@clerk/clerk-react";
+import { auth } from "../auth";
 import { ERROR_CODES } from "@cmumaps/common";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
@@ -62,7 +62,9 @@ function Index() {
   return (
     <>
       <header className="m-2 flex flex-row-reverse">
-        <UserButton />
+        <button type="button" onClick={() => { void auth.signOut(); }}>
+          Sign out
+        </button>
       </header>
       {renderBuildingList()}
       <MyToastContainer errorCode={errorCode} />

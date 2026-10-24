@@ -7,7 +7,6 @@ import {
 import type { Action, Middleware } from "@reduxjs/toolkit";
 import { io, type Socket } from "socket.io-client";
 import env from "../../env";
-import { getClerkToken } from "../api/apiSlice";
 import {
   createEdge,
   createEdgeAcrossFloors,
@@ -44,18 +43,17 @@ interface ParamsType {
 
 // Get floor code from URL
 const getFloorCode = () => {
-  return window.location.pathname.split("/")[1];
+  return window.location.pathname.split("/")[2];
 };
 
 // Create socket connection
 const createSocket = async (user: LiveUser, dispatch: AppDispatch) => {
-  const token = await getClerkToken();
   const socket = io(env.VITE_SERVER_URL, {
     query: {
       userName: user.userName,
       userColor: user.color,
     },
-    auth: { token },
+    withCredentials: true,
     reconnectionAttempts: 1,
   });
 
