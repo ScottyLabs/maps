@@ -25,6 +25,7 @@ PY
 )
 export SERVER_HOST=127.0.0.1 SERVER_PORT=8080 SERVER_URL=http://localhost:8080
 export VITE_SERVER_URL=http://localhost:8080
+export PIPELINE_ROOT="$PWD/uploads/pipeline"
 
 python3 - <<'PY'
 import socket
@@ -32,6 +33,7 @@ import sys
 
 for port in (8080, 5173, 5174):
     with socket.socket() as listener:
+        listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
             listener.bind(("127.0.0.1", port))
         except OSError:

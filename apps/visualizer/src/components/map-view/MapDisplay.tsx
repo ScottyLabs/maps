@@ -1,4 +1,4 @@
-import type { Building, Placement } from "@cmumaps/common";
+import type { Building, Placement, Rooms } from "@cmumaps/common";
 import { CAMERA_BOUNDARY, INITIAL_REGION } from "@cmumaps/ui";
 import {
   FeatureVisibility,
@@ -15,6 +15,7 @@ import env from "@/env";
 
 interface Props {
   floorCode: string;
+  rooms?: Rooms;
   building: Building;
   placement: Placement;
   setPlacement: (placement: Placement) => void;
@@ -22,6 +23,7 @@ interface Props {
 
 const MapDisplay = ({
   floorCode,
+  rooms,
   building,
   placement,
   setPlacement,
@@ -48,8 +50,8 @@ const MapDisplay = ({
         cameraBoundary={CAMERA_BOUNDARY}
         minCameraDistance={5}
         maxCameraDistance={1500}
-        showsUserLocationControl
-        showsUserLocation={true}
+        showsUserLocationControl={false}
+        showsUserLocation={false}
         mapType={MapType.MutedStandard}
         paddingBottom={0}
         paddingLeft={4}
@@ -70,7 +72,11 @@ const MapDisplay = ({
         }}
       >
         <BuildingShape building={building} />
-        <FloorplanOverlay floorCode={floorCode} placement={placement} />
+        <FloorplanOverlay
+          floorCode={floorCode}
+          placement={placement}
+          rooms={rooms}
+        />
         <CenterPin placement={placement} />
       </MapkitMap>
     </div>

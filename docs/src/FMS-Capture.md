@@ -2,8 +2,8 @@
 
 This is the implemented acquisition stage of the
 [fresh-source pipeline](Data-Pipeline-Spec.md). It captures source drawings and
-metadata into a local workspace. Normalization is available offline. Generation, visualizer editing, and candidate
-activation are separate stages; capture alone does not replace the app's dataset.
+metadata into a local workspace. Normalization and [workspace editing](Data-Visualizer-Wiki.md) are available
+offline. Generation and candidate activation are subsequent stages; capture alone does not replace the app's dataset.
 
 ## Run
 
@@ -73,6 +73,11 @@ The live six-floor sample normalizes to 165 source-space pieces, including
 contains 165 physical rooms. Multipart entities, unmatched labels and unknown
 room types remain visible for review. Automatic cross-floor alignment and
 navigation generation still require their source-evidence checks.
+
+As an independent unit check, the extracted areas for spaces labelled `101` and
+`106` on floor 1 are approximately 1,011 and 1,117 square feet. These agree with
+the captured CAD room-area annotations. The annotations are useful validation
+evidence; they do not establish room types or door connectivity.
 
 ## Saved data and checks
 

@@ -116,3 +116,8 @@ The updated data are serialized to the S3 bucket.
 ### Step 6: Deployment
 
 The S3 bucket files are deserialized in staging and production.
+
+Fresh capture, offline normalization and working-JSON editing are implemented.
+See [the visualizer workflow](Data-Visualizer-Wiki.md). Generated candidate
+export, verified stacking, routing/POIs and atomic preview activation remain
+implementation work under the specification.

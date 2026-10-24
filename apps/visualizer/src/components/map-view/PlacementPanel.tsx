@@ -4,11 +4,17 @@ import { useUpdateFloorPlacementMutation } from "@/store/api/floorDataApiSlice";
 
 interface Props {
   floorCode: string;
+  onSave?: () => void;
   placement: Placement;
   setPlacement: (placement: Placement) => void;
 }
 
-const PlacementPanel = ({ floorCode, placement, setPlacement }: Props) => {
+const PlacementPanel = ({
+  floorCode,
+  placement,
+  setPlacement,
+  onSave,
+}: Props) => {
   const [updateFloorPlacement] = useUpdateFloorPlacementMutation();
 
   const renderSliderAndInput = (
@@ -124,6 +130,10 @@ const PlacementPanel = ({ floorCode, placement, setPlacement }: Props) => {
         type="button"
         className="cursor-pointer rounded-lg bg-blue-500 px-4 py-2 text-base text-white"
         onClick={() => {
+          if (onSave) {
+            onSave();
+            return;
+          }
           toast.info("Saving placement...");
           updateFloorPlacement({
             floorCode: floorCode,
@@ -131,7 +141,7 @@ const PlacementPanel = ({ floorCode, placement, setPlacement }: Props) => {
           });
         }}
       >
-        Confirm Placement
+        {onSave ? "Save placement to JSON" : "Confirm Placement"}
       </button>
     );
   };

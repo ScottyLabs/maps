@@ -13,6 +13,7 @@ import { RegisterRoutes } from "../build/routes.ts";
 import { prisma } from "../prisma/index.ts";
 import { env } from "./env.ts";
 import { auth } from "./lib/auth.ts";
+import { pipelineRouter } from "./lib/pipeline.ts";
 import { errorHandler } from "./middleware/errorHandler.ts";
 import { notFoundHandler } from "./middleware/notFoundHandler.ts";
 import { socketAuth } from "./middleware/socketAuth.ts";
@@ -62,6 +63,9 @@ app.use(
 app.get("/openapi.json", (_req, res) => {
   res.status(200).send(swaggerJson);
 });
+
+// Development workspace access uses the same session and pipeline engine.
+app.use("/pipeline", pipelineRouter());
 
 // Routes
 RegisterRoutes(app);
