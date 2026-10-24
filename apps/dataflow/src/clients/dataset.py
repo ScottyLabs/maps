@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from typing import TYPE_CHECKING, Any, Protocol, cast
+from typing import TYPE_CHECKING, Any, Literal, Protocol, cast
 
 from clients._s3_client import SCHEMA_VALIDATORS
 
@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from clients._api_client import TableName
+    from clients._s3_client import S3Client
 
 
 class JsonSource(Protocol):
@@ -32,6 +33,26 @@ class TableWriter(Protocol):
     def populate_table(self, table_name: TableName, data: list[dict[str, Any]]) -> bool:
         """Accept a batch of records, raising on failure."""
         ...
+
+
+class HostedDataset:
+    """Read one named hosted dataset without falling back to other snapshots."""
+
+    def __init__(self, client: S3Client, name: Literal["old", "new"]) -> None:
+        """Keep the selection explicit for validation and every table converter."""
+        if name not in {"old", "new"}:
+            msg = "Dataset must be old or new"
+            raise ValueError(msg)
+        self.client = client
+        self.prefix = f"datasets/{name}/"
+
+    def get_json_file(self, name: str, /) -> dict[str, Any] | None:
+        """Use the selected prefix and the S3 client's validated snapshot cache."""
+        return self.client.get_json_file(self.prefix + name)
+
+    def preload_json_file(self, name: str, /) -> dict[str, Any]:
+        """Fail before reset if the selected dataset is missing or invalid."""
+        return self.client.preload_json_file(self.prefix + name)
 
 
 class LocalDataset:

@@ -226,6 +226,10 @@ def main(argv=None):
         help="Replace local map tables from the temporary S3 bucket; restart app afterwards",
     )
     populate.add_argument(
+        "--dataset", choices=("old", "new"), default="new",
+        help="Choose old campus data or the new Ansys scrape (default: new)",
+    )
+    populate.add_argument(
         "--check",
         action="store_true",
         help="Validate data and authorization without clearing tables",
@@ -252,9 +256,11 @@ def main(argv=None):
         else:
             require_tool("devenv")
             if args.command == "populate":
-                options = (["--check"] if args.check else []) + (
-                    ["--include-pois"] if args.include_pois else []
-                )
+                options = ["--dataset", args.dataset]
+                if args.check:
+                    options.append("--check")
+                if args.include_pois:
+                    options.append("--include-pois")
                 run(
                     ["devenv", "shell", "--", "bash", "scripts/dev/populate.sh"]
                     + options

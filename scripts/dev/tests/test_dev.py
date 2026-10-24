@@ -156,7 +156,9 @@ class LauncherTests(unittest.TestCase):
             patch.object(dev, "require_tool"),
             patch.object(dev, "run") as run,
         ):
-            self.assertEqual(dev.main(["populate", "--check", "--include-pois"]), 0)
+            self.assertEqual(
+                dev.main(["populate", "--dataset", "old", "--check", "--include-pois"]), 0
+            )
         run.assert_called_once_with(
             [
                 "devenv",
@@ -164,6 +166,8 @@ class LauncherTests(unittest.TestCase):
                 "--",
                 "bash",
                 "scripts/dev/populate.sh",
+                "--dataset",
+                "old",
                 "--check",
                 "--include-pois",
             ]

@@ -9,6 +9,7 @@ from unittest.mock import Mock, patch
 
 from clients._api_client import ApiClient
 from clients._s3_client import S3Client
+from clients.dataset import HostedDataset
 
 population = importlib.import_module("deserializer.main")
 
@@ -101,6 +102,9 @@ class PopulationTests(unittest.TestCase):
             stack.enter_context(patch.object(population, "validate_sources")),
             stack.enter_context(patch.object(population, "populate_table")),
         ]
+        self.storage = stack.enter_context(
+            patch.object(population, "get_s3_client_singleton"),
+        ).return_value
 
     def test_missing_or_invalid_source_prevents_reset(self) -> None:
         """Input failure prevents any backend mutation."""
@@ -136,7 +140,10 @@ class PopulationTests(unittest.TestCase):
     def test_explicit_poi_skip(self) -> None:
         """The local archive can import with POIs deliberately omitted."""
         population.main()
-        self.mocks[1].assert_called_once_with(skip_pois=True)
+        self.assertTrue(self.mocks[1].call_args.kwargs["skip_pois"])
+        self.assertEqual(
+            self.mocks[1].call_args.kwargs["source"].prefix, "datasets/new/",
+        )
         self.api.drop_tables.assert_called_once_with(population.ALL_TABLE_NAMES)
         self.assertEqual(
             [call.args[0] for call in self.mocks[2].call_args_list],
@@ -147,8 +154,49 @@ class PopulationTests(unittest.TestCase):
         """The general importer continues requiring the POI source by default."""
         with patch("sys.argv", ["populate-database"]):
             population.main()
-        self.mocks[1].assert_called_once_with(skip_pois=False)
+        self.assertFalse(self.mocks[1].call_args.kwargs["skip_pois"])
         self.assertEqual(self.mocks[2].call_args.args[0], "Poi")
+
+    def test_selected_snapshot_is_shared_by_preflight_and_every_converter(self) -> None:
+        """Changing the dataset must not validate old data and then import new data."""
+        with patch(
+            "sys.argv", ["populate-database", "--dataset", "old", "--skip-pois"],
+        ):
+            population.main()
+        source = self.mocks[1].call_args.kwargs["source"]
+        self.assertEqual(source.prefix, "datasets/old/")
+        for call in self.mocks[2].call_args_list:
+            self.assertIs(call.args[1].keywords["source"], source)
+
+
+class HostedDatasetTests(unittest.TestCase):
+    """A missing selected object must never silently mix the old and new data."""
+
+    def test_named_snapshots_use_distinct_cached_object_keys(self) -> None:
+        """Both reads and preflight retain the same explicit dataset prefix."""
+        client = Mock(spec=S3Client)
+        for name in ("old", "new"):
+            source = HostedDataset(client, name)
+            source.preload_json_file("floorplans/buildings.json")
+            source.get_json_file("floorplans/all-graph.json")
+            client.preload_json_file.assert_called_with(
+                f"datasets/{name}/floorplans/buildings.json",
+            )
+            client.get_json_file.assert_called_with(
+                f"datasets/{name}/floorplans/all-graph.json",
+            )
+
+    def test_missing_selected_snapshot_fails_without_fallback(self) -> None:
+        """The preflight error propagates instead of trying another dataset."""
+        client = Mock(spec=S3Client)
+        client.preload_json_file.side_effect = ValueError("Missing dataset")
+        source = HostedDataset(client, "old")
+        with self.assertRaisesRegex(ValueError, "Missing dataset"):
+            source.preload_json_file("floorplans/buildings.json")
+        client.preload_json_file.assert_called_once_with(
+            "datasets/old/floorplans/buildings.json",
+        )
+        client.get_json_file.assert_not_called()
 
 
 class AuthorizationTests(unittest.TestCase):
