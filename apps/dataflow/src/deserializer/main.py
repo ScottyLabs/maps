@@ -52,7 +52,7 @@ def main() -> None:
     parser.add_argument(
         "--local",
         action="store_true",
-        help="Import into the local backend using devcontainer credentials",
+        help="Import into the local backend using development credentials",
     )
     args = parser.parse_args()
     if args.local:
@@ -94,4 +94,4 @@ def configure_local() -> None:
             raise ValueError(msg)
         os.environ[name] = value
     # Reading shared storage must never select a remote API for database writes.
-    os.environ["SERVER_URL"] = "http://localhost"
+    os.environ["SERVER_URL"] = "http://localhost:8080"

@@ -4,7 +4,7 @@ import { betterAuth } from "better-auth";
 import { genericOAuth, keycloak } from "better-auth/plugins";
 import { ricochetOAuth } from "./ricochetOAuth.ts";
 
-const callbackURL = "http://localhost/api/auth/oauth2/callback/keycloak";
+const callbackURL = "http://localhost:8080/api/auth/oauth2/callback/keycloak";
 const relayURL = "http://localhost:8090/oauth2/callback";
 const frontendURL = "http://localhost:5173/room/test";
 let exchanges: URLSearchParams[] = [];
@@ -58,7 +58,7 @@ beforeEach(() => {
 const createTestAuth = (relay = true) =>
   betterAuth({
     secret: "ricochet-test-only-secret-at-least-32-characters",
-    baseURL: "http://localhost",
+    baseURL: "http://localhost:8080",
     trustedOrigins: ["http://localhost:5173"],
     plugins: [
       genericOAuth({
@@ -88,7 +88,7 @@ const startLogin = async (
 ) => {
   const response = await auth.handler(
     new Request(
-      `http://localhost/api/auth/sign-in/${generic ? "oauth2" : "social"}`,
+      `http://localhost:8080/api/auth/sign-in/${generic ? "oauth2" : "social"}`,
       {
         method: "POST",
         headers: {
@@ -141,7 +141,7 @@ for (const generic of [false, true]) {
         ),
     ).toBe(true);
     const session = await auth.handler(
-      new Request("http://localhost/api/auth/get-session", {
+      new Request("http://localhost:8080/api/auth/get-session", {
         headers: { Cookie: cookies(response) },
       }),
     );

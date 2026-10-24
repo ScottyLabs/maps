@@ -22,8 +22,8 @@ This branch temporarily uses only `https://t3.storageapi.dev`, region `auto`, bu
 the same dataflow env file, ignoring old shell storage settings. There is no source
 selector or local object-storage service.
 
-With the devcontainer and backend running, run from the repository root (replace
-`python3` with `py -3` in Windows PowerShell):
+With the native devenv stack running, run from the repository root
+(macOS, Linux, or WSL2):
 
 ```sh
 python3 scripts/dev/dev.py populate --check
@@ -39,13 +39,13 @@ abort before clearing tables; a later failure can leave a partial import because
 the entire operation is not transactional.
 
 Restart the backend after import to refresh search/graph caches. The local wrapper
-always targets the local backend, loading identity credentials from the server's
+always targets the local backend on port 8080, loading identity credentials from the server's
 ignored env file. The client needs `/projects/maps/admins` in its Keycloak token.
 The minimal `populate` group avoids installing the full scraper toolchain.
 
 ## Validation
 
-With Python 3.12+ and uv available, run from this directory:
+Inside `devenv shell`, run from this directory:
 
 ```sh
 uv sync --locked --only-group populate --group dev
@@ -53,7 +53,7 @@ PYTHONPATH=src uv run --no-sync python -m unittest discover -s tests -v
 PYTHONPATH=src uv run --no-sync python -c "from linter import main; main()"
 ```
 
-The shell assignment above is for Linux/macOS or a container shell. For the host
+The shell assignment above works on macOS, Linux, or WSL2. For the host
 launcher's platform-independent tests, see the main running guide.
 
 ## _25live

@@ -1,4 +1,4 @@
-"""Host launcher contract tests; no Docker daemon or real credentials required."""
+"""Native launcher contract tests; no Nix builds or real credentials required."""
 
 import contextlib
 import importlib.util
@@ -19,6 +19,11 @@ SPEC.loader.exec_module(dev)
 
 class LauncherTests(unittest.TestCase):
     def setUp(self):
+        # Commands are exercised as a supported native host; Windows rejection
+        # is checked separately while filesystem tests still use the real OS.
+        platform_patch = patch.object(dev.sys, "platform", "linux")
+        platform_patch.start()
+        self.addCleanup(platform_patch.stop)
         self.temporary = tempfile.TemporaryDirectory(prefix="maps test ")
         self.root = Path(self.temporary.name).resolve()
         for app in ("server", "web", "dataflow"):
@@ -61,7 +66,10 @@ class LauncherTests(unittest.TestCase):
         self.assertEqual(len(envs["web"].splitlines()), 2)
         self.assertIn('S3_REGION="auto"', envs["dataflow"])
         self.assertNotIn(self.storage["S3_SECRET_KEY"], envs["web"])
-        self.assertNotIn("SERVER_PORT=", envs["server"])
+        self.assertIn('SERVER_PORT="8080"', envs["server"])
+        self.assertIn('SERVER_URL="http://localhost:8080"', envs["server"])
+        self.assertIn('VITE_SERVER_URL="http://localhost:8080"', envs["web"])
+        self.assertNotIn("DATABASE_URL=", envs["server"])
 
     def test_refresh_creates_both_env_variants_without_logging_secrets(self):
         output = io.StringIO()
@@ -108,56 +116,74 @@ class LauncherTests(unittest.TestCase):
                     dev.pull_secrets()
             self.assertFalse(list(self.root.glob("apps/*/.env*")))
 
-    def test_linux_engine_uses_selected_context_without_switching(self):
+    def test_start_runs_devenv_up_without_a_container_engine(self):
+        for app in ("server", "web"):
+            (self.root / "apps" / app / ".env").write_text("configured\n")
         with (
             patch.object(dev, "require_tool"),
-            patch.object(
-                dev, "run", return_value=subprocess.CompletedProcess([], 0, "linux\n")
-            ) as run,
+            patch.object(dev, "run") as run,
         ):
-            dev.docker_ready()
-        self.assertEqual(
-            run.call_args_list[-1].args[0],
-            ["docker", "info", "--format", "{{.OSType}}"],
-        )
-        self.assertFalse(any("context" in call.args[0] for call in run.call_args_list))
+            self.assertEqual(dev.main(["start", "--skip-secrets"]), 0)
+        run.assert_called_once_with(["devenv", "up"])
 
-    def test_windows_container_engine_is_rejected(self):
+    def test_missing_devenv_explains_install_without_changing_system(self):
         with (
-            patch.object(dev, "require_tool"),
-            patch.object(
-                dev, "run", return_value=subprocess.CompletedProcess([], 0, "windows\n")
-            ),
+            patch.object(dev.shutil, "which", return_value=None),
+            contextlib.redirect_stderr(io.StringIO()) as output,
         ):
-            with self.assertRaisesRegex(RuntimeError, "Linux containers"):
-                dev.docker_ready()
+            self.assertEqual(dev.main(["start", "--skip-secrets"]), 1)
+        self.assertIn("Install devenv", output.getvalue())
 
-    def test_engine_failure_gives_desktop_and_colima_help(self):
+    def test_native_windows_is_directed_to_wsl(self):
         with (
-            patch.object(dev, "require_tool"),
-            patch.object(
-                dev, "run", side_effect=subprocess.CalledProcessError(1, ["docker"])
-            ),
+            patch.object(dev.sys, "platform", "win32"),
+            contextlib.redirect_stderr(io.StringIO()) as output,
         ):
-            with self.assertRaisesRegex(RuntimeError, "Colima"):
-                dev.docker_ready()
+            self.assertEqual(dev.main(["start"]), 1)
+        self.assertIn("WSL2", output.getvalue())
 
     def test_no_shell_and_space_containing_path(self):
         with patch.object(dev.subprocess, "run") as run:
-            dev.run(["docker", "compose", "-f", str(self.root / "compose.yml")])
+            dev.run(["devenv", "shell", "--", "python3", str(self.root / "task.py")])
         args, kwargs = run.call_args
         self.assertIsInstance(args[0], list)
-        self.assertEqual(args[0][-1], str(self.root / "compose.yml"))
+        self.assertEqual(args[0][-1], str(self.root / "task.py"))
         self.assertEqual(kwargs["cwd"], self.root)
         self.assertNotIn("shell", kwargs)
 
-    def test_populate_flags_are_forwarded(self):
+    def test_populate_flags_are_forwarded_to_native_shell(self):
         with (
-            patch.object(dev, "docker_ready"),
-            patch.object(dev, "execute_helper") as execute,
+            patch.object(dev, "require_tool"),
+            patch.object(dev, "run") as run,
         ):
             self.assertEqual(dev.main(["populate", "--check", "--include-pois"]), 0)
-        execute.assert_called_once_with("populate.sh", ["--check", "--include-pois"])
+        run.assert_called_once_with(
+            [
+                "devenv",
+                "shell",
+                "--",
+                "bash",
+                "scripts/dev/populate.sh",
+                "--check",
+                "--include-pois",
+            ]
+        )
+
+    def test_logs_selects_named_process(self):
+        with (
+            patch.object(dev, "require_tool"),
+            patch.object(dev, "run") as run,
+        ):
+            self.assertEqual(dev.main(["logs", "postgres"]), 0)
+        run.assert_called_once_with(["devenv", "processes", "logs", "postgres"])
+
+    def test_stop_preserves_database_and_delegates_lifecycle(self):
+        with (
+            patch.object(dev, "require_tool"),
+            patch.object(dev, "run") as run,
+        ):
+            self.assertEqual(dev.main(["stop"]), 0)
+        run.assert_called_once_with(["devenv", "processes", "down"])
 
     def test_failed_storage_fetch_preserves_existing_credentials(self):
         path = self.root / "apps/dataflow/.env"
@@ -172,17 +198,6 @@ class LauncherTests(unittest.TestCase):
                 dev.pull_secrets()
         self.assertEqual(path.read_bytes(), before)
         self.assertFalse((self.root / "apps/server/.env").exists())
-
-    def test_readiness_timeout_is_bounded(self):
-        with (
-            patch.object(dev.time, "monotonic", side_effect=[0, 0, 601]),
-            patch.object(dev.time, "sleep"),
-            patch.object(
-                dev, "run", side_effect=subprocess.TimeoutExpired("docker", 10)
-            ),
-        ):
-            with self.assertRaisesRegex(RuntimeError, "logs"):
-                dev.wait_services()
 
 
 if __name__ == "__main__":

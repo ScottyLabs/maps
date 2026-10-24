@@ -1,5 +1,17 @@
 # AGENTS.md
 
+## Local development
+
+For startup, credentials, database import, or service troubleshooting, read
+`docs/src/Setup.md`. The supported stack runs natively through Kennel/devenv on
+macOS, Linux, or WSL2. Use `python3 scripts/dev/dev.py start`; PostgreSQL and
+Ricochet are Kennel features, and the API uses port 8080. Keep local database
+writes on this private devenv database. Old Docker volumes are separate data.
+
+For fresh-source pipeline implementation, read `docs/src/Data-Pipeline-Spec.md`.
+Working JSONs are authoritative; the database is a derived preview. CLI and
+visualizer must use the same pipeline implementation.
+
 ## Cursor Cloud specific instructions
 
 ### Overview
@@ -17,7 +29,7 @@ CMU Maps is a Turborepo monorepo with 4 apps and 3 shared packages. See `README.
 ### Key gotchas
 
 - **`DATABASE_URL` in shell env**: The VM may have a stale `DATABASE_URL` env var (e.g. `postgres:5432` from Docker Compose). Always `unset DATABASE_URL` before starting the server, or rely on `dotenv -e .env` properly. The server's `.env` should point to `localhost:5432`.
-- **`SERVER_PORT` in Zod v4**: `z.number()` in Zod v4 does NOT coerce strings. Do NOT set `SERVER_PORT` in `.env`; let it default to 80. Use `sudo setcap cap_net_bind_service=+ep $(which bun)` to allow binding port 80 without root.
+- **`SERVER_PORT`**: The schema coerces and validates a string port. The native development helper selects 8080 so it can run as a normal user; the standalone server default remains 80.
 - **Code generation before lint/build**: Before running `bun run check`, `bun run lint`, `bun run tsc`, or `bun run build`, you must first generate the server's build artifacts: `cd apps/server && bun run db-generate && bun run tsoa && bun run openapi` (or use `bun run sync` from the root).
 - **Pre-commit hooks** (`.husky/pre-commit`): Runs `editorconfig-checker`, `syncpack lint`, `biome check`, and `uv run lint` for Python. These are automatically run by husky on commit.
 

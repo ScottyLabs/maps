@@ -74,7 +74,7 @@ app.use(errorHandler as ErrorRequestHandler);
 app.use(notFoundHandler);
 
 const port = env.SERVER_PORT;
-server.listen(port, () => {
+server.listen(port, env.SERVER_HOST, () => {
   console.log(`Server listening on port ${port}`);
 });
 

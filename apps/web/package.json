@@ -44,7 +44,7 @@
   "scripts": {
     "build": "vite build",
     "check": "tsc -b",
-    "dev": "vite",
+    "dev": "vite --host 127.0.0.1 --port 5173 --strictPort",
     "dev:host": "vite --host 0.0.0.0 --port 5173 --strictPort",
     "preview": "vite preview",
     "tsc": "tsc -b"

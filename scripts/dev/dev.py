@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Portable host entry point; app runtimes and Linux helpers live in Docker."""
+"""Native Kennel/devenv development with host-side OpenBao secrets."""
 
 import argparse
 import json
@@ -9,10 +9,8 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import time
 
 ROOT = Path(__file__).resolve().parents[2]
-COMPOSE = ["docker", "compose", "-f", str(ROOT / ".devcontainer/docker-compose.yml")]
 SECRET_NAMES = (
     "OIDC_CLIENT_ID",
     "OIDC_CLIENT_SECRET",
@@ -52,25 +50,6 @@ def require_tool(name):
         raise RuntimeError(f"Install {name} and put it on PATH; see docs/src/Setup.md.")
 
 
-def docker_ready():
-    require_tool("docker")
-    try:
-        run(COMPOSE + ["version"], quiet=True, timeout=20)
-        result = run(
-            ["docker", "info", "--format", "{{.OSType}}"], capture=True, timeout=20
-        )
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
-        raise RuntimeError(
-            "Docker Compose or the Docker engine is unavailable. Start Docker Desktop "
-            "(Linux containers), Colima ('colima start'), or Docker Engine. "
-            "Check 'docker context show' and 'docker compose version'."
-        ) from error
-    if result.stdout.strip() != "linux":
-        raise RuntimeError(
-            "This project needs Linux containers. Switch Docker Desktop to Linux containers."
-        )
-
-
 def dotenv(values):
     # All consumers support quoted dotenv values. Reject control characters so
     # a malformed secret cannot add another assignment or change parsing.
@@ -96,11 +75,11 @@ def secret_environments(values, storage):
         "AUTH_JWKS_URI": issuer + "/protocol/openid-connect/certs",
         "OAUTH_RELAY_URL": values["OAUTH_RELAY_URL"],
         "BETTER_AUTH_URL": "http://localhost:5173",
-        "DATABASE_URL": "postgresql://postgres:donotuseinprod@localhost:5432/cmumaps",
-        "SERVER_URL": "http://localhost",
+        "SERVER_PORT": "8080",
+        "SERVER_URL": "http://localhost:8080",
     }
     web = {
-        "VITE_SERVER_URL": "http://localhost",
+        "VITE_SERVER_URL": "http://localhost:8080",
         "VITE_MAPKIT_TOKEN": values["MAPKIT_TOKEN"],
     }
     return {"server": dotenv(server), "web": dotenv(web), "dataflow": dotenv(storage)}
@@ -208,58 +187,8 @@ def pull_secrets():
     )
 
 
-def wait_services():
-    print(
-        "Waiting for Ricochet (first startup can take several minutes)...",
-        flush=True,
-    )
-    deadline = time.monotonic() + 600
-    while time.monotonic() < deadline:
-        try:
-            run(
-                COMPOSE + ["exec", "-T", "dev", "devenv", "processes", "wait"],
-                quiet=True,
-                timeout=10,
-            )
-            run(
-                COMPOSE
-                + [
-                    "exec",
-                    "-T",
-                    "dev",
-                    "curl",
-                    "--fail",
-                    "--silent",
-                    "--max-time",
-                    "2",
-                    "http://127.0.0.1:8090/healthz",
-                ],
-                quiet=True,
-                timeout=10,
-            )
-            return
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
-            time.sleep(5)
-    raise RuntimeError(
-        "Services did not become ready within 10 minutes. Run this script with 'logs'."
-    )
-
-
-def execute_helper(name, arguments=(), interactive=False):
-    options = (
-        [] if interactive and sys.stdin.isatty() and sys.stdout.isatty() else ["-T"]
-    )
-    run(
-        COMPOSE
-        + ["exec"]
-        + options
-        + ["dev", "bash", f"scripts/dev/{name}"]
-        + list(arguments)
-    )
-
-
 def start(args):
-    docker_ready()
+    require_tool("devenv")
     if not args.skip_secrets:
         pull_secrets()
     for app in ("server", "web"):
@@ -269,16 +198,9 @@ def start(args):
                 f"Missing apps/{app}/.env. Run without --skip-secrets after OpenBao login."
             )
     print(
-        "Starting devcontainer and PostgreSQL using the active Docker context...",
-        flush=True,
+        "Starting native PostgreSQL, Ricochet, API, and web with devenv...", flush=True
     )
-    run(COMPOSE + ["up", "-d"] + (["--build"] if args.rebuild else []) + ["dev"])
-    wait_services()
-    print(
-        "Starting app. Ctrl-C stops the app; containers and stored data remain.",
-        flush=True,
-    )
-    execute_helper("container-app.sh", interactive=True)
+    run(["devenv", "up"])
 
 
 def main(argv=None):
@@ -289,9 +211,6 @@ def main(argv=None):
     )
     startup.add_argument(
         "--skip-secrets", action="store_true", help="Reuse existing .env files"
-    )
-    startup.add_argument(
-        "--rebuild", action="store_true", help="Rebuild the Docker image"
     )
     commands.add_parser(
         "secrets", help="Only refresh server/web/dataflow env files from OpenBao"
@@ -308,33 +227,42 @@ def main(argv=None):
     populate.add_argument(
         "--include-pois", action="store_true", help="Require and import osm-pois.json"
     )
-    commands.add_parser("stop", help="Stop both containers, preserving volumes")
-    commands.add_parser("logs", help="Follow relay and PostgreSQL logs")
-    commands.add_parser("shell", help="Enter the container's Kennel/devenv shell")
+    commands.add_parser("stop", help="Stop devenv processes, preserving the database")
+    logs = commands.add_parser("logs", help="Show recent logs for a devenv process")
+    logs.add_argument(
+        "process", nargs="?", default="app", choices=("app", "postgres", "ricochet")
+    )
+    commands.add_parser("shell", help="Enter the native Kennel/devenv shell")
     args = parser.parse_args(argv)
     try:
+        if sys.platform == "win32":
+            raise RuntimeError(
+                "Run this setup inside WSL2; Nix does not run in PowerShell."
+            )
         if args.command == "start":
             start(args)
         elif args.command == "secrets":
             pull_secrets()
         else:
-            docker_ready()
+            require_tool("devenv")
             if args.command == "populate":
                 options = (["--check"] if args.check else []) + (
                     ["--include-pois"] if args.include_pois else []
                 )
-                execute_helper("populate.sh", options)
+                run(
+                    ["devenv", "shell", "--", "bash", "scripts/dev/populate.sh"]
+                    + options
+                )
                 if not args.check:
                     print(
                         "Import complete. Restart the app to refresh its search index and graph cache."
                     )
             elif args.command == "shell":
-                options = [] if sys.stdin.isatty() and sys.stdout.isatty() else ["-T"]
-                run(COMPOSE + ["exec"] + options + ["dev", "devenv", "shell"])
+                run(["devenv", "shell"])
             elif args.command == "stop":
-                run(COMPOSE + ["stop"])
+                run(["devenv", "processes", "down"])
             elif args.command == "logs":
-                run(COMPOSE + ["logs", "--follow", "--tail", "100"])
+                run(["devenv", "processes", "logs", args.process])
     except (RuntimeError, OSError, subprocess.TimeoutExpired) as error:
         print(f"Error: {error}", file=sys.stderr)
         return 1

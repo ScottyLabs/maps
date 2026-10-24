@@ -210,5 +210,5 @@ class LocalTargetTests(unittest.TestCase):
             ),
         ):
             population.configure_local()
-            self.assertEqual(os.environ["SERVER_URL"], "http://localhost")
+            self.assertEqual(os.environ["SERVER_URL"], "http://localhost:8080")
             self.assertNotIn("UNRELATED", os.environ)

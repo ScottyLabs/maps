@@ -1,26 +1,12 @@
 # Running locally
 
-The same development setup runs on macOS, Linux, and Windows using Linux
-containers. Run the launcher on your host; edit the mounted checkout on your host
-or in VS Code's Dev Containers extension. Bun, Node, Nix, devenv, the OAuth
-relay, and the dataflow Python environment run inside the development container.
-PostgreSQL runs in a second, sibling container.
-
 ## Quick start
 
-For a first-time setup: **start the app → populate the local database → restart
-the app → open CMU Maps**. Run these commands from the repository root after
-installing the [prerequisites](#prerequisites) and starting Docker Desktop, Colima,
-or Docker Engine.
+**Start the app, populate your database, restart, then open CMU Maps.**
+Use a macOS or Linux terminal, or a WSL2 terminal on Windows. Run commands from
+the repository root after installing the [prerequisites](#prerequisites).
 
-The team stores this branch's temporary S3 configuration in OpenBao at
-`secret/secretspec/maps/dev/TEMP_DEV_S3`. Your development policy must allow reading
-that record as well as the app's identity/MapKit entries. Startup downloads the
-settings automatically; no manual storage env setup is needed.
-
-### 1. Log in and start the app (terminal 1)
-
-macOS, Linux, or WSL:
+### 1. Log in and start (terminal 1)
 
 ```sh
 export BAO_ADDR=https://secrets.scottylabs.org
@@ -28,352 +14,268 @@ bao login -method=oidc
 python3 scripts/dev/dev.py start
 ```
 
-Windows PowerShell:
+Leave this terminal running. Nix downloads the pinned toolchain on the first run.
+Devenv starts PostgreSQL and the OAuth relay; the app process installs Bun
+packages, generates API/database code, applies the local schema, and starts the
+API and web app. The new database has tables but no campus data yet.
 
-```powershell
-$env:BAO_ADDR = "https://secrets.scottylabs.org"
-bao login -method=oidc
-py -3 scripts/dev/dev.py start
-```
+### 2. Populate (terminal 2)
 
-Wait for the backend and web app to start, then leave this terminal running.
-First startup downloads packages and may take several minutes. The new local
-database has tables but no campus data yet.
-
-### 2. Populate the database (terminal 2)
-
-Open a second host terminal in the repository root. Validate the temporary S3
-inputs, then import them into your local database. Continue only if the check succeeds.
-
-macOS, Linux, or WSL:
+Open another terminal in the repository root. Continue only if the check succeeds:
 
 ```sh
 python3 scripts/dev/dev.py populate --check
 python3 scripts/dev/dev.py populate
 ```
 
-Windows PowerShell:
+This reads the shared temporary S3 dataset and replaces your local map tables.
+It does not scrape or publish data. Each developer has their own database.
 
-```powershell
-py -3 scripts/dev/dev.py populate --check
-py -3 scripts/dev/dev.py populate
-```
+### 3. Restart and open
 
-### 3. Restart the app (terminal 1)
-
-After population finishes, press **Ctrl-C in terminal 1**, then restart to rebuild
-the backend's search index and navigation graph cache.
-
-macOS, Linux, or WSL:
+Stop the stack with Ctrl-C in terminal 1, then restart to rebuild backend caches:
 
 ```sh
+python3 scripts/dev/dev.py stop
 python3 scripts/dev/dev.py start --skip-secrets
 ```
 
-Windows PowerShell:
-
-```powershell
-py -3 scripts/dev/dev.py start --skip-secrets
-```
-
-### 4. Open CMU Maps
-
-Open [localhost:5173](http://localhost:5173) and sign in through the app when needed.
-Keep terminal 1 running while developing.
-
-For later sessions, start your container engine and run `start --skip-secrets`.
-Your local data persists. Run `populate` again only when you want to replace your
-local map data with the shared dataset, and restart the app afterward.
-
-All subsequent examples use `python3`; substitute `py -3` in PowerShell.
-The old `bash scripts/dev/container.sh` command remains a macOS/Linux shortcut.
+Open [localhost:5173](http://localhost:5173). On later sessions, use
+`start --skip-secrets`. Populate again only when refreshing your local dataset.
+The explicit `stop` also handles a process manager left running in the background.
 
 ## Prerequisites
 
-Install these yourself and make their commands available in your terminal:
+Install these yourself; the launcher reports missing dependencies:
 
-- Git and Python 3.9 or newer (a current Python release is recommended).
-- Docker with the Compose v2 plugin (`docker compose`, not `docker-compose`).
-- [OpenBao CLI](https://openbao.org/docs/install/) (`bao`) and access to the Maps
-  development secrets.
+- Git and Python 3.9 or newer for the launcher.
+- [Nix and devenv](https://devenv.sh/getting-started/), following the instructions
+  for your operating system. Use the current devenv CLI.
+- [OpenBao CLI](https://openbao.org/docs/install/) (`bao`) and Maps development
+  secret access.
 
-The launcher checks dependencies and reports errors. It does not install Docker
-or OpenBao, start a container engine, change Docker contexts, or perform your login.
-You do not need host installations of Bun, Node, Nix, devenv, `jq`, or `uv`.
+| Platform | Where to run |
+| --- | --- |
+| macOS | Native terminal, including Apple Silicon |
+| Linux | Native terminal as your normal user |
+| Windows | WSL2 Linux terminal; install Nix, devenv, Python, and Bao inside WSL |
 
-| Host | Container engine | Host terminal |
-| --- | --- | --- |
-| macOS | Docker Desktop or [Colima](https://github.com/abiosoft/colima), with Docker CLI and Compose installed | Terminal, `python3` |
-| Linux | Docker Engine with Compose v2, or Docker Desktop | Terminal, `python3` |
-| Windows | [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) in Linux container mode | PowerShell, `py -3` (or `python`) |
-| Windows with WSL 2 | Docker Desktop with integration enabled for that distribution | WSL terminal, `python3` |
+Windows PowerShell cannot run Nix directly. Keep the checkout in the WSL Linux
+filesystem and use an editor connected to WSL. OpenBao login must happen inside
+WSL too; a Windows login does not automatically authenticate the Linux CLI.
 
-Start your chosen engine before continuing. For Colima, run `colima start`.
-Verify `docker info` and `docker compose version` work in the same terminal used
-for the launcher. `docker context show` identifies the selected engine; the script
-uses it unchanged. Switching engines gives you a separate set of images and volumes.
-For Windows/WSL, keep the checkout in the WSL Linux filesystem for better bind-mount
-performance and file watching, as described in [Docker's WSL guide](https://docs.docker.com/desktop/features/wsl/).
-Install Python and `bao`, and log into OpenBao, in the environment where you run
-the launcher; a Windows login is not automatically a WSL login.
+Verify `nix --version`, `devenv version`, and `bao version` work. Open a new shell
+after installing Nix so its environment is loaded. Docker, Colima, and Docker
+Desktop are not used by this development workflow. Nix supplies Bun, Node,
+Python 3.12, uv, PostgreSQL, and the relay through the committed scaffold/lock.
+The launcher does not install system tools, request sudo, or perform your login.
 
 ## Everyday commands
 
 ```sh
 python3 scripts/dev/dev.py start --skip-secrets
-python3 scripts/dev/dev.py start --rebuild
+python3 scripts/dev/dev.py secrets
 python3 scripts/dev/dev.py shell
 python3 scripts/dev/dev.py logs
+python3 scripts/dev/dev.py logs postgres
 python3 scripts/dev/dev.py stop
 ```
 
-- `start --skip-secrets` reuses the saved env files without contacting OpenBao.
-- `start --rebuild` rebuilds the image after Dockerfile changes and refreshes secrets.
-  Combine both flags to rebuild while reusing secrets.
-- `shell` enters the container's `devenv shell`, for manual commands.
-- `logs` follows container services (relay and PostgreSQL). App logs appear in
-  the terminal running `start`.
-- `stop` stops both containers, including a detached app, and preserves data.
+`secrets` refreshes the saved env files without starting anything. `shell` enters
+the pinned development environment. `logs` shows recent app output; name `postgres` or `ricochet` to inspect those
+services. `devenv up` shows live process output. `stop` stops the stack and preserves data.
+Use one process manager per checkout; stop it before changing the Nix service
+configuration and starting again.
 
-Ctrl-C in the startup terminal stops the foreground app; service containers keep
-running. If an app was started in another terminal or detached, stop that process
-or use `stop` before starting again. The helper rejects duplicate starts and Vite
-fails if port 5173 is occupied instead of silently moving to a different port.
-
-For VS Code, use **Dev Containers: Reopen in Container**. The post-create hook
-installs app dependencies only. Run `bash scripts/dev/container-app.sh` in the
-container terminal to start the app after secrets have been downloaded on the
-host. Do not run a second app if the host launcher already started one.
+The web app requires port 5173 and the API uses 8080, so startup needs no root
+privileges. Ricochet uses Kennel's fixed loopback port 8090. PostgreSQL uses a
+private Unix socket rather than a TCP port. Stop other applications using these
+HTTP ports before startup; Vite will fail rather than silently choose another.
 
 ## What startup does
 
-1. Checks Docker/Compose and the selected Linux container engine.
-2. Checks your host OpenBao login, fetches six app values and the `TEMP_DEV_S3` record, and writes the
-   server/web/dataflow `.env` and `.env.local` files. It fetches and validates all values
-   before replacing any file. This replaces local edits in those six files.
-3. Runs Compose to start PostgreSQL and the development container. The latter
-   runs `devenv up`, enabling Ricochet through Kennel's Nix module.
-4. Waits for service readiness, then installs the pinned Bun/Node/OpenSSL runtimes
-   into the persistent Nix profile and runs `bun install --frozen-lockfile`.
-5. Generates Prisma, tsoa, and OpenAPI artifacts with `bun run sync`, then runs
-   `prisma db push --skip-generate` against local PostgreSQL. It does not pass
-   `--accept-data-loss`; schema changes that require it need manual review.
-6. Starts the backend and web app with the container database URL overriding the
-   host-oriented value in the env file. Importing data is a separate, explicit
-   command so ordinary startup does not reset your database.
+1. Checks for devenv and, unless `--skip-secrets` is supplied, your OpenBao login.
+2. Fetches six app entries and `TEMP_DEV_S3`. It validates all values before
+   replacing server/web/dataflow `.env` and `.env.local` files. Refreshing replaces
+   local edits in those six files.
+3. Runs `devenv up`. Kennel starts PostgreSQL and Ricochet as native processes.
+4. The app helper waits for both services, then runs `bun install --frozen-lockfile`.
+5. Runs `bun run sync` to generate Prisma, tsoa, and OpenAPI artifacts, followed by
+   `prisma db push --skip-generate`. It does not accept destructive schema changes
+   automatically.
+6. Starts the backend and Vite. Importing campus data remains a separate command.
+
+Code generation makes the server's database client and API types available.
+Applying the schema creates tables; population is the later JSON-to-database
+operation. Startup never resets or imports map records.
 
 ## Secrets and login
 
-Values come from KV v2 mount `secret`, under `secretspec/maps/dev/<NAME>`, with a
-string field named `value` in each entry:
+App values are KV v2 entries under mount `secret`, path
+`secretspec/maps/dev/<NAME>`, with a string field named `value`:
 
 | OpenBao entry | Used as |
 | --- | --- |
 | `OIDC_CLIENT_ID` | Server `AUTH_CLIENT_ID` |
 | `OIDC_CLIENT_SECRET` | Server `AUTH_CLIENT_SECRET` |
-| `KEYCLOAK_URL`, `KEYCLOAK_REALM` | Server `AUTH_ISSUER` and `AUTH_JWKS_URI` |
-| `OAUTH_RELAY_URL` | Server OAuth callback relay URL |
+| `KEYCLOAK_URL`, `KEYCLOAK_REALM` | Server issuer and JWKS URL |
+| `OAUTH_RELAY_URL` | Server callback relay URL |
 | `MAPKIT_TOKEN` | Web `VITE_MAPKIT_TOKEN` |
 
-The launcher also supplies local URLs, the local PostgreSQL connection string,
-and the allowed frontend origin. The web env file contains only the MapKit token
-and `VITE_SERVER_URL`; identity client credentials stay in the server env files.
-The separate `TEMP_DEV_S3` record has fields `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET`,
-`S3_ACCESS_KEY`, and `S3_SECRET_KEY`. The launcher writes them only to ignored
-`apps/dataflow/.env` and `.env.local`; storage credentials never reach the browser.
+The grouped `TEMP_DEV_S3` record at `secret/secretspec/maps/dev/TEMP_DEV_S3`
+contains `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET`, `S3_ACCESS_KEY`, and
+`S3_SECRET_KEY`. Those settings go only into the ignored dataflow env files.
+The browser receives the MapKit token and local API URL; identity and storage
+credentials stay in backend/dataflow files. Env files use owner-only POSIX
+permissions. Never commit them or your OpenBao token.
 
-The current temporary source is `https://t3.storageapi.dev`, region `auto`, bucket
-`categorized-lockerbox-v9qy6t`. Changing the OpenBao record changes the one shared
-source; there are no alternate source flags or local storage services on this branch.
+The current temporary bucket is `categorized-lockerbox-v9qy6t` at
+`https://t3.storageapi.dev`, region `auto`. Changing its OpenBao record changes the
+shared source. The app/database URL is local configuration, not a hosted secret.
+Kennel supplies the PostgreSQL socket; the app helper explicitly selects that
+socket so stale Docker database settings cannot choose another database.
 
-Files are ignored by Git and excluded from image builds. The OpenBao session/token remains
-on your host; it is not passed into the container. POSIX env files are owner-only;
-Windows files inherit your checkout's access controls. Never commit them.
-
-OpenBao authentication and application login are separate. For browser login:
+OpenBao authenticates the developer. Application browser login is separate:
 
 ```text
-Browser -> backend /api/auth -> Keycloak
-Keycloak -> configured OAUTH_RELAY_URL -> local Ricochet on port 8090
-Ricochet -> backend /api/auth/oauth2/callback/keycloak -> web session
+Browser -> API on localhost:8080 -> Keycloak
+Keycloak -> registered OAUTH_RELAY_URL -> Ricochet on localhost:8090
+Ricochet -> localhost:8080/api/auth/oauth2/callback/keycloak -> web session
 ```
 
-The backend wraps the OAuth state with its return URL and binds it to a signed
-cookie. It validates and unwraps the state on return. Ricochet runs through
-`scottylabs.ricochet.enable` and listens on the container interface; Docker exposes
-it only on your host's loopback address. Use the relay URL supplied by OpenBao
-for the registered development client. These files do not provision or change
-Keycloak client registrations.
+The backend wraps the return URL in OAuth state and binds it to a signed cookie.
+Kennel enables Ricochet with `scottylabs.ricochet.enable`; its native loopback
+binding needs no override or Docker forwarding. Use the relay URL from OpenBao.
+Changing local settings does not register a new redirect with Keycloak.
 
-Database population uses `client_credentials`, not a browser or the relay. The
-Keycloak client must have a service account whose access token includes the
-`/projects/maps/admins` group. The backend checks token signature, expiration,
-issuer, and the required group; audience is not required by the current policy.
-There is no separate password-based database-management user. The backend uses
-its PostgreSQL connection to perform the authorized writes.
+Population uses a Keycloak service-account token through `client_credentials`.
+Its `groups` claim must contain `/projects/maps/admins`. The backend validates
+signature, expiration, issuer, and group; audience is not required by the current
+policy. Your personal Bao login does not grant this API permission.
 
 ## Populate the local database
 
-The pipeline reads the temporary bucket and writes through the local backend API:
-
-```text
-S3 categorized-lockerbox-v9qy6t/floorplans/*.json
-  -> dataflow validation + service-account token
-  -> local backend -> local PostgreSQL -> restart backend caches -> web
-```
-
-With the app running, use a second host terminal:
+With the app running:
 
 ```sh
 python3 scripts/dev/dev.py populate --check
 python3 scripts/dev/dev.py populate
 ```
 
-| Required object key | Contents |
+| S3 object key | Contents |
 | --- | --- |
 | `floorplans/buildings.json` | Building metadata |
-| `floorplans/floorplans.json` | Room/floorplan geometry |
-| `floorplans/placements.json` | Floor placement data |
+| `floorplans/floorplans.json` | Room geometry and labels |
+| `floorplans/placements.json` | Floor placements |
 | `floorplans/all-graph.json` | Navigation graph |
 | `floorplans/osm-pois.json` (optional) | Points of interest |
 
-`populate --check` downloads and validates the JSON models and references, obtains
-a Keycloak token, and sends an empty building batch to test backend authorization.
-It does not clear tables. `populate` then clears the seven local map tables and
-imports buildings, floors, rooms, aliases, nodes, and edges. POIs are cleared and
-left empty unless `--include-pois` is supplied and their file exists in the bucket.
-Missing credentials, missing objects, or validation failures abort before reset.
-A later network/write failure can leave a partial import because the operation
-is not one transaction; resolve the issue and rerun it.
+`--check` validates the models/references and sends an empty building batch to
+check backend authorization without clearing tables. Population clears the seven
+map tables, then imports records. POIs remain empty unless `--include-pois` is
+supplied and the optional file exists. Authentication records are retained.
 
-Stop and restart the app after population to refresh its search/graph caches:
+Missing credentials, objects, or validation failures abort before reset. A later
+write failure can leave partial map records because the existing importer is not
+one transaction; resolve the failure and rerun. Restart the app afterward so its
+search index and graph cache reflect the imported data.
 
-```sh
-python3 scripts/dev/dev.py start --skip-secrets
-```
-
-Developers share source files, not databases. Each local database changes only
-when its developer imports. Population reads the hosted bucket without modifying
-it; publishing processed datasets is a separate operation. The scraper/serializer
-S3 helpers use this same bucket. Raw `source-fetch/` artifacts cannot replace the
-four processed JSON inputs.
+The importer always targets `http://localhost:8080` in local mode. It reads auth
+from `apps/server/.env` and storage from `apps/dataflow/.env`, ignoring inherited
+storage variables. Population reads hosted storage without modifying it. Fresh
+capture/generation is covered by the [pipeline specification](Data-Pipeline-Spec.md);
+raw source artifacts are not valid substitutes for the processed JSONs above.
 
 ## Manual run
 
-These are the same stages as the launcher, separated for inspection. Docker
-commands work in PowerShell or a Unix shell. Multiline Bash blocks below run
-**inside the Linux container**, regardless of your host OS.
+These are the same stages the launcher performs, separated for inspection.
 
-### 1. Refresh env files on the host
+### 1. Refresh secrets
 
-Log into OpenBao as in the quick start, then run only the secrets stage:
+After `bao login -method=oidc`:
 
 ```sh
 python3 scripts/dev/dev.py secrets
 ```
 
-Its implementation is `pull_secrets` and `secret_environments` in
-[`scripts/dev/dev.py`](../../scripts/dev/dev.py). For each name in the table it
-executes `bao kv get -format=json -mount=secret secretspec/maps/dev/<NAME>` and
-reads `data.data.value`. It maps those values to the app env names above and writes
-both dotenv variants. `TEMP_DEV_S3` is one grouped record: its five fields are read
-directly from `data.data`, rather than a `value` field. All app/storage values are
-fetched and validated before any env file is replaced. It never sources downloaded
-data as shell code. To manage
-env files manually, use the same mappings and local constants in
-`secret_environments`; do not set `SERVER_PORT`, whose schema expects a number.
+[`pull_secrets`](../../scripts/dev/dev.py) runs `bao kv get -format=json
+-mount=secret secretspec/maps/dev/<NAME>` and reads `data.data.value`. For
+`TEMP_DEV_S3`, it reads the five fields directly from `data.data`. All values are
+validated before any env file is replaced; downloaded content is never executed
+as shell code.
 
-### 2. Start service containers
+### 2. Enter the environment and start services
 
 ```sh
-docker compose -f .devcontainer/docker-compose.yml up -d --build dev
-docker compose -f .devcontainer/docker-compose.yml logs -f dev
+devenv shell
+devenv up postgres ricochet
 ```
 
-Wait for Ricochet to finish starting; Ctrl-C stops the log viewer only.
-Readiness checks used by the launcher:
+Leave that terminal running. In another terminal, enter the environment and start
+the app helper:
 
 ```sh
-docker compose -f .devcontainer/docker-compose.yml exec dev devenv processes wait
-docker compose -f .devcontainer/docker-compose.yml exec dev curl --fail http://127.0.0.1:8090/healthz
+devenv shell
+bash scripts/dev/app.sh
 ```
 
-### 3. Prepare and start the application
+[`app.sh`](../../scripts/dev/app.sh) selects Kennel's PostgreSQL socket, waits for
+PostgreSQL and relay health, and executes:
 
 ```sh
-docker compose -f .devcontainer/docker-compose.yml exec dev bash scripts/dev/container-app.sh
-```
-
-[`container-app.sh`](../../scripts/dev/container-app.sh) installs missing runtimes
-from `devenv.lock`, installs Bun dependencies, and performs these core steps:
-
-```sh
-unset SERVER_PORT
-export DATABASE_URL='postgresql://postgres:donotuseinprod@postgres:5432/cmumaps'
+bun install --frozen-lockfile
 bun run sync
 (cd apps/server && bunx prisma db push --skip-generate)
-export LD_LIBRARY_PATH="/nix/var/nix/profiles/devenv/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-bunx turbo dev:host --env-mode=loose --filter=@cmumaps/web --filter=@cmumaps/server
+bunx turbo dev --env-mode=loose --filter=@cmumaps/web --filter=@cmumaps/server
 ```
 
-The OpenSSL library override is applied after Prisma schema generation/push:
-Bun's Nix loader needs the Nix library, while the standalone Prisma schema engine
-uses Ubuntu's OpenSSL. The helper also removes stale `SERVER_PORT` assignments
-from server dotenv files and guards against two app instances.
+The helper supplies the local API port/URLs and an explicit database user in the
+socket URL for Prisma. On Linux, Nix supplies OpenSSL and C++ shared libraries
+needed by Prisma's downloaded engines. No global runtime profile is modified.
+Run either this manual split or the all-in-one startup, so two app processes
+cannot race for the same ports.
 
-### 4. Populate manually (optional)
+### 3. Populate explicitly
 
-With the app running, run the container helper from another terminal:
+In a third terminal:
 
 ```sh
-docker compose -f .devcontainer/docker-compose.yml exec -T dev bash scripts/dev/populate.sh --check
-docker compose -f .devcontainer/docker-compose.yml exec -T dev bash scripts/dev/populate.sh
+devenv shell
+bash scripts/dev/populate.sh --check
+bash scripts/dev/populate.sh
 ```
 
-The helper installs `uv` from the Nix pin if missing, uses a dedicated Linux cache
-and virtual environment, and executes this inside `devenv shell`:
+The helper runs the minimal population dependency group with Nix's Python 3.12
+and uv. Its virtual environment lives under `.devenv/state/dataflow-venv`:
 
 ```sh
-export UV_CACHE_DIR=/root/.cache/cmumaps-dataflow/uv
-export UV_PYTHON_INSTALL_DIR=/root/.cache/cmumaps-dataflow/python
-export UV_PROJECT_ENVIRONMENT=/root/.cache/cmumaps-dataflow/venv
 cd apps/dataflow
-export PYTHONPATH=src
-uv run --locked --only-group populate python -m deserializer --local --skip-pois --check
+uv run --locked --only-group populate --python "$(command -v python3)" python -m deserializer --local --skip-pois --check
 ```
 
-Remove `--check` to replace local data; remove `--skip-pois` to include POIs.
-The minimal `populate` dependency group avoids installing unused scraper tools.
-The importer reads identity credentials from `apps/server/.env` and bucket
-credentials from `apps/dataflow/.env`. The S3 client reads all five storage settings from the dataflow env file;
-stale shell settings cannot choose a different source. Local mode always targets `http://localhost` for API writes. Restart the
-app when finished.
+The helper also sets `PYTHONPATH=src`, `UV_PROJECT_ENVIRONMENT`, and disables uv's
+Python downloads. Remove `--check` to import; `--include-pois` on the helper
+removes the importer's `--skip-pois`. Stop and restart the app when done.
 
 ## Checks and maintenance
 
-Inside the container, generate code before application checks:
+Run checks in the pinned shell:
 
 ```sh
+devenv shell
 bun run sync
 bun run check
 bun test apps/server/src/lib/ricochetOAuth.test.ts
-```
-
-Host launcher tests require only Python:
-
-```sh
 python3 -m unittest discover -s scripts/dev/tests -v
 ```
 
-The launcher workflow runs these contract tests on Windows, Linux, and macOS.
-They mock Docker/OpenBao; they do not replace an engine integration test. Dataflow
-checks are described in [its README](../../apps/dataflow/README.md).
+See the [dataflow README](../../apps/dataflow/README.md) for Python checks.
+`devenv.lock` pins the project inputs; use `devenv update` only when deliberately
+upgrading them and review its diff.
 
-Named volumes preserve PostgreSQL, Nix packages, and caches across
-container recreation. `stop` and `docker compose ... down` retain those volumes;
-`down --volumes` deletes them. Keep local datasets under `uploads/` and secrets
-in ignored env files. See [Troubleshooting](Troubleshooting.md) for startup issues.
-
-The older native-host `bun run dev:*` and `secrets:*` commands remain for existing
-workflows; they require host runtimes and may use the older Vault paths. The
-container quick start above uses the current Secretspec/OpenBao entries.
+PostgreSQL data live under `.devenv/state`, independently of the old Docker
+volume. Switching starts a fresh local database; run population after startup.
+The migration does not delete Docker volumes. If you need previous local edits,
+export them before retiring the old setup. Stop processes before moving the
+checkout or removing state. Deleting `.devenv/state` deletes the native database.
+Keep source captures/datasets under ignored `uploads/` and credentials in env files.

@@ -8,18 +8,17 @@ floors, rooms, aliases, graph nodes/edges, and POIs; authentication tables are
 managed alongside them. Population replaces the seven map tables, not user login
 records.
 
-Locally, Compose runs PostgreSQL 17 in a sibling container. The backend connects
-to `postgres:5432`; the database port is not published to the host. Inspect it from
-the repository root with:
+Locally, Kennel enables PostgreSQL 18 through devenv, using a private Unix
+socket and database `maps`. Inspect it from the repository root:
 
 ```sh
-docker compose -f .devcontainer/docker-compose.yml exec postgres psql -U postgres -d cmumaps
+devenv shell -- psql -d maps
 ```
 
-The `postgres_data` volume preserves data across container recreation. The startup
-helper applies the Prisma schema but does not automatically populate it. See
-[Running locally](Setup.md#populate-the-local-database) for importing.
-Hosted database access is configured separately; do not reuse local credentials.
+Data persist under `.devenv/state`, independently of the old Docker volume.
+Startup applies the Prisma schema without populating or resetting map records.
+See [Running locally](Setup.md#populate-the-local-database) for importing.
+Hosted database access is configured separately.
 
 ## Object storage
 

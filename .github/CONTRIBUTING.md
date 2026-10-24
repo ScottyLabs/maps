@@ -32,8 +32,8 @@ when opening your PR.
 
 ### Setup and Develop
 
-Follow the [running guide](../docs/src/Setup.md) for Docker Desktop, Colima, or
-Docker Engine setup on macOS, Windows, and Linux. Ask the team for Maps development
+Follow the [running guide](../docs/src/Setup.md) for native Nix/devenv setup on
+macOS, Linux, or Windows through WSL2. Ask the team for Maps development
 OpenBao access and an authorized dataset. A successful OpenBao login alone does
 not grant access to every secret path.
 

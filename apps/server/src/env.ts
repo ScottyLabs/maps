@@ -17,7 +17,8 @@ const envSchema = z.object({
     .string()
     .default("false")
     .transform((val) => val === "true"),
-  SERVER_PORT: z.number().default(80),
+  SERVER_PORT: z.coerce.number().int().min(1).max(65535).default(80),
+  SERVER_HOST: z.string().optional(),
   SERVER_URL: z.url(),
 });
 
