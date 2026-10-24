@@ -11,6 +11,7 @@ from typing import Literal
 import requests
 from pydantic import BaseModel, ConfigDict
 
+from processor.generate import build_workspace
 from processor.store import EditConflictError, WorkspaceStore
 from processor.working import WorkingDataset  # noqa: TC001
 from scraper.fms.capture import SourceError
@@ -22,7 +23,7 @@ class Request(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    operation: Literal["list", "read", "normalize", "save", "public"]
+    operation: Literal["list", "read", "normalize", "save", "public", "build"]
     workspace: str = ""
     expected_revision: str = ""
     working: WorkingDataset | None = None
@@ -48,6 +49,8 @@ def main() -> int:
                 request.working,
                 expected_revision=request.expected_revision,
             ).model_dump_json()
+        elif request.operation == "build":
+            result = build_workspace(store.path(request.workspace)).model_dump_json()
         elif request.operation == "public":
             with requests.Session() as session:
                 fetch_buildings(store.path(request.workspace), session)

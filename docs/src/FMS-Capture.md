@@ -160,3 +160,29 @@ and selection consistency. Fixtures contain synthetic drawings and no credential
 See the [dataflow README](../../apps/dataflow/README.md#validation) for commands.
 A live capture remains the integration check for CMU authentication and source
 navigation; CI does not store CMU passwords or automate Duo.
+
+## Generate an application candidate
+
+After saving a reference placement in the [visualizer](Data-Visualizer-Wiki.md):
+
+```sh
+devenv shell -- bash scripts/dev/pipeline.sh build --workspace uploads/pipeline/ansys-v1
+```
+
+The shared engine exports the five existing JSON contracts together under
+`generated/<revision>/floorplans/`, plus a report with checksums, counts and source
+warnings. `generated.json` points to the last successful build. Saved edits do
+not change a generated candidate until another explicit build. No database write
+or storage upload occurs during generation.
+
+A building needs fresh public metadata and a saved reference anchor. Unverified
+floor alignments are excluded and reported. Unknown room classifications,
+missing labels, absent door/connector evidence and missing outdoor coverage are
+also reported. Current room nodes have no guessed links across shared walls;
+supported, explicitly classified restrooms can generate restroom POIs. These
+incomplete candidates are for development inspection, not proof of usable routes.
+
+Generated revisions are immutable. A bad polygon or failed generation must not
+replace the previous successful report. Application coordinate schemas reject
+out-of-range geographic values, and nullable fields such as `osmId` are retained
+for compatibility with the existing importer.
