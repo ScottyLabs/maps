@@ -17,6 +17,7 @@ from processor.generate import build_workspace
 from processor.store import EditConflictError, WorkspaceStore
 from processor.working import WorkingDataset  # noqa: TC001
 from scraper.fms.capture import SourceError
+from scraper.outdoor import fetch_outdoor
 from scraper.public import fetch_buildings
 
 
@@ -26,7 +27,14 @@ class Request(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     operation: Literal[
-        "list", "read", "normalize", "save", "public", "build", "import-payload",
+        "list",
+        "read",
+        "normalize",
+        "save",
+        "public",
+        "outdoor",
+        "build",
+        "import-payload",
     ]
     workspace: str = ""
     expected_revision: str = ""
@@ -71,14 +79,16 @@ def _dispatch(request: Request, store: WorkspaceStore) -> str:
     elif request.operation == "import-payload":
         with contextlib.redirect_stdout(sys.stderr):
             payload = serialize_candidate(
-                store.path(request.workspace), request.revision,
+                store.path(request.workspace),
+                request.revision,
             )
         result = payload.model_dump_json()
     elif request.operation == "build":
         result = _build(request, store)
-    elif request.operation == "public":
+    elif request.operation in {"public", "outdoor"}:
         with requests.Session() as session:
-            fetch_buildings(store.path(request.workspace), session)
+            fetch = fetch_buildings if request.operation == "public" else fetch_outdoor
+            fetch(store.path(request.workspace), session)
         result = store.read(request.workspace).model_dump_json()
     elif request.operation == "normalize":
         result = store.normalize(request.workspace).model_dump_json()

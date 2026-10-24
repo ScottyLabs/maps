@@ -22,9 +22,11 @@ the same Python engine used by the CLI.
    initial position is a draft centred on the freshly fetched CMU GIS footprint.
    Use the existing map placement controls to align one floor. Click the map to
    move the drawing, adjust angle/scale, then **Save placement to JSON**.
-6. Return to **Working drawing**, then **Build candidate**. Review the counts and
+6. Optionally choose **Fetch outdoor paths and POIs** after fetching building metadata.
+   This saves the public source snapshot to the same working JSON.
+7. Return to **Working drawing**, then **Build candidate**. Review the counts and
    source warnings. Unsaved edits must be saved first.
-7. Choose **Load preview in app**. The backend validates the candidate, imports it
+8. Choose **Load preview in app**. The backend validates the candidate, imports it
    into a separate local schema, and prepares search and routing caches before
    selecting it. The browser opens a fresh app page for that revision.
 
@@ -32,8 +34,8 @@ The map controls use the app's existing coordinate conversion. Normalized source
 coordinates are metres with y up; the visualizer's drawing coordinates use y down.
 A saved building anchor records the reference floor, physical origin, geographic
 centre, angle, and scale. Do not treat merely similar SVG crops as verified floor
-alignment. Unverified floors are excluded with warnings. Door/connector and
-outdoor generation remain incomplete; a preview being viewable does not verify routes.
+alignment. Unverified floors are excluded with warnings. Indoor door/connector generation remains incomplete; a preview being viewable
+does not verify those routes. Public path and point POI generation is available.
 
 The app shows its workspace/revision and preserves that context in room and route
 URLs. An older page gets a reload prompt after another preview activates. Failed

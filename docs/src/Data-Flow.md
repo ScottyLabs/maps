@@ -21,9 +21,10 @@ Fresh FMS capture + public building metadata
   -> ready search/graph caches -> fresh revision-scoped app page
 ```
 
-The first preview contains the reference floor's rooms and labels. Verified
-stacking, source-backed door/connector routes, outdoor paths and full POI coverage
-remain work in progress. Warnings identify excluded floors and missing evidence.
+The first preview contains rooms and labels on five floors aligned through
+verified shared footprints and one manual anchor. Floor D lacks enough alignment
+evidence. Public OSM paths and point POIs now run through the same build/import path.
+Source-backed indoor door/connector routes and full POI coverage remain in progress. Warnings identify excluded floors and missing evidence.
 The import below loads the preserved shared baseline; raw capture is not a
 generated application dataset.
 

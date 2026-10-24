@@ -6,6 +6,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from models.pois import Poi  # noqa: TC001
+
 
 class WorkingModel(BaseModel):
     """Reject unknown fields and non-finite coordinates in saved edits."""
@@ -80,6 +82,27 @@ class SourceBuilding(WorkingModel):
     source_abbreviation: str | None = None
 
 
+class OutdoorWay(WorkingModel):
+    """An OSM path with source tags retained for access/connector review."""
+
+    id: str
+    nodes: list[str]
+    tags: dict[str, str]
+
+
+class OutdoorData(WorkingModel):
+    """A verified public snapshot, retained alongside editable indoor source data."""
+
+    source_url: str
+    query: str
+    artifact_sha256: str
+    artifact_path: str
+    nodes: dict[str, GeographicPoint]
+    ways: list[OutdoorWay]
+    pois: dict[str, Poi]
+    warnings: list[str] = Field(default_factory=list)
+
+
 class WorkingDataset(WorkingModel):
     """The saved editable state, shared by every pipeline entry point."""
 
@@ -88,3 +111,4 @@ class WorkingDataset(WorkingModel):
     floors: dict[str, dict[str, WorkingFloor]]
     anchors: dict[str, ReferencePlacement] = Field(default_factory=dict)
     buildings: dict[str, SourceBuilding] = Field(default_factory=dict)
+    outdoor: OutdoorData | None = None

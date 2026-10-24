@@ -70,17 +70,22 @@ export default function WorkspaceEditor({ workspace, initial }: Props) {
       setBusy(false);
     }
   };
-  const fetchPublic = async () => {
+  const fetchSource = async (operation: "public" | "outdoor") => {
     if (dirty) {
-      setMessage("Save your working edits before fetching public sources.");
+      setMessage("Save your working edits before fetching sources.");
       return;
     }
     setBusy(true);
     try {
-      const saved = await pipeline<WorkspaceView>("public", workspace);
+      const saved = await pipeline<WorkspaceView>(operation, workspace);
       setView(saved);
       setDraft(saved.working);
-      setMessage("Fresh public building metadata is available for placement.");
+      setReport(null);
+      setMessage(
+        operation === "public"
+          ? "Public building metadata is available for placement."
+          : "Outdoor paths and POIs saved to working JSON. Rebuild to include them.",
+      );
     } catch (error) {
       setMessage((error as Error).message);
     } finally {
@@ -303,10 +308,20 @@ export default function WorkspaceEditor({ workspace, initial }: Props) {
           disabled={busy}
           className="rounded border px-3 py-2"
           onClick={() => {
-            void fetchPublic();
+            void fetchSource("public");
           }}
         >
           Fetch public building metadata
+        </button>
+        <button
+          type="button"
+          disabled={busy || dirty}
+          className="rounded border px-3 py-2 disabled:opacity-40"
+          onClick={() => {
+            void fetchSource("outdoor");
+          }}
+        >
+          Fetch outdoor paths and POIs
         </button>
         <button
           type="button"
@@ -359,7 +374,7 @@ export default function WorkspaceEditor({ workspace, initial }: Props) {
         {draft.anchors[building] && (
           <span>
             Reference saved on floor {draft.anchors[building].reference_floor};
-            cross-floor alignment needs verification.
+            build to check shared-frame landmarks.
           </span>
         )}
       </div>
@@ -385,6 +400,29 @@ export default function WorkspaceEditor({ workspace, initial }: Props) {
                 <li key={`${warning}-${index}`}>{warning}</li>
               ))}
             </ul>
+          </details>
+          <details>
+            <summary>Verified shared drawing frames</summary>
+            <ul className="list-inside list-disc text-sm">
+              {Object.entries(report.alignment).map(([floor, evidence]) => (
+                <li key={floor}>
+                  {floor}: {evidence.matches.length} matching footprints against
+                  floor {evidence.reference_floor}, spanning{" "}
+                  {evidence.span_metres.toFixed(2)} m. Maximum boundary
+                  difference{" "}
+                  {Math.max(
+                    ...evidence.matches.map(
+                      (match) => match.boundary_error_metres,
+                    ),
+                  ).toFixed(3)}{" "}
+                  m.
+                </li>
+              ))}
+            </ul>
+            <p className="text-sm">
+              This verifies 2D alignment, not stairs, elevators or travel
+              between floors.
+            </p>
           </details>
         </section>
       )}
@@ -492,6 +530,24 @@ export default function WorkspaceEditor({ workspace, initial }: Props) {
             </>
           )}
           <h2 className="font-semibold">Source coverage</h2>
+          {draft.outdoor && (
+            <div className="text-sm">
+              <p>
+                Public OSM snapshot: {draft.outdoor.ways.length} captured paths
+                · {Object.keys(draft.outdoor.pois).length} point POIs.
+              </p>
+              <details>
+                <summary>
+                  Outdoor source warnings ({draft.outdoor.warnings.length})
+                </summary>
+                <ul className="max-h-48 list-inside list-disc overflow-y-auto">
+                  {draft.outdoor.warnings.map((warning) => (
+                    <li key={warning}>{warning}</li>
+                  ))}
+                </ul>
+              </details>
+            </div>
+          )}
           <ul className="list-inside list-disc text-sm text-amber-800">
             {floor.warnings.map((warning, index) => (
               <li key={`${warning}-${index}`}>{warning}</li>

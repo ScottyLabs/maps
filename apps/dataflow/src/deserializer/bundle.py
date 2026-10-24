@@ -88,7 +88,13 @@ def serialize_candidate(workspace: Path, revision: str) -> PopulationPayload:
             msg = f"Candidate artifact changed after generation: {name}"
             raise SourceError(msg)
     identity = json.dumps(
-        [workspace.name, view.revision, hashes, report.warnings],
+        [
+            workspace.name,
+            view.revision,
+            hashes,
+            report.warnings,
+            {key: value.model_dump() for key, value in report.alignment.items()},
+        ],
         sort_keys=True,
     ).encode()
     if hashlib.sha256(identity).hexdigest() != revision:

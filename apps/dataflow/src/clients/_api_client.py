@@ -95,6 +95,19 @@ class ApiClient:
         """Check credentials, admin authorization, and backend without adding rows."""
         self.populate_table("Building", [])
 
+    def read_preview(self, path: str, revision: str) -> Any:  # noqa: ANN401
+        """Read an app API response pinned to one selected preview revision."""
+        response = requests.get(
+            self.server_url + path,
+            headers={
+                "Authorization": f"Bearer {self._get_token()}",
+                "X-Maps-Revision": revision,
+            },
+            timeout=self.TIMEOUT,
+        )
+        response.raise_for_status()
+        return response.json()
+
     def load_preview(self, workspace: str, revision: str) -> dict[str, Any]:
         """Ask the native API to stage and explicitly activate one candidate."""
         return self._preview_operation(

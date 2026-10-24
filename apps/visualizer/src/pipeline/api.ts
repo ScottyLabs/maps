@@ -50,6 +50,16 @@ export interface WorkingDataset {
       source_abbreviation: string | null;
     }
   >;
+  outdoor: {
+    source_url: string;
+    query: string;
+    artifact_sha256: string;
+    artifact_path: string;
+    nodes: Record<string, GeoCoordinate>;
+    ways: { id: string; nodes: string[]; tags: Record<string, string> }[];
+    pois: Record<string, unknown>;
+    warnings: string[];
+  } | null;
 }
 export interface WorkspaceView {
   revision: string;
@@ -81,4 +91,17 @@ export interface BuildReport {
   directory: string;
   warnings: string[];
   counts: Record<string, number>;
+  alignment: Record<
+    string,
+    {
+      reference_floor: string;
+      span_metres: number;
+      matches: {
+        reference_space: string;
+        candidate_space: string;
+        overlap: number;
+        boundary_error_metres: number;
+      }[];
+    }
+  >;
 }

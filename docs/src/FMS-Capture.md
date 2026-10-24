@@ -71,8 +71,8 @@ stages must consume this same saved data, rather than reimplement extraction.
 The live six-floor sample normalizes to 165 source-space pieces, including
 115 unambiguous names. These are extraction results, not a claim that the source
 contains 165 physical rooms. Multipart entities, unmatched labels and unknown
-room types remain visible for review. Automatic cross-floor alignment and
-navigation generation still require their source-evidence checks.
+room types remain visible for review. Cross-floor alignment uses the landmark
+checks below; door/connector navigation still needs source evidence.
 
 As an independent unit check, the extracted areas for spaces labelled `101` and
 `106` on floor 1 are approximately 1,011 and 1,117 square feet. These agree with
@@ -133,7 +133,18 @@ not the unit code's name alone.
 For floors 1 and 2, SVG crops differ (`8593 x 7903` and `8593 x 7901`) while
 physical bounds are close. Normalize using each floor's own bounds and transforms
 before testing shared landmarks. These are drawing coordinates, not a verified
-latitude/longitude CRS. Common-floor alignment still needs landmark validation.
+latitude/longitude CRS. Generation compares normalized footprints in metres. It
+requires at least two unambiguous, one-to-one matches spanning 3 m, at least 85%
+intersection-over-union, and at most 25 cm centroid/boundary differences. It
+propagates only verified relationships from the manually placed floor, with
+source-space IDs and measured errors saved in the build report. It never fits an
+offset from crop dimensions or treats matching footprints as stair connections.
+
+The six-floor sample verifies floor 2 against 1 (two matches over 4.83 m), A
+against 1 (nine over 24.48 m), B against 2 (two over 4.71 m), and C against 1
+(four over 6.57 m). These five floors export 145 source-space pieces using the
+one saved anchor. D has only one reliable matching footprint and stays excluded
+until additional evidence or a reviewed alignment is supplied.
 
 The tested `ARCH|A-DOOR` and `ARCH|A-WALL` requests returned no geometry. Treat
 those as unavailable evidence rather than generate doors from touching space
@@ -187,6 +198,42 @@ replace the previous successful report. Application coordinate schemas reject
 out-of-range geographic values, and nullable fields such as `osmId` are retained
 for compatibility with the existing importer.
 
+## Capture outdoor paths and POIs
+
+After fetching the selected buildings' public footprints:
+
+```sh
+devenv shell -- bash scripts/dev/pipeline.sh outdoor --workspace uploads/pipeline/ansys-v1
+```
+
+The visualizer's **Fetch outdoor paths and POIs** runs the same engine. It queries
+[Overpass QL](https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL) within
+the selected footprints plus a small geographic buffer. Raw responses are stored
+by checksum under `raw/public/`; the normalized snapshot is saved in working JSON.
+Ordinary reuse is offline and verifies the raw checksum. `--refresh-source`
+explicitly replaces the public snapshot; indoor edits and placement are retained.
+Save pending visualizer edits before acquisition and rebuild afterward.
+
+Generation preserves OSM node identities and explicit way connections. Paths
+retain pedestrian direction; private/no-foot-access paths and unlocated indoor
+ways are omitted. Pedestrian areas are reported for review instead of turning
+their perimeter into a path. Crossings without shared source nodes are not joined.
+Source tags remain in working JSON for later access and connector processing.
+
+Recognized point amenities use the existing app POI vocabulary. Area/relation
+amenities need a reviewed point location; they are reported rather than assigned
+a guessed bounding-box centre. A successful empty query is distinct from an
+HTTP, parsing or Overpass runtime failure. Failure preserves the previous working
+snapshot; the source is never replaced with a fabricated empty dataset.
+
+The October 24 snapshot captured 272 path features and 34 eligible point POIs.
+The combined candidate contains five floors, 145 indoor source pieces, 1,155 graph
+nodes, 2,114 directed edges and 34 POIs. A public route between two captured path
+nodes returned 39 nodes, approximately 419 m and three navigation instructions.
+Indoor room nodes remain disconnected until doors/entrances/connectors are verified.
+The app displays outdoor POIs for signed-in users alongside the focused floor.
+These checks do not verify accessibility or a complete indoor route network.
+
 ## Load the candidate
 
 With the native stack running, use **Load preview in app** in the visualizer,
@@ -211,6 +258,19 @@ Activation selects one ready database/cache set, then opens a fresh app URL with
 workspace and revision. Old requests are drained before switching; stale app
 pages must reload. The selected revision survives backend restarts. A copied
 workspace receives its own candidate identity even when JSON contents match.
+
+After loading, run the read-only consumer check:
+
+```sh
+devenv shell -- bash scripts/dev/pipeline.sh verify --workspace uploads/pipeline/ansys-v1 --revision <full-revision>
+```
+
+It compares generated JSON with the actual app APIs: all floor polygons and
+labels, graph nodes/edges, and indoor/outdoor POIs. Coordinate comparison permits
+only tiny JSON floating-point rounding differences. It fails if unnamed spaces
+are dropped or a selected revision differs. It does not import, repair data, or
+prove that source room classifications and routes are correct. Continue checking
+those visually and against known source evidence in the app.
 
 Return to the preserved shared-source dataset without deleting either schema:
 

@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from uuid import NAMESPACE_URL, uuid5
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from shapely.geometry import Polygon
 
 from models._common import Floor, GeoCoordinate, LocalPosition
@@ -19,6 +19,8 @@ from models.floorplans import Floorplans, Room
 from models.graph import Graph, GraphNode
 from models.placements import Placement, Placements
 from models.pois import Poi
+from processor.frames import FrameEvidence, verified_frames
+from processor.outdoor import outdoor_graph
 from processor.store import WorkspaceStore
 from processor.working import Point, ReferencePlacement, WorkingDataset, WorkingFloor
 from scraper.fms.capture import SourceError
@@ -38,6 +40,7 @@ class BuildReport(BaseModel):
     files: dict[str, str]
     warnings: list[str]
     counts: dict[str, int]
+    alignment: dict[str, FrameEvidence] = Field(default_factory=dict)
 
 
 class Dataset(BaseModel):
@@ -86,11 +89,12 @@ def project(point: Point, anchor: ReferencePlacement) -> GeoCoordinate:
 def build_workspace(workspace: Path) -> BuildReport:
     """Build a candidate without importing, publishing, or mutating working edits."""
     view = WorkspaceStore(workspace.resolve().parent).read(workspace.name)
-    dataset, warnings = _generate(view.working)
+    dataset, warnings, alignment = _generate(view.working)
     contents = dataset.files()
     hashes = {name: hashlib.sha256(data).hexdigest() for name, data in contents.items()}
     identity = json.dumps(
-        [workspace.name, view.revision, hashes, warnings], sort_keys=True,
+        [workspace.name, view.revision, hashes, warnings, alignment],
+        sort_keys=True,
     ).encode()
     revision = hashlib.sha256(identity).hexdigest()
     directory = f"generated/{revision}"
@@ -109,7 +113,13 @@ def build_workspace(workspace: Path) -> BuildReport:
         directory=directory,
         files=hashes,
         warnings=warnings,
+        alignment={
+            key: FrameEvidence.model_validate(value) for key, value in alignment.items()
+        },
         counts={
+            "captured_floors": sum(
+                len(floors) for floors in view.working.floors.values()
+            ),
             "buildings": len(dataset.buildings.root),
             "floors": sum(len(floors) for floors in dataset.placements.root.values()),
             "rooms": sum(
@@ -145,13 +155,16 @@ def _save_report(workspace: Path, content: str) -> None:
             temporary.unlink(missing_ok=True)
 
 
-def _generate(working: WorkingDataset) -> tuple[Dataset, list[str]]:
+def _generate(
+    working: WorkingDataset,
+) -> tuple[Dataset, list[str], dict[str, dict[str, object]]]:
     buildings: dict[str, Building] = {}
     placements: dict[str, dict[str, Placement]] = {}
     floorplans: dict[str, dict[str, dict[str, Room]]] = {}
     graph: dict[str, GraphNode] = {}
     pois: dict[str, Poi] = {}
     warnings: list[str] = []
+    alignment: dict[str, dict[str, object]] = {}
     for code, floors in working.floors.items():
         anchor = working.anchors.get(code)
         metadata = working.buildings.get(code)
@@ -161,8 +174,18 @@ def _generate(working: WorkingDataset) -> tuple[Dataset, list[str]]:
         if anchor.reference_floor not in floors:
             msg = f"Reference floor for {code} is missing from working data"
             raise SourceError(msg)
-        # Other floors are withheld until common-frame landmarks are verified.
-        levels = [anchor.reference_floor]
+        verified = verified_frames(floors, anchor.reference_floor)
+        alignment.update(
+            {
+                f"{code}/{level}": evidence.model_dump()
+                for level, evidence in verified.items()
+            },
+        )
+        levels = [
+            level
+            for level in floors
+            if level == anchor.reference_floor or level in verified
+        ]
         warnings.extend(
             f"{code}/{level}: excluded until shared-frame alignment is verified"
             for level in floors
@@ -209,16 +232,31 @@ def _generate(working: WorkingDataset) -> tuple[Dataset, list[str]]:
         "Door/connector evidence has not been supplied; "
         "room nodes have no fabricated connections",
     )
-    warnings.append(
-        "Outdoor paths and POI source coverage are not captured in this candidate",
+    if working.outdoor:
+        outside, outdoor_warnings = outdoor_graph(working.outdoor)
+        graph.update(outside)
+        warnings.extend(outdoor_warnings)
+        pois.update(working.outdoor.pois)
+        warnings.extend(working.outdoor.warnings)
+        warnings.append(
+            "Outdoor paths are not connected to indoor rooms "
+            "until entrances are verified",
+        )
+    else:
+        warnings.append(
+            "Outdoor paths and POI source coverage are not captured in this candidate",
+        )
+    return (
+        Dataset(
+            buildings=Buildings(buildings),
+            placements=Placements(placements),
+            floorplans=Floorplans(floorplans),
+            graph=Graph(graph),
+            pois=pois,
+        ),
+        warnings,
+        alignment,
     )
-    return Dataset(
-        buildings=Buildings(buildings),
-        placements=Placements(placements),
-        floorplans=Floorplans(floorplans),
-        graph=Graph(graph),
-        pois=pois,
-    ), warnings
 
 
 @dataclass

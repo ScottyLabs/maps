@@ -22,12 +22,14 @@ PoiType = Literal[
 class Poi(BaseModel):
     """A POI on campus with coordinates and optional building/floor."""
 
-    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+    model_config = ConfigDict(
+        extra="forbid", populate_by_name=True, allow_inf_nan=False,
+    )
 
     poi_id: str = Field(alias="poiId")
     type: PoiType
-    latitude: float
-    longitude: float
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
     building_code: str | None = Field(default=None, alias="buildingCode")
     floor_level: str | None = Field(default=None, alias="floorLevel")
 
