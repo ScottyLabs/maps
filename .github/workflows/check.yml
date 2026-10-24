@@ -81,7 +81,7 @@ jobs:
         uses: astral-sh/setup-uv@v7
 
       - name: Run UV Lint
-        run: cd apps/dataflow && uv sync --only-dev && uv run lint
+        run: cd apps/dataflow && uv sync --locked && uv run --locked --no-sync lint
 
-      - name: Test population preflight
-        run: cd apps/dataflow && PYTHONPATH=src uv run python -m unittest discover -s tests -v
+      - name: Test source pipeline and population
+        run: cd apps/dataflow && PYTHONPATH=src uv run --locked --no-sync python -m unittest discover -s tests -v

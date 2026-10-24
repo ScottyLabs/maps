@@ -9,6 +9,7 @@ manual commands, and troubleshooting.
 | `app.sh` | Inside devenv: check services, install dependencies, generate code, apply schema, start app |
 | `populate.sh` | Inside devenv: run the minimal Python importer against the local API |
 | `fms.sh` | Inside devenv: interactive source capture and verified resume, using a minimal Python environment |
+| `pipeline.sh` | Inside devenv: normalize, public/outdoor capture, build, load, verify and baseline restoration |
 
 `devenv.nix` imports the pinned Kennel module and enables its PostgreSQL and
 Ricochet features. Native processes replace the former development containers.
@@ -32,6 +33,8 @@ and are not deleted by this setup. Production Dockerfiles remain independent of
 local development. Fresh scraping/generation is specified in the
 [pipeline spec](../../docs/src/Data-Pipeline-Spec.md).
 
-`pipeline.sh normalize --workspace <path>` normalizes a verified FMS capture into
-editable source-frame JSON using the minimal processing dependency group. See
-[the FMS guide](../../docs/src/FMS-Capture.md#normalize-the-saved-drawing).
+`pipeline.sh` selects the minimal processing dependency group and invokes the
+same stage engine as the visualizer. See the [FMS guide](../../docs/src/FMS-Capture.md)
+for commands and [the work queue](../../docs/src/Data-Pipeline-TODO.md) for the
+checkpoint and remaining tasks. Workspace generation/loading is local; remote
+workspace upload/download is not implemented yet.

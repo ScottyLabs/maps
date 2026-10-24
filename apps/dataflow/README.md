@@ -1,62 +1,67 @@
-# CMU Maps Data
+# CMU Maps Dataflow
 
-## Overview
+Dataflow captures selected FMS drawings and public source records, normalizes
+editable working JSON, generates the existing app JSON contracts and converts
+those records for database import. The CLI and visualizer call the same engine.
 
-This directory is responsible for handling data flow for CMU Maps. Check the
-scripts section in `pyproject.toml` for the available commands. You can run a
-script using the following command:
+## Fresh-source workflow
 
-```zsh
-uv run --env-file <ENV_FILE> <SCRIPT_NAME>
-```
-
-## Fresh FMS capture
-
-From the repository root, use the minimal Nix-managed capture environment:
+After the [native setup](../../docs/src/Setup.md), run from the repository root:
 
 ```sh
 devenv shell -- bash scripts/dev/fms.sh --workspace uploads/pipeline/ansys-v1 --building AN=116
+devenv shell -- bash scripts/dev/pipeline.sh normalize --workspace uploads/pipeline/ansys-v1
+devenv shell -- bash scripts/dev/pipeline.sh public --workspace uploads/pipeline/ansys-v1
+devenv shell -- bash scripts/dev/pipeline.sh outdoor --workspace uploads/pipeline/ansys-v1
 ```
 
-Complete CMU/Duo login in Chrome. Source floors, filenames, bounds, and layer
-roles are discovered automatically. Rerun the same command to resume or reuse
-verified source artifacts offline. Use a new workspace for a fresh capture.
-The [capture guide](../../docs/src/FMS-Capture.md) documents selection, stored
-artifacts, source findings, and current limits. This stage does not populate the
-app or publish data; the old manual-cookie downloader has been replaced.
+Complete interactive CMU/Duo login for a fresh FMS capture. Open the existing
+[workspace editor](http://localhost:5174/workspaces) to review rooms, place one
+reference floor and save working JSON. Source discovery accepts other selected
+buildings/floors; `AN=116` is the example mapping, not a hardcoded pipeline.
 
-## Local database import
+Build explicitly, then use the full printed revision for load and read-only API
+verification while the native stack is running:
 
-Follow the [running guide](../../docs/src/Setup.md). The host launcher downloads the
-`TEMP_DEV_S3` record from OpenBao into this app's ignored `.env` and `.env.local`.
-The record contains `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET`, `S3_ACCESS_KEY`, and
-`S3_SECRET_KEY`. Identity settings come from the existing app entries.
+```sh
+devenv shell -- bash scripts/dev/pipeline.sh build --workspace uploads/pipeline/ansys-v1
+devenv shell -- bash scripts/dev/pipeline.sh load --workspace uploads/pipeline/ansys-v1 --revision <full-revision>
+devenv shell -- bash scripts/dev/pipeline.sh verify --workspace uploads/pipeline/ansys-v1 --revision <full-revision>
+```
 
-This branch temporarily uses only `https://t3.storageapi.dev`, region `auto`, bucket
-`categorized-lockerbox-v9qy6t`. The importer and scraper/serializer S3 helpers read
-the same dataflow env file, ignoring old shell storage settings. There is no source
-selector or local object-storage service.
+The [capture guide](../../docs/src/FMS-Capture.md) covers cache reuse, explicit
+refresh/re-extraction, coordinates, source limitations and commands behind UI
+actions. All five canonical JSONs are exported together. Candidate conversion
+reuses the existing table converters; import is one transaction in an isolated
+local schema, followed by ready cache activation. Saving JSON alone changes no
+database records. A failed load preserves the previous preview.
 
-With the native devenv stack running, run from the repository root
-(macOS, Linux, or WSL2):
+The current workspace is a development milestone. Indoor doors/connectors,
+complete classification/POIs and S3 workspace synchronization remain open.
+See the [work queue](../../docs/src/Data-Pipeline-TODO.md) and linked dated handoff.
+
+## Shared baseline import
+
+The [running guide](../../docs/src/Setup.md#populate-the-local-database) documents
+import of the existing hosted baseline:
 
 ```sh
 python3 scripts/dev/dev.py populate --check
 python3 scripts/dev/dev.py populate
 ```
 
-Required keys are `floorplans/buildings.json`, `floorplans/floorplans.json`,
-`floorplans/placements.json`, and `floorplans/all-graph.json`. Import validates data
-and authorization before clearing the seven local map tables. POIs remain empty
-unless `--include-pois` is supplied and `floorplans/osm-pois.json` exists. Raw
-source-fetch artifacts are not valid import inputs. Missing credentials or files
-abort before clearing tables; a later failure can leave a partial import because
-the entire operation is not transactional.
+OpenBao's `TEMP_DEV_S3` supplies the temporary bucket settings in ignored dataflow
+env files. The client uses that saved configuration rather than inherited shell
+storage settings. App identity settings come from the ignored server env file.
 
-Restart the backend after import to refresh search/graph caches. The local wrapper
-always targets the local backend on port 8080, loading identity credentials from the server's
-ignored env file. The client needs `/projects/maps/admins` in its Keycloak token.
-The minimal `populate` group avoids installing the full scraper toolchain.
+The baseline requires `floorplans/{buildings,floorplans,placements,all-graph}.json`;
+POIs need `osm-pois.json` and `--include-pois`. Source/auth checks precede reset,
+but this older multi-request import is not one transaction. Restart the backend
+to rebuild caches afterward. If a generated preview is active, first run
+`devenv shell -- bash scripts/dev/pipeline.sh baseline`.
+
+Raw source capture is not an import dataset, and generating/loading a local
+workspace does not upload it to S3.
 
 ## Validation
 
@@ -65,75 +70,28 @@ Inside `devenv shell`, run from this directory:
 ```sh
 uv sync --locked --group pipeline --group fms --group dev
 PYTHONPATH=src uv run --no-sync python -m unittest discover -s tests -v
-PYTHONPATH=src uv run --no-sync python -c "from linter import main; main()"
+uv run --no-sync lint
 ```
 
-The shell assignment above works on macOS, Linux, or WSL2. For the host
-launcher's platform-independent tests, see the main running guide.
+Minimal `fms`, `pipeline` and `populate` dependency groups are selected by the
+repository helpers. The full package installation also includes dev tools.
+No ArcGIS SDK or standalone Overpass wrapper is required; public adapters use
+bounded HTTPS requests. NumPy is a direct normalization dependency; SciPy remains
+a transitive dependency of svgpathtools.
 
-## _25live
+## Module map
 
-`_25live/` directory contains the code for processing data from the 25live data
-from the [event-scraper](https://github.com/ScottyLabs/event-scraper) s3 bucket
-and populating the database with the data.
+| Directory | Responsibility |
+| --- | --- |
+| `src/scraper/fms/` | Interactive source authentication, discovery and capture |
+| `src/scraper/public.py` | Selected public building metadata |
+| `src/scraper/outdoor.py` | Public OSM path/point snapshot |
+| `src/processor/` | Working JSON, edits, frame checks, generation, CLI/bridge and app verification |
+| `src/models/` | Existing canonical JSON contracts |
+| `src/clients/` | Configured S3/API clients and validated local dataset reads |
+| `src/deserializer/` | Source validation and shared JSON-to-table conversion |
+| `src/logger/`, `src/linter/` | Shared diagnostics and Python checks |
 
-## Cleaner
-
-`cleaner/` is responsible for archiving one-time scripts for cleaning data.
-
-## Clients
-
-`clients/` contains the clients for interacting with the CMU Maps API and S3 bucket.
-
-## Deserializer
-
-`deserializer/` is responsible for deserializing the JSON files from the S3 bucket
-and populating the database with the data.
-
-## Linter
-
-`linter/` exists to enable the `lint` script in `pyproject.toml`.
-
-## Logger
-
-`logger/` contains the logging module for the dataflow application.
-
-## Processor
-
-`processor/` is responsible for processing the scraped floorplan data.
-
-### Generator
-
-`processor/generator/` is responsible for generating the floorplan data from the
-scraped data.
-
-### Merger
-
-`processor/merger/` is responsible for merging the scraped data into the
-existing floorplan data.
-
-## Scraper
-
-`scraper/` is responsible for scraping floorplan data from various sources and
-uploading it to the S3 bucket
-
-### ESIM
-
-`scraper/esim/` is responsible for scraping building data from the ESIM website.
-
-### FMS
-
-`scraper/fms/` is responsible for scraping floorplan data from the FMS website.
-
-### OSM
-
-`scraper/osm/` is responsible for scraping graph data from the OSM website.
-
-## Serializer
-
-`serializer/` is responsible for serializing data from the database to JSON files.
-
-## Additional Information
-
-See the [Data Flow documentation](../../docs/src/Data-Flow.md)
-for more information.
+The pre-existing `_25live` package/worker entry point is separate from this
+floorplan workflow. Superseded standalone ESIM/OSM scripts and Ansys-specific
+graph experiments have been removed; their history remains in Git.

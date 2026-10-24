@@ -2,7 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 import { activeGraph } from "../services/pathService.ts";
 import { activeSearchContext } from "../services/searchService.ts";
 import { withMapRuntime } from "./mapRuntime.ts";
-import { getActiveDatabase, storedPreview } from "../../prisma/index.ts";
+import { getActiveDatabase } from "../../prisma/index.ts";
 
 export interface PreviewInfo {
   workspace: string;
@@ -25,7 +25,6 @@ export function activePreview() {
 export function setPreview(info: PreviewInfo | null) {
   current = info;
 }
-export const initialPreview = storedPreview;
 
 export async function switchPreview(action: () => Promise<void>) {
   if (switching) throw new Error("Another preview is being activated");

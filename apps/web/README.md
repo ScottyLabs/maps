@@ -4,15 +4,17 @@ The [CMU Maps web app](https://cmumaps.com) provides a map of the CMU campus.
 
 ## Development
 
-Use the [running guide](../../docs/src/Setup.md) to start the web and backend in
-the development container. Open [localhost:5173](http://localhost:5173). Edit this
-checkout on the host or attach VS Code to the container. `dev:host` binds port 5173
-and fails if it is occupied, keeping browser login origins predictable.
+Follow the [native running guide](../../docs/src/Setup.md). The launcher starts
+the web app on [localhost:5173](http://localhost:5173), the API on port 8080 and
+the visualizer on port 5174. Edit this checkout directly; Nix supplies runtimes.
+The default bindings are loopback. Access from another device requires deliberate
+network and authentication-origin configuration.
 
-The Compose configuration publishes services on loopback only. Viewing the app
-from a separate phone requires an explicit network/auth-origin configuration;
-the default local setup is not reachable over your LAN.
+For split manual startup inside `devenv shell`, follow the guide to select the
+private database and configure the API before using `bun run dev:web`. Run either
+that split workflow or the all-in-one launcher to avoid duplicate API processes.
 
-For an existing native-host environment with Bun and env files already configured,
-`bun run dev:web` from the repository root runs both services. This is separate
-from the container launcher and requires host runtimes.
+A generated preview pins the app to its workspace/revision, preserves the context
+in room and route URLs, and requests a full reload when the selected dataset
+changes. See the [visualizer workflow](../../docs/src/Data-Visualizer-Wiki.md) for
+saving working JSON, building and loading a candidate.

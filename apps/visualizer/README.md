@@ -9,5 +9,7 @@ For manual startup inside the pinned environment, use `bun run dev:visualizer`
 with the API's native database environment configured as described in the guide.
 Do not start a second API over the all-in-one launcher.
 
-The [fresh-source pipeline specification](../../docs/src/Data-Pipeline-Spec.md)
-defines the working-JSON editing and explicit preview workflow being implemented.
+The [workspace editing guide](../../docs/src/Data-Visualizer-Wiki.md) covers saving
+working JSON, placing a reference floor, fetching public sources, and explicitly
+building/loading a preview. The [work queue](../../docs/src/Data-Pipeline-TODO.md)
+links the current dated handoff and remaining implementation tasks.

@@ -5,27 +5,20 @@ description = "Responsible for handling data flow for CMU Maps"
 readme = "README.md"
 requires-python = "==3.12.*"
 dependencies = [
-  "arcgis>=2.4.0",
   "colorama>=0.4.6",
   "defusedxml>=0.7.1",
   "minio>=7.2.20",
   "pydantic>=2.12.5",
-  "overpass>=0.7",
-  "pyjwt>=2.10.1",
   "python-dotenv>=1.2.1",
   "requests>=2.32.5",
   "shapely==2.1.1",
   "numpy>=1.26.0",
-  "triangle==20250106",
-  "scipy==1.15.3",
-  "networkx==3.5",
-  "geopy>=2.4.1",
   "selenium>=4.0.0",
   "svgpathtools>=1.7.2",
 ]
 
 [dependency-groups]
-# Interactive capture needs no ArcGIS SDK or legacy graph-generator toolchain.
+# Capture and processing helpers install only the dependencies their stage needs.
 fms = [
   "defusedxml>=0.7.1",
   "pydantic>=2.12.5",
@@ -50,11 +43,10 @@ dev = [
 ]
 pipeline = [
   { include-group = "populate" },
-    "defusedxml>=0.7.1",
-    "pydantic>=2.12.5",
-    "requests>=2.32.5",
-    "shapely==2.1.1",
-    "svgpathtools>=1.7.2",
+  "defusedxml>=0.7.1",
+  "numpy>=1.26.0",
+  "shapely==2.1.1",
+  "svgpathtools>=1.7.2",
 ]
 
 [build-system]
@@ -64,7 +56,6 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = [
   "src/_25live",
-  "src/cleaner",
   "src/clients",
   "src/deserializer",
   "src/linter",
@@ -72,8 +63,6 @@ packages = [
   "src/models",
   "src/processor",
   "src/scraper",
-  "src/serializer",
-  "src/utils",
 ]
 
 [project.scripts]
@@ -81,7 +70,6 @@ populate-database = "deserializer:main"
 process-25live = "_25live:main"
 lint = "linter:main"
 scrape-fms = "scraper.fms.cli:main"
-scrape-osm-pois = "scraper.osm:scrape_pois"
 
 # Supported rules https://github.com/charliermarsh/ruff/#supported-rules
 [tool.ruff]
@@ -91,7 +79,7 @@ lint.select = ["ALL"]
 strict = true
 
 [[tool.mypy.overrides]]
-module = ["overpass", "arcgis.*", "scipy.*", "shapely.*", "triangle", "geopy.*", "svgpathtools.*"]
+module = ["shapely.*", "svgpathtools.*"]
 ignore_missing_imports = true
 
 # Upgrade all non-error rules to "error"

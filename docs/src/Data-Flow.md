@@ -1,136 +1,75 @@
 # Data flow
 
-The agreed replacement workflow is documented in the
-[fresh-source pipeline v1 specification](Data-Pipeline-Spec.md). It requires the
-complete fresh-scrape-to-app loop; the source-processing notes below describe
-existing scripts and do not imply that all stages are currently connected.
+The [fresh-source v1 specification](Data-Pipeline-Spec.md) defines the intended
+workflow. The [work queue](Data-Pipeline-TODO.md) and its dated handoff distinguish
+implemented stages from remaining source and navigation work.
 
-## Fresh-source pipeline status
-
-[Fresh FMS capture](FMS-Capture.md) now discovers selected building floors,
-captures drawings/bounds/additional layers, and supports verified offline resume.
-The live validation captured all six ANSYS floors without the old processed JSONs.
-Normalization, visualizer working-JSON edits, canonical generation, and isolated
-preview activation are connected through the same pipeline engine:
+## Fresh-source workspace
 
 ```text
-Fresh FMS capture + public building metadata
-  -> saved working JSON + reference placement in the visualizer
-  -> explicit build: five canonical JSON files + validation report
-  -> explicit load: existing converters -> local candidate schema transaction
-  -> ready search/graph caches -> fresh revision-scoped app page
+Authenticated FMS capture + selected public building/OSM records
+  -> saved source-frame working JSON
+  -> visualizer room corrections + reference placement
+  -> explicit build: five canonical JSONs + validation/evidence report
+  -> shared converters -> isolated local schema transaction
+  -> ready search/graph caches -> explicit activation -> fresh app page
 ```
 
-The first preview contains rooms and labels on five floors aligned through
-verified shared footprints and one manual anchor. Floor D lacks enough alignment
-evidence. Public OSM paths and point POIs now run through the same build/import path.
-Source-backed indoor door/connector routes and full POI coverage remain in progress. Warnings identify excluded floors and missing evidence.
-The import below loads the preserved shared baseline; raw capture is not a
-generated application dataset.
+Use [FMS Capture](FMS-Capture.md) for acquisition, offline replay, build, load and
+API verification, and the [visualizer guide](Data-Visualizer-Wiki.md) for editing.
+Working JSON is authoritative. Save, build and load are separate operations.
+The CLI and visualizer use the same engine; failed loads retain the active preview.
 
-## Local development import
+FMS provides drawing identities, bounds, units, layer roles and SVG data. Public
+CMU GIS provides selected building names and geographic footprints through a
+numeric FMS-ID join. Public OSM provides explicit outdoor way relationships and
+supported point POIs. A configured layer name or touching pair of polygons is
+not evidence of a door or navigable connection.
 
-The [running guide](Setup.md#populate-the-local-database) describes the
-supported local pipeline:
+The current Ansys milestone includes five aligned floors, source-space polygons,
+public outdoor routes and point POIs. Floor D alignment, source-linked room
+classification and indoor/cross-floor/entrance connectivity remain incomplete.
+Detailed status and evidence are in the timestamped handoff linked from the queue.
+
+## Application contracts
+
+Each generated revision exports these files together under `floorplans/`:
+
+| File | Contents |
+| --- | --- |
+| `buildings.json` | Building-code dictionary: names, floors and geographic shapes |
+| `placements.json` | Building/floor placements |
+| `floorplans.json` | Building/floor/room-ID dictionary with labels and polygon rings |
+| `all-graph.json` | Node-ID dictionary with coordinates, floor and neighbor dictionaries |
+| `osm-pois.json` | Existing POI dictionary, including valid empty results |
+
+Raw drawing coordinates are normalized to metres before geographic projection.
+The database is derived from a complete generated revision through the existing
+seven table converters. Per-workspace source provenance belongs in capture and
+working/report metadata rather than unsupported canonical fields.
+
+Fresh captures, working JSON and generated candidates currently remain under
+ignored `uploads/pipeline/`. Remote named-workspace synchronization is an open
+task. A local build/load does not publish data or update hosted S3 objects.
+
+## Shared baseline import
+
+The [running guide](Setup.md#populate-the-local-database) describes the older
+shared-data import used for ordinary app onboarding:
 
 ```text
-Temporary S3 categorized-lockerbox-v9qy6t/floorplans/*.json
-  -> dataflow validation + Keycloak service token
-  -> backend population API -> local PostgreSQL
-  -> backend restart -> search index and graph cache -> web app
+Temporary S3 floorplans/*.json
+  -> model/reference checks + Keycloak authorization
+  -> population API -> local baseline PostgreSQL tables
+  -> explicit backend restart -> search/graph caches -> app
 ```
 
-OpenBao record `TEMP_DEV_S3` supplies the one temporary source and credentials
-through ignored `apps/dataflow/.env`. `populate` reads hosted data and
-writes only to the local API/database. Each developer imports independently;
-sharing files does not automatically synchronize databases.
+OpenBao `TEMP_DEV_S3` supplies the one temporary source through ignored dataflow
+env files. Population reads hosted storage and writes the developer's private
+local database. This older multi-request import is not transactional. Required
+JSON and authorization failures abort before reset; a later write failure may
+require rerunning population. POIs require the optional file and an explicit flag.
 
-The four required inputs are `buildings.json`, `floorplans.json`, `placements.json`,
-and `all-graph.json`; POIs require `osm-pois.json` and an explicit flag. Validation
-and authorization checks run before clearing tables. The import uses several API
-requests and is not a single transaction. It does not copy SVGs or publish assets
-to the production CDN. The sections below describe the broader source-processing
-pipeline; those scraper tools have their own environment configuration.
-
-## Overview
-
-![Data Flow Diagram](dataflow/2026-02-28.png)
-*You can regenerate this diagram by pasting the [linked code](dataflow/2026-02-28.excalidraw) into [Excalidraw](https://www.excalidraw.com/).*
-
-**Note**: Production is the only environment with the serializer.
-
-## Files
-
-### Buildings.json
-
-- `buildings.json`: The main ESIM building dataset. It is produced by `osm_building_to_json.py`, which combines the existing building metadata with OpenStreetMap geometry, and then updated by `add_fms_id.py` to add FMS IDs.
-
-### Intermediary files
-
-- `query.json`: A raw snapshot of CMU building data from the public ArcGIS campus layer. It is generated by `arc_gis_query.py` and serves as the source for official building names, abbreviations, and IDs.
-- `export.osm`: A local OpenStreetMap export for the CMU campus area. It is generated by `fetch_osm_data.py` and used by `osm_building_to_json.py` to extract building geometry.
-- `sign_abbrev_mapping.json`: A small lookup file that maps building abbreviations to FMS building IDs. It is generated by `sign_abbrev_mapping.py` from `query.json`.
-- `building_info_map.json`: A simplified lookup keyed by building code, mainly for basic building info like name and default floor. It is generated by `generate_building_info_map.py` from `buildings.json`.
-
-### Osm-outside.json
-
-- `osm-outside.json`: A file containing all nodes outside of buildings, their neighbors, and positions by their OSM IDs. Note that this does not connect to any nodes inside of buildings.
-
-## Sources
-
-### CMU ArcGIS
-
-- Provides the official building metadata used for names, abbreviations, and building identifiers.
-
-### OpenStreetMap
-
-- Provides the building geometry that is used to rebuild the final ESIM `buildings.json`.
-- Provides the nodes and connections for roads, sidewalks, and any other passages outside of buildings in the `osm-outside.json`
-
-## Steps
-
-### Step 1: Scraping
-
-[Scraper code](https://github.com/ScottyLabs/cmumaps/tree/main/apps/dataflow/src/scraper)
-
-The source tools use the same [branch-configured bucket](Data-Storage.md#object-storage).
-
-Data sources:
-
-- OSM Scraper uses the [Overpass API](https://wiki.openstreetmap.org/wiki/Overpass_API) to scrape outside graph from OpenStreetMaps.
-
-- ESIM Scraper scrapes the [CMU Building ArcGIS layer](https://www.arcgis.com/home/item.html?id=0a8e645dc06d43f1b197b2ea2c2b876e).
-
-- FMS Scraper scrapes the svgs from the [CMU FMS website](https://fmsystems.cmu.edu/FMInteract/ShowDrawingView.aspx?file_code=L0&bldgcode%2Bfloorcode%2Boptn=073%20%20%20%20%20%20%201%20%20%20&bldgcode=073%20%20%20%20%20%20%20&floorcode=1%20%20%20&act_code=Q).
-  - Backup link: <https://www.cmu.edu/enterprise-space/database/index.html>
-
-### Step 2: Generation
-
-The [generator](https://github.com/ScottyLabs/cmumaps/tree/staging/apps/dataflow/src/generator)
-takes in the scraped data and the serialized data as input and generates
-
-- Rescale the svgs to fit in a [1920x1080](https://en.wikipedia.org/wiki/1080p) rectangle
-    and converts them to `floorplans.json` file.
-
-- Generates the inside graph from the `floorplans.json` file.
-
-### Step 3: Deserialization
-
-The S3 bucket json files are deserialized locally.
-
-### Step 4: Visualization
-
-The visualizer is used to place the data in geo-coordinates. It can also be used
-to add new data, such as connections between rooms and POIs.
-
-### Step 5: Serialization
-
-The updated data are serialized to the S3 bucket.
-
-### Step 6: Deployment
-
-The S3 bucket files are deserialized in staging and production.
-
-See [the visualizer workflow](Data-Visualizer-Wiki.md) for the connected fresh-source
-path. The historical steps above describe the older source-processing scripts;
-they are not prerequisites for the new JSON-first workspace.
+Generated previews use isolated schemas and atomic activation instead. Restore
+the baseline before ordinary population. Production deployment and object-storage
+publication remain separate from either local import path.
