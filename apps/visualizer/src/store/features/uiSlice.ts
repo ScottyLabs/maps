@@ -25,7 +25,8 @@ const initialState: UIState = {
   sidePanelActiveTabIndex: SidePanelTabIndex.VISIBILITY,
   showRoomSpecific: false,
   editRoomLabel: false,
-  nodeSize: 2,
+  // Radius in screen pixels, independent of zoom
+  nodeSize: 4,
 };
 
 const UISlice = createSlice({

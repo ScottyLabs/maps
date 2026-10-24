@@ -34,7 +34,7 @@ const SelectedPolygonDisplay = ({
         key={index}
         points={coords.flat()}
         stroke="orange"
-        strokeWidth={nodeSize / 2}
+        strokeWidth={nodeSize / 2 / scale}
       />
     ));
   }

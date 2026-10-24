@@ -10,9 +10,10 @@ import { useAppSelector } from "../../store/hooks";
 interface Props {
   floorCode: string;
   graph: Graph;
+  scale: number;
 }
 
-const EdgesDisplay = ({ floorCode, graph }: Props) => {
+const EdgesDisplay = ({ floorCode, graph, scale }: Props) => {
   const nodeSize = useAppSelector((state) => state.ui.nodeSize);
   const nodeIdOnDrag = useAppSelector((state) => state.mouseEvent.dragNodeId);
   const dragNodePos = useAppSelector((state) => state.mouseEvent.dragNodePos);
@@ -102,7 +103,7 @@ const EdgesDisplay = ({ floorCode, graph }: Props) => {
         key={index}
         points={points}
         stroke={color}
-        strokeWidth={nodeSize / 2}
+        strokeWidth={nodeSize / 2 / scale}
       />
     );
   });

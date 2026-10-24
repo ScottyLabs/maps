@@ -231,10 +231,10 @@ const NodesDisplay = ({
           key={index}
           x={node.pos.x}
           y={node.pos.y}
-          radius={nodeSize}
+          radius={nodeSize / scale}
           fill={getFillColor(nodeId)}
           stroke="black"
-          strokeWidth={nodeSize / 4}
+          strokeWidth={nodeSize / 4 / scale}
           onMouseEnter={(e) => setCursor(e, "pointer")}
           onMouseLeave={(e) => setCursor(e, "default")}
           onClick={() => handleNodeClick(nodeId)}

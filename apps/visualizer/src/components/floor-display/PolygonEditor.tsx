@@ -158,7 +158,7 @@ const PolygonEditor = ({
         key={index}
         points={[...line[0], ...line[1]]}
         stroke="orange"
-        strokeWidth={nodeSize / 2}
+        strokeWidth={nodeSize / 2 / scale}
       />
     ));
   };
@@ -174,9 +174,9 @@ const PolygonEditor = ({
               key={index}
               x={point[0]}
               y={point[1]}
-              radius={nodeSize}
+              radius={nodeSize / scale}
               fill="cyan"
-              strokeWidth={nodeSize / 2}
+              strokeWidth={nodeSize / 2 / scale}
               stroke="black"
               draggable
               onMouseEnter={(e) => setCursor(e, "pointer")}

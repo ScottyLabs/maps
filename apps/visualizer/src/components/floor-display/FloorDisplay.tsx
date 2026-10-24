@@ -88,8 +88,8 @@ const FloorDisplay = ({
       ref={stageRef}
     >
       <Layer>
-        <PolygonsDisplay rooms={rooms} />
-        <EdgesDisplay floorCode={floorCode} graph={graph} />
+        <PolygonsDisplay rooms={rooms} scale={scale} />
+        <EdgesDisplay floorCode={floorCode} graph={graph} scale={scale} />
         <NodesDisplay
           floorCode={floorCode}
           graph={graph}
@@ -106,7 +106,12 @@ const FloorDisplay = ({
             scale={scale}
           />
         )}
-        <LabelsDisplay floorCode={floorCode} graph={graph} rooms={rooms} />
+        <LabelsDisplay
+          floorCode={floorCode}
+          graph={graph}
+          rooms={rooms}
+          scale={scale}
+        />
         {LIVE_CURSORS_ENABLED && (
           <LiveCursors floorCode={floorCode} scale={scale} />
         )}

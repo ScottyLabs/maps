@@ -13,9 +13,9 @@ const NodeSizeSlider = ({ text }: Props) => {
     <div className="w-48">
       <input
         type="range"
-        min="0.5"
-        max="10"
-        step=".1"
+        min="1"
+        max="12"
+        step=".5"
         value={nodeSize}
         onChange={(e) =>
           dispatch(setNodeSize(Number.parseFloat(e.target.value)))

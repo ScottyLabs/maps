@@ -5,9 +5,10 @@ import { useAppSelector } from "../../store/hooks";
 
 interface Props {
   rooms: Rooms;
+  scale: number;
 }
 
-const PolygonsDisplay = ({ rooms }: Props) => {
+const PolygonsDisplay = ({ rooms, scale }: Props) => {
   const navigate = useNavigate({ from: "/floors/$floorCode" });
   const showPolygons = useAppSelector((state) => state.visibility.showPolygons);
   const nodeSize = useAppSelector((state) => state.ui.nodeSize);
@@ -54,7 +55,7 @@ const PolygonsDisplay = ({ rooms }: Props) => {
         key={roomId}
         data={geojsonToPath(room.polygon)}
         stroke={roomColor.border}
-        strokeWidth={nodeSize / 2}
+        strokeWidth={nodeSize / 2 / scale}
         closed
         fill={roomColor.background}
         onClick={() => navigate({ to: ".", search: { roomId } })}

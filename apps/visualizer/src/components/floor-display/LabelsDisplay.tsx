@@ -14,9 +14,14 @@ interface Props {
   floorCode: string;
   graph: Graph;
   rooms: Rooms;
+  scale: number;
 }
 
-const LabelsDisplay = ({ floorCode, rooms }: Props) => {
+// Label sizes in screen pixels, independent of zoom
+const PIN_HEIGHT = 24;
+const FONT_SIZE = 12;
+
+const LabelsDisplay = ({ floorCode, rooms, scale }: Props) => {
   const navigate = useNavigate({ from: "/floors/$floorCode" });
   const { roomId: selectedRoomId } = useValidatedFloorParams(floorCode);
 
@@ -40,6 +45,10 @@ const LabelsDisplay = ({ floorCode, rooms }: Props) => {
     return { width, height, path };
   }, []);
 
+  // The pin icon is drawn at its native size, so scale it to PIN_HEIGHT
+  const pinScale = PIN_HEIGHT / height;
+  const pinWidth = width * pinScale;
+
   return Object.entries(rooms).map(([roomId, room]) => {
     // selected if it is edit label mode and it is the label of the selected room
     // or the room of the label is connected by the selected door
@@ -55,19 +64,23 @@ const LabelsDisplay = ({ floorCode, rooms }: Props) => {
     }
 
     const handleOnDragEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
+      // The group is positioned at the tip of the pin
       const roomInfo: Partial<RoomInfo> = {
         labelPosition: {
-          x: Number((e.target.x() + width / 2).toFixed(2)),
-          y: Number((e.target.y() + height).toFixed(2)),
+          x: Number(e.target.x().toFixed(2)),
+          y: Number(e.target.y().toFixed(2)),
         },
       };
       updateRoom({ floorCode, roomId, roomInfo, batchId: uuidv4() });
     };
 
     return (
+      // Counter the stage zoom so one group unit is one screen pixel
       <Group
-        x={room.labelPosition.x - width / 2}
-        y={room.labelPosition.y - height}
+        x={room.labelPosition.x}
+        y={room.labelPosition.y}
+        scaleX={1 / scale}
+        scaleY={1 / scale}
         key={roomId}
         onMouseEnter={(e) => setCursor(e, "pointer")}
         onMouseLeave={(e) => setCursor(e, "default")}
@@ -75,9 +88,26 @@ const LabelsDisplay = ({ floorCode, rooms }: Props) => {
         draggable={draggable}
         onDragEnd={handleOnDragEnd}
       >
-        <Path fill={selected ? "orange" : "indigo"} data={path} />
-        <Rect width={Number(width)} height={Number(height)} />
-        <Text text={room.name} y={height + 2} />
+        <Path
+          fill={selected ? "orange" : "indigo"}
+          data={path}
+          x={-pinWidth / 2}
+          y={-PIN_HEIGHT}
+          scaleX={pinScale}
+          scaleY={pinScale}
+        />
+        <Rect
+          x={-pinWidth / 2}
+          y={-PIN_HEIGHT}
+          width={pinWidth}
+          height={PIN_HEIGHT}
+        />
+        <Text
+          text={room.name}
+          x={-pinWidth / 2}
+          y={2}
+          fontSize={FONT_SIZE}
+        />
       </Group>
     );
   });
