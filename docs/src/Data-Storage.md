@@ -18,26 +18,18 @@ docker compose -f .devcontainer/docker-compose.yml exec postgres psql -U postgre
 
 The `postgres_data` volume preserves data across container recreation. The startup
 helper applies the Prisma schema but does not automatically populate it. See
-[Running locally](Setup.md#upload-and-populate-the-local-database) for importing.
+[Running locally](Setup.md#populate-the-local-database) for importing.
 Hosted database access is configured separately; do not reuse local credentials.
 
 ## Object storage
 
-The default development importer reads the allocated hosted CDN bucket
-`cdn-maps` at `https://s3.scottylabs.org`, exposed at
-`https://cdn.scottylabs.org/maps/`. OpenBao supplies its S3 settings and credentials
-via the dataflow env file. Processed JSON under `floorplans/` is imported through
-the local backend API into each developer's own PostgreSQL database. The importer
-only reads hosted storage; publishing a dataset is a separate operation. Raw
-`source-fetch/` artifacts do not replace the four processed JSON inputs.
+This branch temporarily uses `categorized-lockerbox-v9qy6t` at
+`https://t3.storageapi.dev`, with region `auto`. Settings and credentials come from OpenBao record
+`secret/secretspec/maps/dev/TEMP_DEV_S3`, downloaded into ignored
+`apps/dataflow/.env`. See the [running guide](Setup.md#quick-start) for setup.
 
-Local Garage remains available for isolated experiments: S3 endpoint
-`http://localhost:9000`, bucket `maps`, persisted in `garage_data`.
-`populate --source garage` opts into it. The upload helper still targets only this
-local bucket and never publishes to the CDN. See the [storage and script reference](../../scripts/dev/README.md)
-for details. Keep downloaded campus datasets under ignored `uploads/` and never
-commit credentials.
-
-This setup uses the existing allocated bucket. Provisioning distinct hosted
-buckets and credentials for development and production is an infrastructure
-configuration task; the application does not create them automatically.
+The importer reads processed JSON under `floorplans/` and sends records through
+the local API into each developer's own PostgreSQL database. It does not modify
+hosted storage. The scraper/serializer S3 helpers use the same bucket; publishing
+data is a separate operation. Raw source-fetch artifacts are not import datasets.
+Keep downloaded files under ignored `uploads/` and never commit credentials.

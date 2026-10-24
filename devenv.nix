@@ -1,4 +1,4 @@
-{ config, inputs, lib, ricochet, ... }:
+{ inputs, lib, ricochet, ... }:
 {
   imports = [ inputs.scottylabs.devenvModules.default ];
 
@@ -6,12 +6,7 @@
     enable = true;
     project.name = "maps";
 
-    garage = {
-      enable = true;
-      # Public local-only credentials in Garage's required key format.
-      accessKey = "GK000000000000000000000001";
-      secretKey = builtins.hashString "sha256" "maps-local-garage";
-    };
+    garage.enable = false;
 
     ricochet = {
       enable = true;
@@ -24,24 +19,6 @@
     security.osvScanner.enable = false;
     security.semgrep.enable = false;
     kennel.previewDeployments = false;
-  };
-
-  services.garage = {
-    # Docker forwards the host's loopback port to this container interface.
-    s3Address = lib.mkForce "0.0.0.0:9000";
-
-    # The shared module imports unconditionally, which fails on restart.
-    afterStart = lib.mkForce ''
-      if ! garage key info ${lib.escapeShellArg config.scottylabs.garage.accessKey} >/dev/null 2>&1; then
-        garage key import --yes \
-          -n ${lib.escapeShellArg config.scottylabs.project.name} \
-          ${lib.escapeShellArg config.scottylabs.garage.accessKey} \
-          ${lib.escapeShellArg config.scottylabs.garage.secretKey}
-      fi
-      garage bucket allow --read --write --owner \
-        ${lib.escapeShellArg config.scottylabs.project.name} \
-        --key ${lib.escapeShellArg config.scottylabs.garage.accessKey}
-    '';
   };
 
   # Use Kennel's pinned relay package, listening on the Docker interface.

@@ -2,20 +2,20 @@
 
 ## Local development import
 
-The [running guide](Setup.md#upload-and-populate-the-local-database) describes the
+The [running guide](Setup.md#populate-the-local-database) describes the
 supported local pipeline:
 
 ```text
-Allocated hosted CDN cdn-maps/floorplans/*.json
+Temporary S3 categorized-lockerbox-v9qy6t/floorplans/*.json
   -> dataflow validation + Keycloak service token
   -> backend population API -> local PostgreSQL
   -> backend restart -> search index and graph cache -> web app
 ```
 
-OpenBao provides the CDN S3 credentials. `populate` reads shared hosted data and
-writes only to the local API/database. `populate --source garage` is the optional
-isolated source. Each developer imports independently; sharing files does not
-automatically synchronize databases.
+OpenBao record `TEMP_DEV_S3` supplies the one temporary source and credentials
+through ignored `apps/dataflow/.env`. `populate` reads hosted data and
+writes only to the local API/database. Each developer imports independently;
+sharing files does not automatically synchronize databases.
 
 The four required inputs are `buildings.json`, `floorplans.json`, `placements.json`,
 and `all-graph.json`; POIs require `osm-pois.json` and an explicit flag. Validation
@@ -65,7 +65,7 @@ pipeline; those scraper tools have their own environment configuration.
 
 [Scraper code](https://github.com/ScottyLabs/cmumaps/tree/main/apps/dataflow/src/scraper)
 
-S3 bucket link: <https://minio.scottylabs.org/browser/cmumaps>
+The source tools use the same [branch-configured bucket](Data-Storage.md#object-storage).
 
 Data sources:
 

@@ -16,45 +16,51 @@ population = importlib.import_module("deserializer.main")
 class S3ConfigurationTests(unittest.TestCase):
     """Local URLs and legacy hostnames keep their intended transport."""
 
-    def test_local_and_legacy_endpoints(self) -> None:
-        """Only explicit HTTP disables TLS; the legacy bucket stays default."""
-        for endpoint, bucket, secure in [
-            ("http://localhost:9000", "maps", False),
-            ("s3.example.com", "cmumaps", True),
-            ("https://s3.example.com/", "cmumaps", True),
-        ]:
-            with (
-                self.subTest(endpoint=endpoint),
-                patch.dict(
-                    os.environ,
-                    {"S3_ENDPOINT": endpoint, "S3_BUCKET": bucket},
-                    clear=True,
-                ),
-                patch("clients._s3_client.Minio") as minio,
-            ):
-                client = S3Client()
-                self.assertEqual(client.bucket_name, bucket)
-                self.assertEqual(minio.call_args.kwargs["secure"], secure)
-        with patch.dict(os.environ, {"S3_ENDPOINT": "s3.example.com"}, clear=True):
-            self.assertEqual(S3Client().bucket_name, "cmumaps")
+    def setUp(self) -> None:
+        """Use test credentials rather than reading the developer's env file."""
+        patcher = patch(
+            "clients._s3_client.dotenv_values",
+            return_value={
+                "S3_ENDPOINT": "https://t3.storageapi.dev",
+                "S3_REGION": "auto",
+                "S3_BUCKET": "categorized-lockerbox-v9qy6t",
+                "S3_ACCESS_KEY": "temporary-test-key",
+                "S3_SECRET_KEY": "temporary-test-secret",
+            },
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
-    def test_invalid_endpoint(self) -> None:
-        """Reject URLs that would silently discard paths or credentials."""
-        for endpoint in [
-            "ftp://localhost",
-            "https://s3.example.com/bucket",
-            "http://user:pass@localhost",
-        ]:
-            with (
-                self.subTest(endpoint=endpoint),
-                patch.dict(
-                    os.environ,
-                    {"S3_ENDPOINT": endpoint},
-                    clear=True,
-                ),
-                self.assertRaises(ValueError),
-            ):
-                S3Client()
+    def test_pinned_bucket_overrides_legacy_environment(self) -> None:
+        """Ambient legacy storage settings cannot change the branch's source."""
+        with (
+            patch.dict(
+                os.environ,
+                {
+                    "S3_ENDPOINT": "http://localhost:9000",
+                    "S3_BUCKET": "old-bucket",
+                    "S3_REGION": "us-east-1",
+                    "S3_ACCESS_KEY": "stale-key",
+                },
+                clear=True,
+            ),
+            patch("clients._s3_client.Minio") as minio,
+        ):
+            client = S3Client()
+            self.assertEqual(client.bucket_name, "categorized-lockerbox-v9qy6t")
+            self.assertEqual(minio.call_args.args, ("t3.storageapi.dev",))
+            self.assertTrue(minio.call_args.kwargs["secure"])
+            self.assertEqual(minio.call_args.kwargs["region"], "auto")
+            self.assertEqual(minio.call_args.kwargs["access_key"], "temporary-test-key")
+
+    def test_missing_credentials_fail_without_environment_fallback(self) -> None:
+        """Old CDN or shell credentials must not silently be reused."""
+        with (
+            patch.dict(os.environ, {"S3_ACCESS_KEY": "old", "S3_SECRET_KEY": "old"}),
+            patch("clients._s3_client.dotenv_values", return_value={}),
+            self.assertRaisesRegex(ValueError, "TEMP_DEV_S3"),
+        ):
+            S3Client()
 
     def test_cached_snapshot_and_response_cleanup(self) -> None:
         """Imports reuse the checked bytes instead of refetching changing objects."""
@@ -181,42 +187,14 @@ class AuthorizationTests(unittest.TestCase):
 
 
 class LocalTargetTests(unittest.TestCase):
-    """Local mode never adopts a remote endpoint from a dotenv file."""
-
-    def test_local_mode_rejects_remote_storage(self) -> None:
-        """A local run must not use a production storage destination."""
-        with (
-            patch.dict(
-                os.environ,
-                {
-                    "S3_ENDPOINT": "https://s3.example.com",
-                    "S3_BUCKET": "maps",
-                },
-                clear=True,
-            ),
-            patch.object(
-                population.dotenv,
-                "dotenv_values",
-                return_value={
-                    "AUTH_CLIENT_ID": "test",
-                    "AUTH_CLIENT_SECRET": "test",
-                    "AUTH_ISSUER": "https://idp.example/realm",
-                },
-            ),
-            self.assertRaises(ValueError),
-        ):
-            population.configure_local(source="garage")
+    """The hosted bucket must never change the database write destination."""
 
     def test_local_mode_forces_backend_and_loads_only_auth(self) -> None:
-        """Old remote backend settings cannot redirect a local reset."""
+        """Environment and dotenv API URLs cannot redirect a local reset."""
         with (
             patch.dict(
                 os.environ,
-                {
-                    "S3_ENDPOINT": "http://localhost:9000",
-                    "S3_BUCKET": "maps",
-                    "SERVER_URL": "https://remote.example.com",
-                },
+                {"SERVER_URL": "https://remote.example.com"},
                 clear=True,
             ),
             patch.object(
@@ -231,80 +209,6 @@ class LocalTargetTests(unittest.TestCase):
                 },
             ),
         ):
-            population.configure_local(source="garage")
+            population.configure_local()
             self.assertEqual(os.environ["SERVER_URL"], "http://localhost")
             self.assertNotIn("UNRELATED", os.environ)
-
-
-class HostedSourceTests(unittest.TestCase):
-    """CDN imports read hosted data but can only reset the local backend."""
-
-    def setUp(self) -> None:
-        """Provide separate server and dataflow dotenv fixtures."""
-        self.server = {
-            "AUTH_CLIENT_ID": "test",
-            "AUTH_CLIENT_SECRET": "test",
-            "AUTH_ISSUER": "https://idp.example/realm",
-            "SERVER_URL": "https://production.example",
-        }
-        self.storage = {
-            "S3_ENDPOINT": "https://s3.example.com",
-            "S3_BUCKET": "cdn-maps",
-            "S3_ACCESS_KEY": "cdn-test-key",
-            "S3_SECRET_KEY": "cdn-test-secret",
-            "SERVER_URL": "https://production.example",
-        }
-
-    def test_cdn_overrides_garage_and_pins_local_target(self) -> None:
-        """Inherited devenv/legacy values cannot select another bucket or API."""
-        with (
-            patch.dict(
-                os.environ,
-                {
-                    "S3_ENDPOINT": "http://localhost:9000",
-                    "S3_BUCKET": "maps",
-                    "S3_ACCESS_KEY": "local-key",
-                    "S3_SECRET_KEY": "local-secret",
-                    "S3_REGION": "us-east-1",
-                    "SERVER_URL": "https://production.example",
-                },
-                clear=True,
-            ),
-            patch.object(
-                population.dotenv,
-                "dotenv_values",
-                side_effect=[self.server, self.storage],
-            ),
-        ):
-            population.configure_local()
-            self.assertEqual(os.environ["SERVER_URL"], "http://localhost")
-            for name in ("S3_ENDPOINT", "S3_BUCKET", "S3_ACCESS_KEY", "S3_SECRET_KEY"):
-                self.assertEqual(os.environ[name], self.storage[name])
-            self.assertNotIn("S3_REGION", os.environ)
-
-    def test_missing_cdn_credentials_do_not_fall_back(self) -> None:
-        """A missing secret must fail instead of reading legacy or local storage."""
-        del self.storage["S3_SECRET_KEY"]
-        with (
-            patch.dict(os.environ, {"S3_SECRET_KEY": "old-secret"}, clear=True),
-            patch.object(
-                population.dotenv,
-                "dotenv_values",
-                side_effect=[self.server, self.storage],
-            ),
-            self.assertRaisesRegex(ValueError, "S3_SECRET_KEY"),
-        ):
-            population.configure_local()
-
-    def test_cdn_requires_tls(self) -> None:
-        """Do not send the hosted credentials over HTTP."""
-        self.storage["S3_ENDPOINT"] = "http://s3.example.com"
-        with (
-            patch.object(
-                population.dotenv,
-                "dotenv_values",
-                side_effect=[self.server, self.storage],
-            ),
-            self.assertRaisesRegex(ValueError, "HTTPS"),
-        ):
-            population.configure_local()

@@ -28,22 +28,29 @@ class LauncherTests(unittest.TestCase):
         self.addCleanup(self.root_patch.stop)
         self.addCleanup(self.temporary.cleanup)
         self.values = {name: "example-" + name.lower() for name in dev.SECRET_NAMES}
+        self.storage = {
+            "S3_ENDPOINT": "https://t3.storageapi.dev",
+            "S3_REGION": "auto",
+            "S3_BUCKET": "categorized-lockerbox-v9qy6t",
+            "S3_ACCESS_KEY": "test-key",
+            "S3_SECRET_KEY": "test-secret",
+        }
         self.values["KEYCLOAK_URL"] = "https://idp.example.test/"
         self.values["OAUTH_RELAY_URL"] = "http://localhost:8090/oauth2/callback"
-        self.values["CDN_S3_ENDPOINT"] = "https://s3.example.test"
-        self.values["CDN_S3_BUCKET"] = "cdn-maps"
-        self.values["CDN_PUBLIC_URL"] = "https://cdn.example.test/maps/"
 
     def mock_bao(self, args, **kwargs):
         if args[1:3] == ["token", "lookup"]:
             return subprocess.CompletedProcess(args, 0)
         name = args[-1].split("/")[-1]
+        data = (
+            self.storage if name == dev.STORAGE_RECORD else {"value": self.values[name]}
+        )
         return subprocess.CompletedProcess(
-            args, 0, dev.json.dumps({"data": {"data": {"value": self.values[name]}}})
+            args, 0, dev.json.dumps({"data": {"data": data}})
         )
 
     def test_secret_mapping_and_frontend_separation(self):
-        envs = dev.secret_environments(self.values)
+        envs = dev.secret_environments(self.values, self.storage)
         self.assertIn('AUTH_CLIENT_SECRET="example-oidc_client_secret"', envs["server"])
         self.assertIn(
             'AUTH_ISSUER="https://idp.example.test/realms/example-keycloak_realm"',
@@ -52,11 +59,8 @@ class LauncherTests(unittest.TestCase):
         self.assertNotIn("AUTH_CLIENT", envs["web"])
         self.assertNotIn("example-oidc_client_secret", envs["web"])
         self.assertEqual(len(envs["web"].splitlines()), 2)
-        self.assertIn('S3_BUCKET="cdn-maps"', envs["dataflow"])
-        self.assertIn('S3_ENDPOINT="https://s3.example.test"', envs["dataflow"])
-        self.assertIn(self.values["CDN_SECRET_ACCESS_KEY"], envs["dataflow"])
-        for app in ("server", "web"):
-            self.assertNotIn(self.values["CDN_SECRET_ACCESS_KEY"], envs[app])
+        self.assertIn('S3_REGION="auto"', envs["dataflow"])
+        self.assertNotIn(self.storage["S3_SECRET_KEY"], envs["web"])
         self.assertNotIn("SERVER_PORT=", envs["server"])
 
     def test_refresh_creates_both_env_variants_without_logging_secrets(self):
@@ -81,7 +85,7 @@ class LauncherTests(unittest.TestCase):
         for app in ("server", "web", "dataflow"):
             for name in (".env", ".env.local"):
                 (self.root / "apps" / app / name).write_text("old\n")
-        self.values["CDN_PUBLIC_URL"] = None
+        self.values["OAUTH_RELAY_URL"] = None
         with (
             patch.object(dev, "require_tool"),
             patch.object(dev, "run", side_effect=self.mock_bao),
@@ -153,36 +157,21 @@ class LauncherTests(unittest.TestCase):
             patch.object(dev, "execute_helper") as execute,
         ):
             self.assertEqual(dev.main(["populate", "--check", "--include-pois"]), 0)
-        execute.assert_called_once_with(
-            "populate.sh", ["--source", "cdn", "--check", "--include-pois"]
-        )
+        execute.assert_called_once_with("populate.sh", ["--check", "--include-pois"])
 
-    def test_upload_requires_complete_input_before_contacting_docker(self):
-        folder = self.root / "uploads" / "floor plans"
-        folder.mkdir(parents=True)
+    def test_failed_storage_fetch_preserves_existing_credentials(self):
+        path = self.root / "apps/dataflow/.env"
+        path.write_text('S3_ACCESS_KEY="existing"\n')
+        before = path.read_bytes()
+        del self.storage["S3_SECRET_KEY"]
         with (
-            patch.object(dev, "docker_ready") as ready,
-            contextlib.redirect_stderr(io.StringIO()),
+            patch.object(dev, "require_tool"),
+            patch.object(dev, "run", side_effect=self.mock_bao),
         ):
-            self.assertEqual(dev.main(["upload", str(folder)]), 1)
-        ready.assert_not_called()
-
-    def test_upload_translates_host_path_to_linux_mount(self):
-        folder = self.root / "uploads" / "floor plans"
-        folder.mkdir(parents=True)
-        for name in (
-            "buildings.json",
-            "floorplans.json",
-            "placements.json",
-            "all-graph.json",
-        ):
-            (folder / name).write_text("{}")
-        with (
-            patch.object(dev, "docker_ready"),
-            patch.object(dev, "execute_helper") as execute,
-        ):
-            self.assertEqual(dev.main(["upload", str(folder)]), 0)
-        execute.assert_called_once_with("upload.sh", ["/workspace/uploads/floor plans"])
+            with self.assertRaisesRegex(RuntimeError, "TEMP_DEV_S3"):
+                dev.pull_secrets()
+        self.assertEqual(path.read_bytes(), before)
+        self.assertFalse((self.root / "apps/server/.env").exists())
 
     def test_readiness_timeout_is_bounded(self):
         with (

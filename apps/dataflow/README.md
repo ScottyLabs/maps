@@ -12,40 +12,36 @@ uv run --env-file <ENV_FILE> <SCRIPT_NAME>
 
 ## Local database import
 
-Start the devcontainer and backend using the [running guide](../../docs/src/Setup.md).
-The host launcher downloads CDN settings from OpenBao into this app's ignored env
-files. From the repository root (use `py -3` in Windows PowerShell):
+Follow the [running guide](../../docs/src/Setup.md). The host launcher downloads the
+`TEMP_DEV_S3` record from OpenBao into this app's ignored `.env` and `.env.local`.
+The record contains `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET`, `S3_ACCESS_KEY`, and
+`S3_SECRET_KEY`. Identity settings come from the existing app entries.
+
+This branch temporarily uses only `https://t3.storageapi.dev`, region `auto`, bucket
+`categorized-lockerbox-v9qy6t`. The importer and scraper/serializer S3 helpers read
+the same dataflow env file, ignoring old shell storage settings. There is no source
+selector or local object-storage service.
+
+With the devcontainer and backend running, run from the repository root (replace
+`python3` with `py -3` in Windows PowerShell):
 
 ```sh
-python3 scripts/dev/dev.py secrets
 python3 scripts/dev/dev.py populate --check
 python3 scripts/dev/dev.py populate
 ```
 
-By default this reads `floorplans/buildings.json`, `floorplans/floorplans.json`,
-`floorplans/placements.json`, and `floorplans/all-graph.json` from the allocated
-hosted CDN bucket (`cdn-maps`). It uses S3 credentials, not the public CDN URL, and
-writes only through the local backend API. The storage settings override inherited
-Garage variables. The importer does not upload to or modify hosted storage.
+Required keys are `floorplans/buildings.json`, `floorplans/floorplans.json`,
+`floorplans/placements.json`, and `floorplans/all-graph.json`. Import validates data
+and authorization before clearing the seven local map tables. POIs remain empty
+unless `--include-pois` is supplied and `floorplans/osm-pois.json` exists. Raw
+source-fetch artifacts are not valid import inputs. Missing credentials or files
+abort before clearing tables; a later failure can leave a partial import because
+the entire operation is not transactional.
 
-Import validates datasets and backend authorization before clearing the seven
-local map tables. POIs are left empty unless `--include-pois` is supplied and
-`floorplans/osm-pois.json` exists. Restart the backend after import to refresh
-search and graph caches. A failure after reset can leave a partial import; the
-whole operation is not transactional. Raw `source-fetch/` artifacts are not the
-processed datasets required by this importer.
-
-For isolated experiments, `dev.py upload DIRECTORY` uploads to local Garage and
-`dev.py populate --source garage` imports from it. Local Garage remains in the
-Kennel scaffold; it is not the default data source.
-
-The local helper loads identity credentials from the server env file. The client
-needs `/projects/maps/admins` in its Keycloak access token. It uses the minimal
-`populate` dependency group, without the full scraper/geometry toolchain. The
-`--local` mode always forces the local API destination, regardless of data source.
-For a standalone import without `--local`, configure `S3_ENDPOINT`, `S3_ACCESS_KEY`,
-`S3_SECRET_KEY`, optional `S3_BUCKET` and `S3_REGION`, `SERVER_URL`, `AUTH_CLIENT_ID`,
-`AUTH_CLIENT_SECRET`, and `AUTH_ISSUER` for the intended environment explicitly.
+Restart the backend after import to refresh search/graph caches. The local wrapper
+always targets the local backend, loading identity credentials from the server's
+ignored env file. The client needs `/projects/maps/admins` in its Keycloak token.
+The minimal `populate` group avoids installing the full scraper toolchain.
 
 ## Validation
 

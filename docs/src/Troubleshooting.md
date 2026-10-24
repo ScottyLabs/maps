@@ -17,14 +17,14 @@ must use Linux containers. The script uses the active Docker context; check
 OIDC login authenticates your identity; it does not grant every path. This setup
 reads KV v2 mount `secret`, path `secretspec/maps/dev/<NAME>`, field `value`.
 The older `ScottyLabs/cmumaps/local/server` path is not used by the new launcher.
-Ask the team to check your Maps development policies and that all eleven entries
+Ask the team to check your Maps development policies and that the six identity/MapKit entries and the `TEMP_DEV_S3` record
 listed in the running guide exist. A failed fetch leaves existing env files intact.
 Do not paste tokens or secret values into logs or issues.
 
 ## A different app appears on port 5173
 
 Stop the other app, then stop/start the CMU Maps containers so the engine retries
-host port forwarding. The same applies to conflicts on ports 80, 8090, and 9000.
+host port forwarding. The same applies to conflicts on ports 80 and 8090.
 
 ```sh
 python3 scripts/dev/dev.py stop
@@ -37,7 +37,7 @@ containers before launching another. Host ports are bound only to loopback.
 On rootless Linux Docker, publishing port 80 may require host configuration;
 use an engine configured to publish the documented ports.
 
-## Garage or relay readiness times out
+## Relay readiness times out
 
 ```sh
 python3 scripts/dev/dev.py logs
@@ -51,7 +51,7 @@ downloads or evaluation fail. Do not delete volumes as a first troubleshooting s
 The Compose file mounts `/tmp` as executable tmpfs so devenv PID/socket files
 cannot survive container restarts. After updating from an older configuration,
 recreate the devcontainer with `docker compose -f .devcontainer/docker-compose.yml up -d --force-recreate dev`.
-Persistent Garage and PostgreSQL data stay in named volumes. Restart the app after
+Persistent PostgreSQL data stay in named volumes. Restart the app after
 recreating the container.
 
 ## Keycloak rejects redirect_uri
@@ -75,17 +75,17 @@ login does not prove that the service account can populate data.
 
 ## Missing maps, routes, or floorplans
 
-Startup creates the local schema but does not load a dataset. Run `dev.py secrets`
-to refresh CDN credentials, then follow the hosted population steps in the running
-guide. Check that the four `floorplans/*.json` objects exist in the allocated bucket;
-raw `source-fetch/` files cannot be imported directly. A CDN 403 indicates storage
-access issues, separate from Keycloak backend authorization. Missing credentials
-or objects do not fall back to legacy storage and do not clear the local database.
-For an isolated dataset, upload to Garage and use `populate --source garage`. If an import fails validation,
-correct the source files before retrying. If it fails after clearing tables,
-retry the complete import after resolving the error. Restart the backend after a
-successful import to rebuild its cached graph/search index. POIs require their optional dataset; floorplan geometry is rendered from the
-imported room records rather than raw SVGs.
+Startup creates the local schema but does not import campus data. Run `dev.py secrets` to refresh the `TEMP_DEV_S3` configuration, then
+`populate --check`. This branch reads the one source from the dataflow env file;
+inherited storage variables and old settings do not select another source. A storage
+403 means the supplied bucket credentials lack access, separate from Keycloak
+backend authorization.
+
+The four required `floorplans/*.json` objects must exist. Raw source-fetch files
+cannot be imported directly. Missing credentials/files fail before database reset.
+After a successful import, restart the app to rebuild caches. A failure after
+reset can leave partial records; fix the cause and rerun the complete import.
+POIs require their optional dataset; floorplans render from imported room geometry.
 
 ## Windows line endings, file watching, and paths
 
@@ -93,8 +93,7 @@ Use PowerShell with `py -3 scripts/dev/dev.py`, or a WSL terminal with `python3`
 The host launcher needs no Bash or jq. Container helpers are Bash scripts running
 inside Linux, and `.gitattributes` keeps their line endings as LF. If you have an
 older checkout with CRLF scripts, normalize those files to LF before rebuilding.
-Quote paths containing spaces. Upload folders must be inside the checkout so the
-container can access them through `/workspace`.
+Quote paths containing spaces. The checkout is mounted at `/workspace` in the container.
 
 For reliable hot reload with Docker Desktop/WSL, keep the checkout in the WSL
 filesystem and edit using a WSL-aware editor. Run `bao login` in the same host

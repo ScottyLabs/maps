@@ -4,22 +4,21 @@
 
 The supported local workflow is documented in [Running locally](Setup.md).
 Docker runs a Linux development container and a sibling PostgreSQL 17 container.
-Nix/devenv uses Kennel's module for Garage and Ricochet. It does not deploy the app.
+Nix/devenv uses Kennel's module for Ricochet. It does not deploy the app.
 
 | Component | Local address | Configuration |
 | --- | --- | --- |
 | Web | `http://localhost:5173` | Vite in the devcontainer |
 | API | `http://localhost` | Bun in the devcontainer |
-| OAuth relay | `http://localhost:8090` | Kennel Ricochet; registered callback from OpenBao |
-| Shared dataset | `https://s3.scottylabs.org` | Allocated CDN bucket `cdn-maps`, read using OpenBao credentials |
-| Optional local S3 API | `http://localhost:9000` | Garage, bucket `maps`; select `--source garage` |
+| OAuth relay | `http://localhost:8090` | Kennel Ricochet; callback from OpenBao |
+| Dataset source | `https://t3.storageapi.dev` | Bucket `categorized-lockerbox-v9qy6t`, region `auto` |
 | PostgreSQL | `postgres:5432` inside Docker | No host port published |
 | Identity provider | ScottyLabs Keycloak | Development client from OpenBao |
 
-The local setup uses `secret/secretspec/maps/dev` for identity, MapKit, and CDN values.
-Database and Garage credentials are public local defaults, and their volumes are
-independent of hosted storage. Population reads shared hosted JSON and copies
-its records into local PostgreSQL; it does not synchronize databases automatically. The launcher does not write secrets back to OpenBao.
+OpenBao supplies identity/MapKit settings from `secret/secretspec/maps/dev`.
+The `TEMP_DEV_S3` record supplies all temporary bucket settings; the launcher
+writes them to ignored dataflow env files when refreshing secrets. Each local database
+imports independently from the same hosted source.
 
 ## Hosted environments
 

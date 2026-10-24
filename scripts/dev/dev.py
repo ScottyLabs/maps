@@ -20,11 +20,15 @@ SECRET_NAMES = (
     "KEYCLOAK_REALM",
     "MAPKIT_TOKEN",
     "OAUTH_RELAY_URL",
-    "CDN_S3_ENDPOINT",
-    "CDN_S3_BUCKET",
-    "CDN_ACCESS_KEY_ID",
-    "CDN_SECRET_ACCESS_KEY",
-    "CDN_PUBLIC_URL",
+)
+
+STORAGE_RECORD = "TEMP_DEV_S3"
+STORAGE_NAMES = (
+    "S3_ENDPOINT",
+    "S3_REGION",
+    "S3_BUCKET",
+    "S3_ACCESS_KEY",
+    "S3_SECRET_KEY",
 )
 
 
@@ -82,7 +86,7 @@ def dotenv(values):
     return "".join(f'{name}="{value}"\n' for name, value in values.items())
 
 
-def secret_environments(values):
+def secret_environments(values, storage):
     issuer = values["KEYCLOAK_URL"].rstrip("/") + "/realms/" + values["KEYCLOAK_REALM"]
     server = {
         "ALLOWED_ORIGINS_REGEX": "^http://(localhost|127[.]0[.]0[.]1):5173$",
@@ -99,14 +103,7 @@ def secret_environments(values):
         "VITE_SERVER_URL": "http://localhost",
         "VITE_MAPKIT_TOKEN": values["MAPKIT_TOKEN"],
     }
-    dataflow = {
-        "S3_ENDPOINT": values["CDN_S3_ENDPOINT"],
-        "S3_BUCKET": values["CDN_S3_BUCKET"],
-        "S3_ACCESS_KEY": values["CDN_ACCESS_KEY_ID"],
-        "S3_SECRET_KEY": values["CDN_SECRET_ACCESS_KEY"],
-        "CDN_PUBLIC_URL": values["CDN_PUBLIC_URL"],
-    }
-    return {"server": dotenv(server), "web": dotenv(web), "dataflow": dotenv(dataflow)}
+    return {"server": dotenv(server), "web": dotenv(web), "dataflow": dotenv(storage)}
 
 
 def write_env(path, content):
@@ -169,7 +166,39 @@ def pull_secrets():
                 "and the entry's nonempty 'value' field. Existing env files were not changed."
             ) from error
     # Fetch and validate everything before replacing any file. Never print values.
-    environments = secret_environments(values)
+    try:
+        result = run(
+            [
+                "bao",
+                "kv",
+                "get",
+                "-format=json",
+                "-mount=secret",
+                f"secretspec/maps/dev/{STORAGE_RECORD}",
+            ],
+            capture=True,
+            env=environment,
+            timeout=30,
+        )
+        record = json.loads(result.stdout)["data"]["data"]
+        storage = {name: record[name] for name in STORAGE_NAMES}
+        if any(
+            not isinstance(value, str) or not value or "$" in value
+            for value in storage.values()
+        ):
+            raise ValueError("Invalid storage field")
+    except (
+        subprocess.CalledProcessError,
+        subprocess.TimeoutExpired,
+        ValueError,
+        KeyError,
+        TypeError,
+    ) as error:
+        raise RuntimeError(
+            f"Cannot read secret/secretspec/maps/dev/{STORAGE_RECORD}. "
+            "Check access and that all five S3 fields are present. Existing env files were not changed."
+        ) from error
+    environments = secret_environments(values, storage)
     for app, content in environments.items():
         for filename in (".env", ".env.local"):
             write_env(ROOT / "apps" / app / filename, content)
@@ -181,7 +210,7 @@ def pull_secrets():
 
 def wait_services():
     print(
-        "Waiting for Garage and Ricochet (first startup can take several minutes)...",
+        "Waiting for Ricochet (first startup can take several minutes)...",
         flush=True,
     )
     deadline = time.monotonic() + 600
@@ -252,28 +281,6 @@ def start(args):
     execute_helper("container-app.sh", interactive=True)
 
 
-def upload(args):
-    directory = Path(args.directory).resolve()
-    try:
-        relative = directory.relative_to(ROOT)
-    except ValueError as error:
-        raise RuntimeError(
-            "Put the extracted dataset inside this checkout (for example uploads/floorplans)."
-        ) from error
-    names = ["buildings.json", "floorplans.json", "placements.json", "all-graph.json"]
-    if args.include_pois:
-        names.append("osm-pois.json")
-    for name in names:
-        if not (directory / name).is_file():
-            raise RuntimeError(f"Missing input: {directory / name}")
-    docker_ready()
-    execute_helper(
-        "upload.sh",
-        ["/workspace/" + relative.as_posix()]
-        + (["--include-pois"] if args.include_pois else []),
-    )
-
-
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -291,13 +298,7 @@ def main(argv=None):
     )
     populate = commands.add_parser(
         "populate",
-        help="Replace local map tables from the hosted CDN; restart app afterwards",
-    )
-    populate.add_argument(
-        "--source",
-        choices=("cdn", "garage"),
-        default="cdn",
-        help="Read the allocated hosted CDN (default), or local Garage",
+        help="Replace local map tables from the temporary S3 bucket; restart app afterwards",
     )
     populate.add_argument(
         "--check",
@@ -307,17 +308,8 @@ def main(argv=None):
     populate.add_argument(
         "--include-pois", action="store_true", help="Require and import osm-pois.json"
     )
-    uploader = commands.add_parser(
-        "upload", help="Upload the four dataset JSON files to local Garage"
-    )
-    uploader.add_argument(
-        "directory", help="Extracted dataset directory inside this checkout"
-    )
-    uploader.add_argument(
-        "--include-pois", action="store_true", help="Also upload osm-pois.json"
-    )
     commands.add_parser("stop", help="Stop both containers, preserving volumes")
-    commands.add_parser("logs", help="Follow Garage, relay, and PostgreSQL logs")
+    commands.add_parser("logs", help="Follow relay and PostgreSQL logs")
     commands.add_parser("shell", help="Enter the container's Kennel/devenv shell")
     args = parser.parse_args(argv)
     try:
@@ -325,15 +317,11 @@ def main(argv=None):
             start(args)
         elif args.command == "secrets":
             pull_secrets()
-        elif args.command == "upload":
-            upload(args)
         else:
             docker_ready()
             if args.command == "populate":
-                options = (
-                    ["--source", args.source]
-                    + (["--check"] if args.check else [])
-                    + (["--include-pois"] if args.include_pois else [])
+                options = (["--check"] if args.check else []) + (
+                    ["--include-pois"] if args.include_pois else []
                 )
                 execute_helper("populate.sh", options)
                 if not args.check:

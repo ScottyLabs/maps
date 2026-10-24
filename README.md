@@ -15,7 +15,9 @@ Key features include:
 ## Quick start
 
 Install Docker with Compose, Python, and OpenBao CLI on your host. Start Docker
-Desktop, Colima, or Docker Engine. From the repository root:
+Desktop, Colima, or Docker Engine. Ensure your OpenBao policy can read the app
+settings and `secret/secretspec/maps/dev/TEMP_DEV_S3`, which contains this branch's
+temporary bucket configuration. From the repository root:
 
 1. **Terminal 1:** log into OpenBao and start the app. Leave it running once ready.
 
@@ -36,7 +38,7 @@ Desktop, Colima, or Docker Engine. From the repository root:
    ```
 
 2. **Terminal 2:** open another terminal in the repository root, check the shared
-   CDN dataset, then populate the local database. Continue only if the check succeeds.
+   S3 dataset, then populate the local database. Continue only if the check succeeds.
 
    ```sh
    python3 scripts/dev/dev.py populate --check
@@ -62,7 +64,7 @@ The launcher reports missing Docker/OpenBao dependencies; it does not install th
 ## Documentation
 
 The project documentation lives in [docs/src](docs/src/SUMMARY.md).
-See the [script and Garage reference](scripts/dev/README.md) for the Kennel scaffold,
+See the [development script reference](scripts/dev/README.md) for the Kennel scaffold,
 service layout, and storage configuration.
 
 ## Contributing

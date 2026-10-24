@@ -1,10 +1,10 @@
 import json
-import os
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, cast
 from urllib.parse import urlsplit
 
+from dotenv import dotenv_values
 from minio import Minio
 from pydantic import BaseModel, ValidationError
 
@@ -28,37 +28,42 @@ class S3Client:
         """
         self.logger = get_app_logger()
 
-        self.access_key = os.getenv("S3_ACCESS_KEY")
-        self.secret_key = os.getenv("S3_SECRET_KEY")
-        self.s3_endpoint = os.getenv("S3_ENDPOINT")
-
-        if not self.s3_endpoint:
-            msg = "S3_ENDPOINT must be set"
-            self.logger.critical(msg)
-            raise ValueError(msg)
-
-        endpoint = urlsplit(
-            self.s3_endpoint
-            if "://" in self.s3_endpoint
-            else f"https://{self.s3_endpoint}",
+        credentials_file = Path(__file__).resolve().parents[2] / ".env"
+        credentials = dotenv_values(credentials_file)
+        required = (
+            "S3_ENDPOINT",
+            "S3_REGION",
+            "S3_BUCKET",
+            "S3_ACCESS_KEY",
+            "S3_SECRET_KEY",
         )
+        if any(not credentials.get(name) for name in required):
+            msg = (
+                f"Missing temporary S3 settings in {credentials_file}; "
+                "run python3 scripts/dev/dev.py secrets to fetch TEMP_DEV_S3"
+            )
+            raise ValueError(msg)
+        self.access_key = credentials.get("S3_ACCESS_KEY")
+        self.secret_key = credentials.get("S3_SECRET_KEY")
+        self.s3_endpoint = str(credentials["S3_ENDPOINT"])
+        endpoint = urlsplit(self.s3_endpoint)
         if (
-            endpoint.scheme not in {"http", "https"}
+            endpoint.scheme != "https"
             or not endpoint.hostname
             or endpoint.path not in {"", "/"}
-            or endpoint.query
-            or endpoint.fragment
             or endpoint.username
             or endpoint.password
+            or endpoint.query
+            or endpoint.fragment
         ):
-            msg = "S3_ENDPOINT must be an HTTP(S) origin or host:port"
+            msg = "TEMP_DEV_S3 requires an HTTPS S3 origin without embedded credentials"
             raise ValueError(msg)
-        self.bucket_name = os.getenv("S3_BUCKET", "cmumaps")
+        self.bucket_name = str(credentials["S3_BUCKET"])
         self._json_cache: dict[str, dict[str, Any]] = {}
-        self._client = Minio(
+        self.client = Minio(
             endpoint.netloc,
-            secure=endpoint.scheme == "https",
-            region=os.getenv("S3_REGION"),
+            secure=True,
+            region=str(credentials["S3_REGION"]),
             access_key=self.access_key,
             secret_key=self.secret_key,
         )
@@ -108,7 +113,7 @@ class S3Client:
                 return False
 
         try:
-            self._client.fput_object(
+            self.client.fput_object(
                 self.bucket_name,
                 s3_object_name,
                 local_file_path,
@@ -142,7 +147,7 @@ class S3Client:
             return self._json_cache[s3_object_name]
         try:
             # Get the object
-            response = self._client.get_object(self.bucket_name, s3_object_name)
+            response = self.client.get_object(self.bucket_name, s3_object_name)
 
             # Read and parse JSON data
             try:

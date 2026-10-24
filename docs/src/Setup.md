@@ -2,7 +2,7 @@
 
 The same development setup runs on macOS, Linux, and Windows using Linux
 containers. Run the launcher on your host; edit the mounted checkout on your host
-or in VS Code's Dev Containers extension. Bun, Node, Nix, devenv, Garage, the OAuth
+or in VS Code's Dev Containers extension. Bun, Node, Nix, devenv, the OAuth
 relay, and the dataflow Python environment run inside the development container.
 PostgreSQL runs in a second, sibling container.
 
@@ -12,6 +12,11 @@ For a first-time setup: **start the app → populate the local database → rest
 the app → open CMU Maps**. Run these commands from the repository root after
 installing the [prerequisites](#prerequisites) and starting Docker Desktop, Colima,
 or Docker Engine.
+
+The team stores this branch's temporary S3 configuration in OpenBao at
+`secret/secretspec/maps/dev/TEMP_DEV_S3`. Your development policy must allow reading
+that record as well as the app's identity/MapKit entries. Startup downloads the
+settings automatically; no manual storage env setup is needed.
 
 ### 1. Log in and start the app (terminal 1)
 
@@ -37,7 +42,7 @@ database has tables but no campus data yet.
 
 ### 2. Populate the database (terminal 2)
 
-Open a second host terminal in the repository root. Validate the shared CDN
+Open a second host terminal in the repository root. Validate the temporary S3
 inputs, then import them into your local database. Continue only if the check succeeds.
 
 macOS, Linux, or WSL:
@@ -125,8 +130,8 @@ python3 scripts/dev/dev.py stop
 - `start --skip-secrets` reuses the saved env files without contacting OpenBao.
 - `start --rebuild` rebuilds the image after Dockerfile changes and refreshes secrets.
   Combine both flags to rebuild while reusing secrets.
-- `shell` enters the container's `devenv shell`, including local S3 variables.
-- `logs` follows container services (Garage, relay, PostgreSQL). App logs appear in
+- `shell` enters the container's `devenv shell`, for manual commands.
+- `logs` follows container services (relay and PostgreSQL). App logs appear in
   the terminal running `start`.
 - `stop` stops both containers, including a detached app, and preserves data.
 
@@ -143,11 +148,11 @@ host. Do not run a second app if the host launcher already started one.
 ## What startup does
 
 1. Checks Docker/Compose and the selected Linux container engine.
-2. Checks your host OpenBao login, fetches eleven development values, and writes the
+2. Checks your host OpenBao login, fetches six app values and the `TEMP_DEV_S3` record, and writes the
    server/web/dataflow `.env` and `.env.local` files. It fetches and validates all values
    before replacing any file. This replaces local edits in those six files.
 3. Runs Compose to start PostgreSQL and the development container. The latter
-   runs `devenv up`, enabling Garage and Ricochet through Kennel's Nix module.
+   runs `devenv up`, enabling Ricochet through Kennel's Nix module.
 4. Waits for service readiness, then installs the pinned Bun/Node/OpenSSL runtimes
    into the persistent Nix profile and runs `bun install --frozen-lockfile`.
 5. Generates Prisma, tsoa, and OpenAPI artifacts with `bun run sync`, then runs
@@ -169,17 +174,19 @@ string field named `value` in each entry:
 | `KEYCLOAK_URL`, `KEYCLOAK_REALM` | Server `AUTH_ISSUER` and `AUTH_JWKS_URI` |
 | `OAUTH_RELAY_URL` | Server OAuth callback relay URL |
 | `MAPKIT_TOKEN` | Web `VITE_MAPKIT_TOKEN` |
-| `CDN_S3_ENDPOINT` | Dataflow `S3_ENDPOINT` |
-| `CDN_S3_BUCKET` | Dataflow `S3_BUCKET` |
-| `CDN_ACCESS_KEY_ID` | Dataflow `S3_ACCESS_KEY` |
-| `CDN_SECRET_ACCESS_KEY` | Dataflow `S3_SECRET_KEY` |
-| `CDN_PUBLIC_URL` | Dataflow CDN reference URL (not a credential) |
 
 The launcher also supplies local URLs, the local PostgreSQL connection string,
 and the allowed frontend origin. The web env file contains only the MapKit token
 and `VITE_SERVER_URL`; identity client credentials stay in the server env files.
-CDN access credentials stay in the dataflow env files and never reach the browser. Files are
-ignored by Git and excluded from image builds. The OpenBao session/token remains
+The separate `TEMP_DEV_S3` record has fields `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET`,
+`S3_ACCESS_KEY`, and `S3_SECRET_KEY`. The launcher writes them only to ignored
+`apps/dataflow/.env` and `.env.local`; storage credentials never reach the browser.
+
+The current temporary source is `https://t3.storageapi.dev`, region `auto`, bucket
+`categorized-lockerbox-v9qy6t`. Changing the OpenBao record changes the one shared
+source; there are no alternate source flags or local storage services on this branch.
+
+Files are ignored by Git and excluded from image builds. The OpenBao session/token remains
 on your host; it is not passed into the container. POSIX env files are owner-only;
 Windows files inherit your checkout's access controls. Never commit them.
 
@@ -205,24 +212,15 @@ issuer, and the required group; audience is not required by the current policy.
 There is no separate password-based database-management user. The backend uses
 its PostgreSQL connection to perform the authorized writes.
 
-## Upload and populate the local database
+## Populate the local database
 
-The default pipeline reads the allocated hosted CDN's backing S3 bucket and writes
-to your local PostgreSQL database through the local API:
+The pipeline reads the temporary bucket and writes through the local backend API:
 
 ```text
-OpenBao CDN credentials -> hosted cdn-maps/floorplans/*.json
+S3 categorized-lockerbox-v9qy6t/floorplans/*.json
   -> dataflow validation + service-account token
   -> local backend -> local PostgreSQL -> restart backend caches -> web
 ```
-
-The current development allocation is bucket `cdn-maps` at
-`https://s3.scottylabs.org`, exposed publicly at `https://cdn.scottylabs.org/maps/`.
-The importer uses authenticated S3 reads, not the public HTTP URL. It overrides
-inherited local Garage/legacy storage variables with the dataflow env file and
-always targets `http://localhost` for API writes. It never uploads to or modifies
-the hosted bucket. The allocation is read from development OpenBao entries;
-this code does not provision separate development/production buckets.
 
 With the app running, use a second host terminal:
 
@@ -231,11 +229,7 @@ python3 scripts/dev/dev.py populate --check
 python3 scripts/dev/dev.py populate
 ```
 
-Run `python3 scripts/dev/dev.py secrets` first if upgrading from the older setup,
-so `apps/dataflow/.env` contains the allocated CDN credentials. Missing credentials
-fail explicitly; there is no fallback to the old `cmumaps` bucket or local Garage.
-
-| Required object key in the allocated bucket | Contents |
+| Required object key | Contents |
 | --- | --- |
 | `floorplans/buildings.json` | Building metadata |
 | `floorplans/floorplans.json` | Room/floorplan geometry |
@@ -248,39 +242,21 @@ a Keycloak token, and sends an empty building batch to test backend authorizatio
 It does not clear tables. `populate` then clears the seven local map tables and
 imports buildings, floors, rooms, aliases, nodes, and edges. POIs are cleared and
 left empty unless `--include-pois` is supplied and their file exists in the bucket.
-Validation happens before clearing. A later network or write failure can still
-leave a partial import because the complete operation is not one transaction;
-correct the issue and rerun the import. Missing CDN objects abort before reset.
+Missing credentials, missing objects, or validation failures abort before reset.
+A later network/write failure can leave a partial import because the operation
+is not one transaction; resolve the issue and rerun it.
 
-After population, stop and restart the app to rebuild its in-memory search index
-and graph cache. Ctrl-C in its startup terminal, then:
+Stop and restart the app after population to refresh its search/graph caches:
 
 ```sh
 python3 scripts/dev/dev.py start --skip-secrets
 ```
 
-Developers share the source dataset, not the database: each local database changes
-only when its developer imports. Publishing updated JSON to the shared bucket is
-a separate deliberate operation. Raw files under `source-fetch/` are not processed
-import datasets and are not read by this command.
-
-### Optional isolated Garage workflow
-
-Garage remains in the Kennel scaffold for local experiments and runs alongside
-the relay. It is no longer the default import source. Extract a dataset under the
-ignored `uploads/` directory, then:
-
-```sh
-python3 scripts/dev/dev.py upload "uploads/Data/cmumaps-data/floorplans"
-python3 scripts/dev/dev.py populate --source garage --check
-python3 scripts/dev/dev.py populate --source garage
-```
-
-The upload folder must be inside the checkout and directly contain the four JSON
-files listed above. `upload` writes only to local Garage's `maps` bucket, never
-the shared CDN. Add `--include-pois` to upload/import its optional file too.
-It does not upload an archive, `.git`, or a whole directory tree. The JSON import
-does not copy raw SVG assets; the web app renders floorplan geometry from the API.
+Developers share source files, not databases. Each local database changes only
+when its developer imports. Population reads the hosted bucket without modifying
+it; publishing processed datasets is a separate operation. The scraper/serializer
+S3 helpers use this same bucket. Raw `source-fetch/` artifacts cannot replace the
+four processed JSON inputs.
 
 ## Manual run
 
@@ -300,7 +276,10 @@ Its implementation is `pull_secrets` and `secret_environments` in
 [`scripts/dev/dev.py`](../../scripts/dev/dev.py). For each name in the table it
 executes `bao kv get -format=json -mount=secret secretspec/maps/dev/<NAME>` and
 reads `data.data.value`. It maps those values to the app env names above and writes
-both dotenv variants. It never sources downloaded data as shell code. To manage
+both dotenv variants. `TEMP_DEV_S3` is one grouped record: its five fields are read
+directly from `data.data`, rather than a `value` field. All app/storage values are
+fetched and validated before any env file is replaced. It never sources downloaded
+data as shell code. To manage
 env files manually, use the same mappings and local constants in
 `secret_environments`; do not set `SERVER_PORT`, whose schema expects a number.
 
@@ -311,7 +290,7 @@ docker compose -f .devcontainer/docker-compose.yml up -d --build dev
 docker compose -f .devcontainer/docker-compose.yml logs -f dev
 ```
 
-Wait for Garage and Ricochet to finish starting; Ctrl-C stops the log viewer only.
+Wait for Ricochet to finish starting; Ctrl-C stops the log viewer only.
 Readiness checks used by the launcher:
 
 ```sh
@@ -342,24 +321,7 @@ Bun's Nix loader needs the Nix library, while the standalone Prisma schema engin
 uses Ubuntu's OpenSSL. The helper also removes stale `SERVER_PORT` assignments
 from server dotenv files and guards against two app instances.
 
-### 4. Upload to local Garage manually (optional)
-
-Enter `devenv shell` with `python3 scripts/dev/dev.py shell`. For each required
-file, use the matching object key, for example:
-
-```sh
-curl --fail --silent --show-error \
-  --aws-sigv4 "aws:amz:${S3_REGION}:s3" \
-  --user "${S3_ACCESS_KEY}:${S3_SECRET_KEY}" \
-  --upload-file uploads/Data/cmumaps-data/floorplans/buildings.json \
-  "${S3_ENDPOINT}/${S3_BUCKET}/floorplans/buildings.json"
-```
-
-This optional upload does not affect the default hosted import. The upload helper
-repeats this for the four known filenames after checking all are present. [Storage configuration](../../scripts/dev/README.md) describes the
-local credentials and bucket.
-
-### 5. Populate manually (optional)
+### 4. Populate manually (optional)
 
 With the app running, run the container helper from another terminal:
 
@@ -377,16 +339,15 @@ export UV_PYTHON_INSTALL_DIR=/root/.cache/cmumaps-dataflow/python
 export UV_PROJECT_ENVIRONMENT=/root/.cache/cmumaps-dataflow/venv
 cd apps/dataflow
 export PYTHONPATH=src
-uv run --locked --only-group populate python -m deserializer --local --source cdn --skip-pois --check
+uv run --locked --only-group populate python -m deserializer --local --skip-pois --check
 ```
 
 Remove `--check` to replace local data; remove `--skip-pois` to include POIs.
-Use `--source garage` only for the optional local bucket. The `populate` dependency
-group avoids installing scraping/geometry tools not needed
-by the importer. The importer reads identity credentials from `apps/server/.env`,
-overrides the shell's Garage settings with CDN credentials from `apps/dataflow/.env`, and calls
-the local backend API. With `--source garage`, it instead validates the local
-Garage endpoint and bucket. Restart the app when finished.
+The minimal `populate` dependency group avoids installing unused scraper tools.
+The importer reads identity credentials from `apps/server/.env` and bucket
+credentials from `apps/dataflow/.env`. The S3 client reads all five storage settings from the dataflow env file;
+stale shell settings cannot choose a different source. Local mode always targets `http://localhost` for API writes. Restart the
+app when finished.
 
 ## Checks and maintenance
 
@@ -408,7 +369,7 @@ The launcher workflow runs these contract tests on Windows, Linux, and macOS.
 They mock Docker/OpenBao; they do not replace an engine integration test. Dataflow
 checks are described in [its README](../../apps/dataflow/README.md).
 
-Named volumes preserve PostgreSQL, Garage, Nix packages, and caches across
+Named volumes preserve PostgreSQL, Nix packages, and caches across
 container recreation. `stop` and `docker compose ... down` retain those volumes;
 `down --volumes` deletes them. Keep local datasets under `uploads/` and secrets
 in ignored env files. See [Troubleshooting](Troubleshooting.md) for startup issues.

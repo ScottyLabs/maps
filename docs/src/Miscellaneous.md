@@ -30,7 +30,7 @@ for the path finding service, so it is just simpler to have a monolith.
 
 Keep directory overviews in their READMEs and project-wide guides in `docs/src`.
 The [running guide](Setup.md) is the single maintained source for local setup.
-The local stack adds Docker, Nix/devenv with Kennel, Garage S3, and Ricochet.
+The local stack adds Docker, Nix/devenv with Kennel, hosted S3 storage, and Ricochet.
 Authentication uses Better Auth and Keycloak; development credentials come from
 OpenBao on the host.
 

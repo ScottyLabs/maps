@@ -11,7 +11,6 @@ services:
       - nix_store:/nix
       - devenv_cache:/root/.cache/devenv
       - dataflow_cache:/root/.cache/cmumaps-dataflow
-      - garage_data:/workspace/.devenv/state/garage
       # Keep Linux dependencies separate from dependencies installed on the host.
       - node_modules:/workspace/node_modules
       - server_modules:/workspace/apps/server/node_modules
@@ -29,7 +28,6 @@ services:
       - "127.0.0.1:80:80"
       - "127.0.0.1:5173:5173"
       - "127.0.0.1:8090:8090"
-      - "127.0.0.1:9000:9000"
     command: devenv up
     depends_on:
       postgres:
@@ -55,7 +53,6 @@ volumes:
   nix_store:
   devenv_cache:
   dataflow_cache:
-  garage_data:
   node_modules:
   server_modules:
   web_modules:

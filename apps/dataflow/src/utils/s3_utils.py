@@ -4,23 +4,12 @@ import json
 import os
 from typing import Any
 
-from dotenv import load_dotenv
-from minio import Minio
+from clients import get_s3_client_singleton
 
-load_dotenv()
-
-access_key = os.getenv("S3_ACCESS_KEY")
-secret_key = os.getenv("S3_SECRET_KEY")
-s3_endpoint = os.getenv("S3_ENDPOINT")
-
-# Create client with access and secret key.
-client = Minio(
-    s3_endpoint or "",
-    access_key=access_key,
-    secret_key=secret_key,
-)
-
-bucket_name = "cmumaps"
+# Scrapers/serializers use exactly the same temporary bucket as population.
+s3 = get_s3_client_singleton()
+client = s3.client
+bucket_name = s3.bucket_name
 
 
 def upload_json_file(local_file_path: str, s3_object_name: str) -> bool:
