@@ -31,3 +31,7 @@ environment persist under `.devenv/state`. The old Docker volumes are separate
 and are not deleted by this setup. Production Dockerfiles remain independent of
 local development. Fresh scraping/generation is specified in the
 [pipeline spec](../../docs/src/Data-Pipeline-Spec.md).
+
+`pipeline.sh normalize --workspace <path>` normalizes a verified FMS capture into
+editable source-frame JSON using the minimal processing dependency group. See
+[the FMS guide](../../docs/src/FMS-Capture.md#normalize-the-saved-drawing).

@@ -63,7 +63,7 @@ The minimal `populate` group avoids installing the full scraper toolchain.
 Inside `devenv shell`, run from this directory:
 
 ```sh
-uv sync --locked --only-group populate --group fms --group dev
+uv sync --locked --only-group populate --group fms --group pipeline --group dev
 PYTHONPATH=src uv run --no-sync python -m unittest discover -s tests -v
 PYTHONPATH=src uv run --no-sync python -c "from linter import main; main()"
 ```

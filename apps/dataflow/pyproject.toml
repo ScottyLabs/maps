@@ -21,6 +21,7 @@ dependencies = [
   "networkx==3.5",
   "geopy>=2.4.1",
   "selenium>=4.0.0",
+  "svgpathtools>=1.7.2",
 ]
 
 [dependency-groups]
@@ -46,6 +47,13 @@ dev = [
   "types-colorama>=0.4.15.20250801",
   "types-defusedxml>=0.7.0.20240218",
   "types-requests>=2.32.4.20260107",
+]
+pipeline = [
+    "defusedxml>=0.7.1",
+    "pydantic>=2.12.5",
+    "requests>=2.32.5",
+    "shapely==2.1.1",
+    "svgpathtools>=1.7.2",
 ]
 
 [build-system]
@@ -82,7 +90,7 @@ lint.select = ["ALL"]
 strict = true
 
 [[tool.mypy.overrides]]
-module = ["overpass", "arcgis.*", "scipy.*", "shapely.*", "triangle", "geopy.*"]
+module = ["overpass", "arcgis.*", "scipy.*", "shapely.*", "triangle", "geopy.*", "svgpathtools.*"]
 ignore_missing_imports = true
 
 # Upgrade all non-error rules to "error"

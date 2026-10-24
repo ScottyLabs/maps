@@ -2,7 +2,7 @@
 
 This is the implemented acquisition stage of the
 [fresh-source pipeline](Data-Pipeline-Spec.md). It captures source drawings and
-metadata into a local workspace. Generation, visualizer editing, and candidate
+metadata into a local workspace. Normalization is available offline. Generation, visualizer editing, and candidate
 activation are separate stages; capture alone does not replace the app's dataset.
 
 ## Run
@@ -42,6 +42,37 @@ not make a bounded capture appear to cover the whole building.
 
 Use a new workspace for a genuinely fresh capture. Ordinary processing should
 reuse the saved source. Keep datasets under ignored `uploads/`, not in Git.
+
+## Normalize the saved drawing
+
+Run the offline stage through the same pinned environment:
+
+```sh
+devenv shell -- bash scripts/dev/pipeline.sh normalize --workspace uploads/pipeline/ansys-v1
+```
+
+This creates `working.json` with source-linked spaces, polygon rings, label
+candidates, names where containment is unambiguous, and review warnings. Its
+coordinates are metres in the physical drawing frame, with x right and y up.
+They are not geographic coordinates. No database writes or S3 uploads occur.
+
+Normalization composes nested SVG transforms with each floor's physical bounds,
+removes rendering duplicates, preserves holes and SVG fill rules, and samples
+curves at a maximum 2 cm source-frame arc step. Self-touching CAD contours are
+split into their filled faces and flagged for review. Degenerate paths are
+reported rather than turned into rooms. Source spaces still need review against
+physical rooms, doors, and access information.
+
+Re-running uses saved working JSON, preserving room corrections. If intentionally
+re-extracting, add `--replace-working`; that explicitly discards working edits.
+A changed capture requires that explicit replacement. The next placement/export
+stages must consume this same saved data, rather than reimplement extraction.
+
+The live six-floor sample normalizes to 165 source-space pieces, including
+115 unambiguous names. These are extraction results, not a claim that the source
+contains 165 physical rooms. Multipart entities, unmatched labels and unknown
+room types remain visible for review. Automatic cross-floor alignment and
+navigation generation still require their source-evidence checks.
 
 ## Saved data and checks
 
