@@ -15,9 +15,18 @@ Key features include:
 ## Quick start
 
 Install [Nix and devenv](https://devenv.sh/getting-started/), Python, and OpenBao
-CLI. Use macOS, Linux, or WSL2 on Windows. Docker is not needed. Ensure your OpenBao
+CLI. Use macOS, Linux, or WSL2 on Windows. Windows users install and run everything
+inside WSL, keeping the clone in its Linux filesystem. Docker is not needed. Ensure your OpenBao
 policy can read the Maps app entries and `secret/secretspec/maps/dev/TEMP_DEV_S3`.
-From the repository root:
+For a first checkout, use the branch being tested:
+
+```sh
+git clone --branch hotfix ssh://forgejo@git.cmu.dev/ScottyLabs/maps.git
+cd maps
+```
+
+See the [platform prerequisites](docs/src/Setup.md#prerequisites) for installation,
+WSL browser login and tool verification. From the repository root:
 
 1. **Terminal 1:** log into OpenBao and start the app. Leave it running once ready.
 
@@ -27,12 +36,13 @@ From the repository root:
    python3 scripts/dev/dev.py start
    ```
 
-2. **Terminal 2:** open another terminal in the repository root, check the shared
-   S3 dataset, then populate the local database. Continue only if the check succeeds.
+2. **Terminal 2:** after the API reports `Server listening on port 8080` and Vite
+   shows ports 5173/5174, open another terminal in the repository root. Check the
+   shared S3 dataset, then populate the local database. Continue only if the check succeeds.
 
    ```sh
-   python3 scripts/dev/dev.py populate --check
-   python3 scripts/dev/dev.py populate
+   python3 scripts/dev/dev.py populate --check --include-pois
+   python3 scripts/dev/dev.py populate --include-pois
    ```
 
 3. **Terminal 1:** after population finishes, press **Ctrl-C** and restart the app
@@ -43,7 +53,13 @@ From the repository root:
    python3 scripts/dev/dev.py start --skip-secrets
    ```
 
-4. Open [localhost:5173](http://localhost:5173).
+4. Once startup is ready again, open [Ansys Hall](http://localhost:5173/AN) and
+   complete the app login if prompted. Windows users can use their Windows browser.
+
+The temporary bucket currently supplies **Ansys only**: five processed floors
+and 34 point POIs. Indoor routing remains incomplete. Database population does
+not fetch the source workspace for visualizer editing; see the
+[fresh-source guide](docs/src/FMS-Capture.md) for that workflow.
 
 On later runs, use `start --skip-secrets`; populate only when refreshing local data.
 

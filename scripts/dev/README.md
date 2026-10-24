@@ -36,5 +36,7 @@ local development. Fresh scraping/generation is specified in the
 `pipeline.sh` selects the minimal processing dependency group and invokes the
 same stage engine as the visualizer. See the [FMS guide](../../docs/src/FMS-Capture.md)
 for commands and [the work queue](../../docs/src/Data-Pipeline-TODO.md) for the
-checkpoint and remaining tasks. Workspace generation/loading is local; remote
-workspace upload/download is not implemented yet.
+checkpoint and remaining tasks. Workspace generation/loading is local. The current
+Ansys snapshot was uploaded separately; see the dated
+[storage checkpoint](../../docs/src/Data-Storage.md). A supported workspace
+upload/download command remains open work.

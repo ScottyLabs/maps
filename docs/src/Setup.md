@@ -4,7 +4,23 @@
 
 **Start the app, populate your database, restart, then open CMU Maps.**
 Use a macOS or Linux terminal, or a WSL2 terminal on Windows. Run commands from
-the repository root after installing the [prerequisites](#prerequisites).
+the repository root. All three platforms use the same commands below.
+
+### 0. Prepare once
+
+Install the [prerequisites for your platform](#prerequisites), and ask the Maps
+team for repository access and Maps development secrets access. If you do not
+already have this branch checked out, clone it:
+
+```sh
+git clone --branch hotfix ssh://forgejo@git.cmu.dev/ScottyLabs/maps.git
+cd maps
+```
+
+On Windows, run this inside WSL and keep the checkout under your Linux home
+directory, for example `~/projects/maps`. Open both terminals below in this same
+checkout. An existing checkout can use `git switch hotfix` with local work saved.
+You do not need to install Bun, Node, PostgreSQL or uv separately.
 
 ### 1. Log in and start (terminal 1)
 
@@ -19,20 +35,26 @@ Devenv starts PostgreSQL and the OAuth relay; the app process installs Bun
 packages, generates API/database code, applies the local schema, and starts the
 API and web app. The new database has tables but no campus data yet.
 
+Complete browser login when OpenBao prompts you, and wait for the terminal to
+show **`Server listening on port 8080`** and both Vite URLs (`5173` and `5174`).
+The first run can take several minutes. You can confirm the API is ready by
+opening [localhost:8080](http://localhost:8080/); it should show `{"status":"ok"}`.
+If OpenBao cannot open a browser in WSL, use the [login fallback](#windows-wsl2).
+
 ### 2. Populate (terminal 2)
 
 Open another terminal in the repository root. Continue only if the check succeeds:
 
 ```sh
-python3 scripts/dev/dev.py populate --check
-python3 scripts/dev/dev.py populate
+python3 scripts/dev/dev.py populate --check --include-pois
+python3 scripts/dev/dev.py populate --include-pois
 ```
 
 This reads the shared temporary S3 dataset and replaces your local map tables.
 It does not scrape or publish data. Each developer has their own database.
 The bucket currently contains the partial Ansys test dataset: five processed
-floors, with indoor routing still incomplete. Add `--include-pois` to both commands
-to validate and import its 34 point POIs. See the dated
+floors, with indoor routing still incomplete. The commands above include its
+34 point POIs. See the dated
 [storage checkpoint](Data-Storage.md#current-bucket-checkpoint--october-24-2026-1410-edt)
 for coverage and the matching saved scrape.
 
@@ -45,14 +67,23 @@ python3 scripts/dev/dev.py stop
 python3 scripts/dev/dev.py start --skip-secrets
 ```
 
-Open [localhost:5173](http://localhost:5173). The visualizer runs at
-[localhost:5174](http://localhost:5174) and uses the same Keycloak session. On later sessions, use
-`start --skip-secrets`. Populate again only when refreshing your local dataset.
+Wait for startup to finish again, then open [Ansys Hall](http://localhost:5173/AN).
+Complete the app's CMU/Keycloak login if prompted; this is separate from OpenBao
+login. You should see the imported Ansys floors. Other campus floorplans and
+indoor routes are not included in this temporary snapshot.
+
+The visualizer runs at [localhost:5174](http://localhost:5174). Its source-workspace
+editor needs the matching scrape/working JSON locally; ordinary database
+population does not download that workspace. See [FMS Capture](FMS-Capture.md)
+and the [storage checkpoint](Data-Storage.md) before starting pipeline work.
+
+On later sessions, use `python3 scripts/dev/dev.py start --skip-secrets` and open
+the app; your database persists. Populate again only when refreshing the dataset.
 The explicit `stop` also handles a process manager left running in the background.
 
 ## Prerequisites
 
-Install these yourself; the launcher reports missing dependencies:
+Install these once; the launcher reports missing dependencies:
 
 - Git and Python 3.9 or newer for the launcher.
 - [Nix and devenv](https://devenv.sh/getting-started/), following the instructions
@@ -60,19 +91,86 @@ Install these yourself; the launcher reports missing dependencies:
 - [OpenBao CLI](https://openbao.org/docs/install/) (`bao`) and Maps development
   secret access.
 
-| Platform | Where to run |
+| Platform | Terminal and checkout |
 | --- | --- |
-| macOS | Native terminal, including Apple Silicon |
-| Linux | Native terminal as your normal user |
-| Windows | WSL2 Linux terminal; install Nix, devenv, Python, and Bao inside WSL |
+| macOS | Terminal/iTerm with zsh or Bash; Intel and Apple Silicon supported |
+| Linux | Your normal user's Bash/zsh terminal; install tools for your distribution |
+| Windows | WSL2 Linux terminal and Linux checkout; follow the section below first |
 
-Windows PowerShell cannot run Nix directly. Keep the checkout in the WSL Linux
-filesystem and use an editor connected to WSL. OpenBao login must happen inside
-WSL too; a Windows login does not automatically authenticate the Linux CLI.
+### macOS
 
-Verify `nix --version`, `devenv version`, and `bao version` work. Open a new shell
-after installing Nix so its environment is loaded. Docker, Colima, and Docker
-Desktop are not used by this development workflow. Nix supplies Bun, Node,
+If you use Homebrew, install the host tools with:
+
+```sh
+brew install git python openbao
+```
+
+Homebrew is optional. Follow the official [Nix/devenv installation guide](https://devenv.sh/getting-started/)
+for the native development environment. OpenBao's
+[installation guide](https://openbao.org/docs/install/) also covers other installs.
+
+### Linux
+
+Install Git, Python 3.9+ and curl using your distribution's package manager. For
+Ubuntu/Debian:
+
+```sh
+sudo apt update
+sudo apt install git python3 curl
+```
+
+Then install [Nix and devenv](https://devenv.sh/getting-started/) and the
+[OpenBao CLI](https://openbao.org/docs/install/#linux) for your distribution.
+Use your normal user for project commands; installation may request administrator
+access.
+
+### Windows (WSL2)
+
+If WSL is not installed, follow [Microsoft's WSL installation guide](https://learn.microsoft.com/en-us/windows/wsl/install).
+The initial command runs in **PowerShell as Administrator**:
+
+```powershell
+wsl --install
+```
+
+Restart if prompted, open the installed Ubuntu distribution and finish creating
+your Linux user. Check `wsl --list --verbose` in PowerShell; your distribution
+must show version `2`.
+
+**From here on, use the Ubuntu/WSL terminal for every project command.** Follow
+the Linux prerequisites above inside WSL, including Nix, devenv and the Linux
+`bao` executable. Configure repository SSH access inside WSL too. Keep the clone
+under `~/projects`, rather than `/mnt/c/`, and use a WSL-connected editor.
+Installing or logging into Bao on Windows does not authenticate the WSL CLI.
+
+Open the app URLs in your normal Windows browser. WSL supports
+[accessing Linux applications through localhost](https://learn.microsoft.com/en-us/windows/wsl/networking#accessing-linux-networking-apps-from-windows-localhost).
+If Bao cannot launch that browser, run this **inside WSL** and open the printed
+authorization URL in your Windows browser while the command stays running:
+
+```sh
+export BAO_ADDR=https://secrets.scottylabs.org
+bao login -method=oidc skip_browser=true
+```
+
+Wait for the CLI to report a successful login, then run the quick start's
+`python3 scripts/dev/dev.py start`. This uses OpenBao's documented
+[manual browser login](https://openbao.org/docs/auth/jwt/#oidc-login-cli).
+
+### Verify your tools
+
+Open a fresh terminal after installing Nix so its environment is loaded. On
+Windows, open a fresh WSL terminal. Confirm these all work before the quick start:
+
+```sh
+git --version
+python3 --version
+nix --version
+devenv version
+bao version
+```
+
+Docker, Colima and Docker Desktop are not used by this workflow. Nix supplies Bun, Node,
 Python 3.12, uv, PostgreSQL, and the relay through the committed scaffold/lock.
 The launcher does not install system tools, request sudo, or perform your login.
 
@@ -174,8 +272,8 @@ caches automatically. If a generated preview is active, run
 With the app running:
 
 ```sh
-python3 scripts/dev/dev.py populate --check
-python3 scripts/dev/dev.py populate
+python3 scripts/dev/dev.py populate --check --include-pois
+python3 scripts/dev/dev.py populate --include-pois
 ```
 
 | S3 object key | Contents |
@@ -257,8 +355,8 @@ In a third terminal:
 
 ```sh
 devenv shell
-bash scripts/dev/populate.sh --check
-bash scripts/dev/populate.sh
+bash scripts/dev/populate.sh --check --include-pois
+bash scripts/dev/populate.sh --include-pois
 ```
 
 The helper runs the minimal population dependency group with Nix's Python 3.12
@@ -266,12 +364,32 @@ and uv. Its virtual environment lives under `.devenv/state/dataflow-venv`:
 
 ```sh
 cd apps/dataflow
-uv run --locked --only-group populate --python "$(command -v python3)" python -m deserializer --local --skip-pois --check
+uv run --locked --only-group populate --python "$(command -v python3)" python -m deserializer --local --check
 ```
 
 The helper also sets `PYTHONPATH=src`, `UV_PROJECT_ENVIRONMENT`, and disables uv's
-Python downloads. Remove `--check` to import; `--include-pois` on the helper
-removes the importer's `--skip-pois`. Stop and restart the app when done.
+Python downloads. Remove `--check` to import. The helper defaults to skipping
+POIs; `--include-pois` removes the importer's `--skip-pois` as in the example.
+Stop and restart the app when done.
+
+## If something goes wrong
+
+Use `python3 scripts/dev/dev.py logs` for recent app output. Common first-run
+problems are covered in [Troubleshooting](Troubleshooting.md):
+
+| Symptom | Next step |
+| --- | --- |
+| `devenv`, `nix` or `bao` not found | Finish platform prerequisites and open a fresh terminal; on Windows, use WSL |
+| Bao login works, secret fetch returns 403 | Ask the Maps team for access to `secret/secretspec/maps/dev`; login alone does not grant access |
+| API not reachable during population | Wait for startup; inspect `logs`, `logs postgres` and `logs ricochet` |
+| Population authorization fails | Run `populate --check --include-pois`; the service account needs the project admin group |
+| Port already occupied | Stop the other application or an old Maps stack, then retry; do not change OAuth ports independently |
+| Map is blank after import | Restart the stack and open `/AN`; only Ansys is in the current dataset; inspect browser errors for MapKit token failures |
+| A generated preview is active | Restore `baseline` as described above before ordinary population |
+
+The workflow has been exercised on macOS. Launcher contract tests cover Windows,
+Linux and macOS, and the native-service CI job targets Linux and macOS. A complete
+Linux/WSL onboarding run remains a tracked [verification task](Data-Pipeline-TODO.md#dp-10--native-platform-verification).
 
 ## Checks and maintenance
 
