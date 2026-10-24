@@ -21,8 +21,6 @@ import {
   toggleShowEdges,
   toggleShowLabels,
   toggleShowNodes,
-  toggleShowOutline,
-  toggleShowPdf,
   toggleShowPolygons,
 } from "../store/features/visibilitySlice";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
@@ -58,12 +56,6 @@ const useKeyboardShortcuts = (
       // general keyboard shortcuts
       switch (event.key) {
         // visibility
-        case "f":
-          dispatch(toggleShowPdf());
-          break;
-        case "o":
-          dispatch(toggleShowOutline());
-          break;
         case "g":
           dispatch(toggleShowNodes());
           dispatch(toggleShowEdges());

@@ -29,8 +29,6 @@ const HelpInfo = () => {
     <div className="space-y-5 p-1">
       <div>
         <h1 className="font-bold">Visibility</h1>
-        <p>Press 'f' to toggle "Show PDF".</p>
-        <p>Press 'o' to toggle "Show Outline".</p>
         <p>Press 'g' to toggle "Show Nodes" and "Show Edges".</p>
         <p>Press 'l' to toggle "Show Labels".</p>
         <p>Press 'p' to toggle "Show Polygons".</p>
