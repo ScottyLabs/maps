@@ -1,5 +1,6 @@
 import { toast } from "react-toastify";
 import { env } from "@/env.ts";
+import { track } from "@/lib/analytics.ts";
 import { useBoundStore } from "@/store/index.ts";
 import { MAP_VIEW_OPTIONS } from "./mapViewModes.ts";
 
@@ -28,6 +29,9 @@ const MapViewSwitcher = () => {
                     "Google Maps 3D is unavailable. Set GOOGLE_MAPS_API_KEY or VITE_GOOGLE_MAPS_API_KEY.",
                   );
                   return;
+                }
+                if (!isSelected) {
+                  track("map_view_changed", { mode: option.mode });
                 }
                 setMapViewMode(option.mode);
               }}
