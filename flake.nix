@@ -37,6 +37,12 @@
             project.name = "maps";
             # Each pull request gets maps-web-pr-<number>.scottylabs.net
             previewDeployments = true;
+            # devenv.nix turns formatting hooks off for this repo; existing
+            # docs and code are not formatted to them or ASCII-only
+            hooksCheck.skip = [
+              "treefmt"
+              "block-ai-slop"
+            ];
           };
 
           sites.web = {
