@@ -27,7 +27,7 @@
     secrets.enable = false;
     security.osvScanner.enable = false;
     security.semgrep.enable = false;
-    kennel.previewDeployments = false;
+    kennel.previewDeployments = true;
   };
 
   packages = [
