@@ -3,6 +3,7 @@ import { NavOverlayMobile } from "@/components/nav/NavOverlayMobile.tsx";
 import { useIsMobile } from "@/hooks/useIsMobile.ts";
 import { useNavPaths } from "@/hooks/useNavigationParams.ts";
 import { useUser } from "@/hooks/useUser.ts";
+import { track } from "@/lib/analytics.ts";
 import { useBoundStore } from "@/store/index.ts";
 import type { Node } from "@/types/navTypes";
 import { isPublicBuilding } from "@/utils/authUtils";
@@ -121,6 +122,7 @@ const NavOverlay = ({
         dstBuildingCode &&
         !isPublicBuilding(dstBuildingCode);
       if (srcNeedsAuth || dstNeedsAuth) {
+        track("login_prompted", { source: "navigation" });
         showLogin();
       }
     }

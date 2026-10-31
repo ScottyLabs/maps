@@ -13,6 +13,7 @@ import outdoorAvailableIcon from "@/assets/icons/nav/route-selection/outdoorAvai
 import outdoorSelectedIcon from "@/assets/icons/nav/route-selection/outdoorSelected.svg";
 import outdoorUnavailableIcon from "@/assets/icons/nav/route-selection/outdoorUnavailable.svg";
 import { useNavPaths } from "@/hooks/useNavigationParams.ts";
+import { track } from "@/lib/analytics.ts";
 import { useBoundStore } from "@/store/index.ts";
 import { metresToFeet } from "@/utils/distanceUtils";
 
@@ -64,7 +65,7 @@ const NavCard = ({
   const selectedPath = useBoundStore((state) => state.selectedPath);
   const setSelectedPath = useBoundStore((state) => state.setSelectedPath);
 
-  const { navPaths, setSrc, setDst } = useNavPaths();
+  const { navPaths, setSrc, setDst, srcType, dstType } = useNavPaths();
 
   const distance = metresToFeet(navPaths?.[selectedPath]?.path.distance ?? 0);
   const time = Math.round((navPaths?.[selectedPath]?.path.distance ?? 0) / 100);
@@ -161,6 +162,12 @@ const NavCard = ({
           className={`${navPaths ? "bg-button-green" : "bg-primary-grey"} inline-flex h-12 w-20 items-center justify-center rounded-full font-medium text-sm`}
           disabled={!navPaths?.[selectedPath]}
           onClick={() => {
+            track("navigation_started", {
+              route: selectedPath,
+              from: srcType,
+              to: dstType,
+              distance,
+            });
             startNav();
           }}
         >
@@ -179,6 +186,7 @@ const NavCard = ({
         type="button"
         className="mr-5 inline-flex h-12 w-20 items-center justify-center rounded-full bg-primary-red font-medium text-sm"
         onClick={() => {
+          track("navigation_ended", { route: selectedPath });
           setDst(null);
           setSrc(null);
         }}

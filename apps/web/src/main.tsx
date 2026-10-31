@@ -3,18 +3,15 @@ import { PostHogProvider } from "posthog-js/react";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router";
-import { env } from "@/env.ts";
+import { initAnalytics } from "@/lib/analytics.ts";
 import { initializePreviewContext } from "./preview";
 import { App } from "./App.tsx";
 import "./index.css";
 import { NuqsAdapter } from "nuqs/adapters/react";
 import posthog from "posthog-js";
 
-// Initialize Posthog https://posthog.com/docs/libraries/react
-posthog.init(env.VITE_PUBLIC_POSTHOG_KEY || "", {
-  // biome-ignore lint/style/useNamingConvention: posthog config is in snake_case
-  api_host: env.VITE_PUBLIC_POSTHOG_HOST,
-});
+// Initialize PostHog; stays off when no key is configured
+initAnalytics();
 
 // Create a query client
 const queryClient = new QueryClient();

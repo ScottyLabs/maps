@@ -11,6 +11,7 @@ import stairsIcon from "@/assets/icons/search_results/stairs.svg";
 import { useNavigateLocationParams } from "@/hooks/useNavigateLocationParams.ts";
 import { useNavPaths } from "@/hooks/useNavigationParams.ts";
 import { useUser } from "@/hooks/useUser.ts";
+import { track } from "@/lib/analytics.ts";
 import { setPostLoginCallbackUrl } from "@/lib/authClient.ts";
 import { CardStates } from "@/store/cardSlice";
 import { useBoundStore } from "@/store/index.ts";
@@ -314,7 +315,15 @@ const SearchResults = ({ searchQuery, mapRef }: Props) => {
     }
   };
 
-  const handleClick = (result: SearchResultProps) => {
+  const handleClick = (result: SearchResultProps, rank: number) => {
+    track("search_result_selected", {
+      query: searchQuery,
+      type: result.type ?? "room",
+      id: result.id,
+      rank,
+      target: searchTarget ?? "none",
+    });
+
     if (result.type === "room" || result.type === "floor") {
       // Public buildings are accessible to unauthenticated users via the public pathfinding API
       // Other indoor destinations require authentication
@@ -337,6 +346,7 @@ const SearchResults = ({ searchQuery, mapRef }: Props) => {
           callbackUrl.pathname = callbackPath;
           setPostLoginCallbackUrl(callbackUrl.toString());
         }
+        track("login_prompted", { source: "search" });
         showLogin();
         return;
       }
@@ -356,12 +366,12 @@ const SearchResults = ({ searchQuery, mapRef }: Props) => {
 
   return (
     <div className="z-50 flex-col overflow-hidden overflow-y-scroll rounded-lg bg-white py-2">
-      {organizedResults?.map((result) => (
+      {organizedResults?.map((result, rank) => (
         <button
           type="button"
           key={result.id}
           className="flex h-9 w-full items-center bg-white text-lg active:bg-[#F5F5F5]"
-          onClick={() => handleClick(result)}
+          onClick={() => handleClick(result, rank)}
         >
           {renderResultByType(result)}
         </button>

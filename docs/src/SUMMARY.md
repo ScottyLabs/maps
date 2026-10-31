@@ -11,6 +11,7 @@
   - [Handoff: 2026-10-24 12:00 EDT](./handoffs/2026-10-24_1200-EDT-data-pipeline.md)
 - [Data Storage](./Data-Storage.md)
 - [Data Visualizer](./Data-Visualizer-Wiki.md)
+- [Analytics](./Analytics.md)
 - [Style Guide](./Style-Guide.md)
 - [Manual Integration Tests](./Manual-Integration-Tests.md)
 - [Troubleshooting](./Troubleshooting.md)

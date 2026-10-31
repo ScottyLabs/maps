@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 import shareIcon from "@/assets/icons/infocard/share.svg";
+import { track } from "@/lib/analytics.ts";
 
 const ShareButton = () => {
   const [clicked, setClicked] = useState<boolean>(false);
@@ -12,6 +13,7 @@ const ShareButton = () => {
       onClick={() => {
         navigator.clipboard.writeText(window.location.href);
         setClicked(true);
+        track("location_shared", {});
         toast.success("Link copied!");
       }}
     >
