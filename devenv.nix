@@ -28,6 +28,9 @@
     security.osvScanner.enable = false;
     security.semgrep.enable = false;
     kennel.previewDeployments = true;
+    # Built from the flake's packages.<system>.web; each pull request gets
+    # maps-web-pr-<number>.scottylabs.net
+    kennel.sites.web.spa = true;
   };
 
   packages = [

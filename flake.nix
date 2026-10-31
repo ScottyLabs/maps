@@ -27,12 +27,15 @@
       perSystem =
         { pkgs, ... }:
         let
-          web = pkgs.callPackage ./nix/web.nix { };
+          web = pkgs.callPackage ./nix/web.nix {
+            # PostHog project key (phc_...); empty keeps analytics off
+            posthogKey = "";
+          };
         in
         {
           scottylabs = {
             project.name = "maps";
-            # Each pull request gets maps-pr-<number>.scottylabs.net
+            # Each pull request gets maps-web-pr-<number>.scottylabs.net
             previewDeployments = true;
           };
 

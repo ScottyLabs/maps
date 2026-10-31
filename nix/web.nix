@@ -8,6 +8,9 @@
   nodejs,
   autoPatchelfHook,
   serverUrl ? "https://api.maps.invalid",
+  # Kennel releases before public values cannot serve /_kennel/env.json, so
+  # a project key given here is inlined instead. It ships in every page anyway.
+  posthogKey ? "",
 }:
 
 let
@@ -79,7 +82,8 @@ stdenv.mkDerivation {
     find node_modules -type d -name '*musl*' -prune -exec rm -rf {} +
     autoPatchelf node_modules
     cd apps/web
-    VITE_SERVER_URL=${serverUrl} node node_modules/vite/bin/vite.js build
+    VITE_SERVER_URL=${serverUrl} VITE_PUBLIC_POSTHOG_KEY=${posthogKey} \
+      node node_modules/vite/bin/vite.js build
     runHook postBuild
   '';
 
