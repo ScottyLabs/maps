@@ -28,8 +28,8 @@
         { pkgs, ... }:
         let
           web = pkgs.callPackage ./nix/web.nix {
-            # PostHog project key (phc_...); empty keeps analytics off
-            posthogKey = "";
+            # Public PostHog project key for the maps project; it ships in every page
+            posthogKey = "phc_sHDfoRSAojLiAPFsVXh68VrJzqHydwVnKVsWQD38mN84"; # gitleaks:allow
           };
         in
         {
