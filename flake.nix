@@ -82,6 +82,7 @@
           treefmt.settings.global.excludes = [
             "apps/server/src/generated/**"
             "apps/visualizer/src/routeTree.gen.ts"
+            ".forgejo/ISSUE_TEMPLATE/*"
           ];
 
           services.server = {
