@@ -1,0 +1,3 @@
+exclude_loopback = true
+exclude_path = ["apps/web/index.html", "apps/visualizer/index.html"]
+exclude = ['^https://scottylabs\.slack\.com/', '^https://maps\.app\.goo\.gl/']

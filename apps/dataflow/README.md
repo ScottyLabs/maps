@@ -62,4 +62,4 @@ uv run --env-file <ENV_FILE> <SCRIPT_NAME>
 
 ## Additional Information
 
-See the [Dataflow wiki page](https://github.com/ScottyLabs/cmumaps/wiki/Data-Flow) for more information.
+See the [Data Flow docs](../../docs/src/Data-Flow.md) for more information.

@@ -1,1 +1,1 @@
-See team structure at https://github.com/ScottyLabs/governance/blob/main/teams/cmumaps.toml.
+See team structure at https://git.cmu.dev/ScottyLabs/governance/src/branch/main/data/teams/cmu-maps.yaml.

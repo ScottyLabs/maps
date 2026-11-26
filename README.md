@@ -11,11 +11,10 @@ Key features include:
 - Search for buildings and rooms
 - View building and room information
 
-## Wiki
+## Docs
 
-Please check out our [wiki](https://github.com/ScottyLabs/cmumaps/wiki) for more information about the project.
+Please check out our [docs](https://maps-docs-main.scottylabs.net) ([source](docs/src)) for setup instructions and more information about the project.
 
 ## Contributing
 
-Please check out our [Contributing Guide](.forgejo/CONTRIBUTING.md)
-for more information about how to contribute to the project.
+Please check out our [Contributing Guide](.forgejo/CONTRIBUTING.md) for more information about how to contribute to the project.

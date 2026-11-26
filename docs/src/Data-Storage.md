@@ -76,13 +76,7 @@ erDiagram
 
 ### How to access the database
 
-Use PgAdmin, which can connect to the DB through Railway's internal network and limits login retries for safety.
-
-Passwords are stored in Railway. Hosted in the following locations for each environment
-
-- Dev: https://pgadmin.maps.slabs-dev.org/browser/
-- Staging: to be set up
-- Prod: to be set up
+Locally, run `psql "$DATABASE_URL"` inside `nix develop`. Kennel provisions a separate database for every deployment.
 
 ## S3 Bucket
 

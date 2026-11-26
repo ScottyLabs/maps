@@ -36,9 +36,7 @@
 
 ### Step 1: Scraping
 
-[Scraper code](https://github.com/ScottyLabs/cmumaps/tree/main/apps/dataflow/src/scraper)
-
-S3 bucket link: <https://minio.scottylabs.org/browser/cmumaps>
+[Scraper code](https://git.cmu.dev/ScottyLabs/maps/src/branch/main/apps/dataflow/src/scraper)
 
 Data sources:
 
@@ -52,7 +50,7 @@ Data sources:
 
 ### Step 2: Generation
 
-The [generator](https://github.com/ScottyLabs/cmumaps/tree/staging/apps/dataflow/src/generator) takes in the scraped data and the serialized data as input and generates
+The [generator](https://git.cmu.dev/ScottyLabs/maps/src/branch/main/apps/dataflow/src/generator) takes in the scraped data and the serialized data as input and generates
 
 - Rescale the svgs to fit in a [1920x1080](https://en.wikipedia.org/wiki/1080p) rectangle and converts them to `floorplans.json` file.
 

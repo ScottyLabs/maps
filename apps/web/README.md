@@ -8,18 +8,21 @@ The [CMU Maps web](https://cmumaps.com) is a web application that provides a map
 
 ### Running the Web
 
-Run the web with the server by running the following command in the root directory:
+Start the server, both UIs and their dependencies from the repository root inside `nix develop`:
 
 ```zsh
-deno task dev:web
+pitchfork start --local
 ```
+
+The web runs at <http://localhost:5173>.
 
 ### Developing by viewing on a Mobile Device
 
-To develop by viewing on a mobile device, run the following command in the root directory:
+To expose the dev server on your network, restart it with `--host`:
 
 ```zsh
-deno task dev:web:host
+pitchfork stop web
+secretspec run -- deno task dev:web --host
 ```
 
 Then, open the web application on your mobile device by navigating to the Network URL listed in the terminal.

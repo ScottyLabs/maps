@@ -1,50 +1,12 @@
 # Environments
 
-## Production
+[Kennel](https://docs.kennel.scottylabs.org/guides/deploying/) deploys every long-lived branch and pull request with the matching secretspec profile. Each deployment has its own database.
 
-The production environment is version used by the public users.
+| Branch | Profile | Server | Docs |
+| -- | -- | -- | -- |
+| `main` | `prod` | [cmumaps.com](https://cmumaps.com) | [maps-docs-main.scottylabs.net](https://maps-docs-main.scottylabs.net) |
+| `staging` | `staging` | [maps-server-staging.scottylabs.net](https://maps-server-staging.scottylabs.net) | [maps-docs-staging.scottylabs.net](https://maps-docs-staging.scottylabs.net) |
+| `dev` | `dev` | [maps-server-dev.scottylabs.net](https://maps-server-dev.scottylabs.net) | [maps-docs-dev.scottylabs.net](https://maps-docs-dev.scottylabs.net) |
+| PR `n` | `preview` | `maps-server-pr-n.scottylabs.net` | `maps-docs-pr-n.scottylabs.net` |
 
-**Vercel**: production
-
-- CMU Maps: [maps.scottylabs.org](http://maps.scottylabs.org)
-- Visualizer: [floorplans.scottylabs.org](http://floorplans.scottylabs.org)
-
-**Railway**: production
-
-- [api.maps.scottylabs.org](http://api.maps.scottylabs.org)
-
-**Clerk**: production
-
-## Staging
-
-The staging environment is version used by the development team for testing before merging to main.
-
-**Vercel**: staging
-
-- CMU Maps: [maps.slabs-staging.org](http://maps.slabs-staging.org)
-- Visualizer: [floorplans.slabs-staging.org](http://floorplans.slabs-staging.org)
-
-**Railway**: staging
-
-- [api.maps.slabs-staging.org](http://api.maps.slabs-staging.org)
-
-**Clerk**: development
-
-## Development
-
-The development environment is used for verifying a PR before merging to staging.
-
-**Vercel**: preview
-
-- CMU Maps: ^https://cmumaps-[0-9a-zA-Z]{9}-scottylabs.vercel.app$
-- Visualizer: none since staging is more than enough testing for this internal tool.
-
-**Railway**: development (default connected to the staging branch, but can be changed to a specific branch as needed for api testing)
-
-- [api.maps.slabs-dev.org](http://api.maps.slabs-dev.org)
-
-**Clerk**: development
-
-### Note:
-
-Using Railway PR environment probably could achieve automation of the development environment for every PR, but would be unnecessarily costly since most PRs won't affect the server. Might be worth it to revisit in the future.
+The server serves the web at `/` and the visualizer at `/visualizer`.

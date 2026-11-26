@@ -24,7 +24,7 @@ Put functionality overview of each directory in README. Otherwise use the Wiki f
 
 **Free**\* dinner after work session at [98K Halal Fried Chicken & Sandwiches](https://maps.app.goo.gl/4E2vhfQmwPhFzgjm9)!
 
-\*Sponsored by @Yuxiang-Huang (because he wants to cosplay team manager 🙃) and open to five [CMU Maps contributors](https://github.com/ScottyLabs/governance/blob/main/teams/cmumaps.toml) each week. If there are too many sign-ups in the CMU Maps Slack channel, we will prioritize based on contribution.
+\*Sponsored by @Yuxiang-Huang (because he wants to cosplay team manager 🙃) and open to five [CMU Maps contributors](https://git.cmu.dev/ScottyLabs/governance/src/branch/main/data/teams/cmu-maps.yaml) each week. If there are too many sign-ups in the CMU Maps Slack channel, we will prioritize based on contribution.
 
 Enjoy a crispy chicken sandwich, the snack of the week, and some Chi Forest to share :>
 
