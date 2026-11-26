@@ -1,6 +1,5 @@
 import { Elysia } from "elysia";
 import { buildingsRoutes } from "./buildings.ts";
-import { configRoute } from "./config.ts";
 import { dropTablesRoutes } from "./dropTables.ts";
 import { edgesRoutes } from "./edges.ts";
 import { floorsRoutes } from "./floors.ts";
@@ -13,7 +12,6 @@ import { searchRoutes } from "./search.ts";
 
 export const apiRoutes = new Elysia()
   .use(buildingsRoutes)
-  .use(configRoute)
   .use(dropTablesRoutes)
   .use(edgesRoutes)
   .use(floorsRoutes)

@@ -2,7 +2,18 @@ import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import viteReact from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
+
+const kennelEnv: Plugin = {
+  name: "kennel-env",
+  configureServer(server) {
+    server.middlewares.use("/_kennel/env.json", (_req, res) => {
+      const env = Object.entries(process.env).filter(([key]) => key.startsWith("PUBLIC_"));
+      res.setHeader("Content-Type", "application/json");
+      res.end(JSON.stringify(Object.fromEntries(env)));
+    });
+  },
+};
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -21,6 +32,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    kennelEnv,
     tanstackRouter({
       target: "react",
       autoCodeSplitting: true,

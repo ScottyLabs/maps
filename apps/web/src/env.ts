@@ -1,49 +1,41 @@
-// The SPA is built in a sandbox with no secrets, so nothing is inlined at build
-// time: the server hands these over at boot from GET /api/config.
+import { z } from "zod";
 
-export interface RuntimeConfig {
-  googleMapsApiKey: string | null;
-  ignoreLogin: boolean;
-  mapkitToken: string | null;
-  posthogHost: string | null;
-  posthogKey: string | null;
-}
+const publicEnvSchema = z.object({
+  PUBLIC_GOOGLE_MAPS_API_KEY: z.string().optional(),
+  PUBLIC_MAPKIT_TOKEN: z.string().optional(),
+  PUBLIC_POSTHOG_HOST: z.string().optional(),
+  PUBLIC_POSTHOG_KEY: z.string().optional(),
+});
 
-let config: RuntimeConfig = {
-  googleMapsApiKey: null,
-  ignoreLogin: false,
-  mapkitToken: null,
-  posthogHost: null,
-  posthogKey: null,
-};
+let publicEnv: z.infer<typeof publicEnvSchema> = {};
 
-export async function loadConfig(): Promise<void> {
+export async function loadEnv() {
   try {
-    const response = await fetch("/api/config", { credentials: "include" });
-    if (response.ok) {
-      config = (await response.json()) as RuntimeConfig;
-    } else {
-      console.error(`Failed to load /api/config: ${response.status}`);
+    const response = await fetch("/_kennel/env.json");
+
+    if (!response.ok) {
+      console.error(`Failed to load /_kennel/env.json: ${response.status}`);
+
+      return;
     }
+
+    publicEnv = publicEnvSchema.parse(await response.json());
   } catch (error) {
-    console.error("Failed to load /api/config", error);
+    console.error("Failed to load /_kennel/env.json", error);
   }
 }
 
 export const env = {
-  get googleMapsApiKey(): string | undefined {
-    return config.googleMapsApiKey ?? undefined;
+  get googleMapsApiKey() {
+    return publicEnv.PUBLIC_GOOGLE_MAPS_API_KEY;
   },
-  get ignoreLogin(): boolean {
-    return config.ignoreLogin;
+  get mapkitToken() {
+    return publicEnv.PUBLIC_MAPKIT_TOKEN;
   },
-  get mapkitToken(): string | undefined {
-    return config.mapkitToken ?? undefined;
+  get posthogHost() {
+    return publicEnv.PUBLIC_POSTHOG_HOST;
   },
-  get posthogHost(): string | undefined {
-    return config.posthogHost ?? undefined;
-  },
-  get posthogKey(): string | undefined {
-    return config.posthogKey ?? undefined;
+  get posthogKey() {
+    return publicEnv.PUBLIC_POSTHOG_KEY;
   },
 };

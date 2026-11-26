@@ -1,28 +1,30 @@
-// Built in a sandbox with no secrets, so the server hands these over at boot
-// from GET /api/config.
+import { z } from "zod";
 
-interface RuntimeConfig {
-  mapkitToken: string | null;
-}
+const publicEnvSchema = z.object({
+  PUBLIC_MAPKIT_TOKEN: z.string().optional(),
+});
 
-let config: RuntimeConfig = { mapkitToken: null };
+let publicEnv: z.infer<typeof publicEnvSchema> = {};
 
-export async function loadConfig(): Promise<void> {
+export async function loadEnv() {
   try {
-    const response = await fetch("/api/config", { credentials: "include" });
-    if (response.ok) {
-      config = (await response.json()) as RuntimeConfig;
-    } else {
-      console.error(`Failed to load /api/config: ${response.status}`);
+    const response = await fetch("/_kennel/env.json");
+
+    if (!response.ok) {
+      console.error(`Failed to load /_kennel/env.json: ${response.status}`);
+
+      return;
     }
+
+    publicEnv = publicEnvSchema.parse(await response.json());
   } catch (error) {
-    console.error("Failed to load /api/config", error);
+    console.error("Failed to load /_kennel/env.json", error);
   }
 }
 
 const env = {
-  get mapkitToken(): string | undefined {
-    return config.mapkitToken ?? undefined;
+  get mapkitToken() {
+    return publicEnv.PUBLIC_MAPKIT_TOKEN;
   },
 };
 
