@@ -19,11 +19,6 @@ brew install shfmt
 # https://github.com/editorconfig-checker/editorconfig-checker?tab=readme-ov-file#6-using-homebrew
 brew install editorconfig-checker
 
-# Install Vault for secret management
-# https://developer.hashicorp.com/vault/install
-brew tap hashicorp/tap
-brew install hashicorp/tap/vault
-
 # Activate Bun completions in zsh on startup
 if ! grep -q 'source <(SHELL=zsh bun completions)' ~/.zshrc; then
   echo 'source <(SHELL=zsh bun completions)' >>~/.zshrc
@@ -32,9 +27,13 @@ fi
 # Install Bun dependencies
 bun install
 
-# Set up environment variables
-bun run secrets:setup
-bun run secrets:pull all all
+# Environment files must be configured before database setup.
+for app in server dataflow; do
+  if [[ ! -f "apps/$app/.env" ]]; then
+    echo "Configure apps/$app/.env, then rerun .devcontainer/post-create.sh. Please ask a team lead for the required values." >&2
+    exit 1
+  fi
+done
 
 # Push the database schema and generate OpenAPI spec
 cd apps/server

@@ -18,7 +18,6 @@ If you aren't allowed to commit, try the following:
 2. Run `bun run check` and try to fix the errors.
 3. If you believe the errors are not related to your code changes, try syncing with
    - `git pull`
-   - `bun run secrets:pull all all`
    - `bun run sync`
 
 If you really believe that it is a local issue, use the `--no-verify` flag to bypass the precommit hook. 

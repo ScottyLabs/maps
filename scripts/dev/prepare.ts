@@ -21,8 +21,6 @@ type EnvValidation = {
   values: Record<string, string> | null;
 };
 
-type VaultEnv = "local";
-
 const textDecoder = new TextDecoder();
 const repoRoot = path.resolve(import.meta.dir, "../..");
 const serverDir = path.join(repoRoot, "apps/server");
@@ -98,12 +96,6 @@ const envFilesByProfile: Record<Profile, EnvFileSpec[]> = {
   ],
 };
 
-const vaultEnvByProfile: Record<Profile, VaultEnv> = {
-  default: "local",
-  "web-noauth": "local",
-  visualizer: "local",
-};
-
 const { values } = parseArgs({
   args: process.argv.slice(2),
   options: {
@@ -118,10 +110,9 @@ if (values.help) {
 
 Preflight steps:
   1. Validate the selected env files
-  2. Run the repo secrets flow only when env files are missing or invalid
-  3. Start local Postgres from compose.dev.yml when it is not already reachable
-  4. Regenerate stale server build artifacts
-  5. Apply Drizzle migrations to the local database
+  2. Start local Postgres from compose.dev.yml when it is not already reachable
+  3. Regenerate stale server build artifacts
+  4. Apply Drizzle migrations to the local database
 `);
   process.exit(0);
 }
@@ -175,107 +166,19 @@ function parseProfile(input: string | undefined): Profile {
 }
 
 async function ensureEnvFiles(profile: Profile) {
-  const specs = envFilesByProfile[profile];
-  const vaultEnv = vaultEnvByProfile[profile];
-  let validations = await Promise.all(specs.map(validateEnvFile));
-
-  if (validations.every((validation) => validation.issues.length === 0)) {
-    log("Environment files are present and valid for this profile.");
-    return getServerEnv(validations);
-  }
-
-  log(
-    `Environment files are missing or invalid. Running secrets sync for Vault env "${vaultEnv}".`,
+  const validations = await Promise.all(
+    envFilesByProfile[profile].map(validateEnvFile),
   );
-  printEnvIssues(validations);
-  try {
-    await runCommand(["bun", "run", "secrets:setup"], repoRoot, process.env);
-  } catch (error) {
-    throw new Error(
-      "Environment sync is required, but the repo secrets bootstrap could not run. Ensure the checked-out repo includes the expected scripts under scripts/secrets/ and that local Vault access is configured.",
-      {
-        cause: error,
-      },
-    );
-  }
 
-  try {
-    await runCommand(
-      ["bun", "run", "secrets:pull", "all", vaultEnv],
-      repoRoot,
-      process.env,
-    );
-    await promotePulledEnvFiles(specs, vaultEnv);
-  } catch (error) {
-    throw new Error(
-      `Environment sync failed after running the repo secrets flow. ${toError(error).message}`,
-      {
-        cause: error,
-      },
-    );
-  }
-
-  validations = await Promise.all(specs.map(validateEnvFile));
   if (validations.some((validation) => validation.issues.length > 0)) {
     printEnvIssues(validations);
     throw new Error(
-      "Environment sync finished, but the active env files are still missing required values.",
+      "Configure the selected apps' .env files with the required values, then rerun dev preparation.",
     );
   }
 
-  log("Environment files synced successfully.");
+  log("Environment files are present and valid for this profile.");
   return getServerEnv(validations);
-}
-
-async function promotePulledEnvFiles(
-  specs: EnvFileSpec[],
-  vaultEnv: VaultEnv,
-) {
-  for (const spec of specs) {
-    const sourcePath = getVaultEnvFilePath(spec.path, vaultEnv);
-
-    try {
-      await access(sourcePath, constants.F_OK);
-    } catch {
-      throw new Error(
-        `Expected ${path.relative(repoRoot, sourcePath)} to exist after pulling Vault env "${vaultEnv}".`,
-      );
-    }
-
-    log(
-      `Syncing ${path.relative(repoRoot, spec.path)} from ${path.relative(repoRoot, sourcePath)}.`,
-    );
-    const sourceText = await Bun.file(sourcePath).text();
-    const targetText = transformPulledEnvFile(spec.path, sourceText, vaultEnv);
-    await Bun.write(spec.path, targetText);
-  }
-}
-
-function getVaultEnvFilePath(envFilePath: string, vaultEnv: VaultEnv) {
-  return `${envFilePath}.${vaultEnv}`;
-}
-
-function transformPulledEnvFile(
-  envFilePath: string,
-  sourceText: string,
-  vaultEnv: VaultEnv,
-) {
-  if (
-    vaultEnv === "local" &&
-    envFilePath === path.join(repoRoot, "apps/server/.env")
-  ) {
-    const values = parseDotEnv(sourceText);
-    const normalizedDatabaseUrl = normalizeLocalDatabaseUrl(values.DATABASE_URL);
-
-    if (values.DATABASE_URL !== normalizedDatabaseUrl) {
-      log("Rewriting apps/server/.env DATABASE_URL for local Postgres.");
-    }
-
-    values.DATABASE_URL = normalizedDatabaseUrl;
-    return serializeDotEnv(values);
-  }
-
-  return sourceText;
 }
 
 async function validateEnvFile(spec: EnvFileSpec): Promise<EnvValidation> {
@@ -350,19 +253,6 @@ function parseDotEnv(text: string) {
   return values;
 }
 
-function serializeDotEnv(values: Record<string, string>) {
-  return `${Object.entries(values)
-    .map(([key, value]) => `${key}="${escapeDotEnvDoubleQuotedValue(value)}"`)
-    .join("\n")}\n`;
-}
-
-function escapeDotEnvDoubleQuotedValue(value: string) {
-  return value
-    .replaceAll('"', '\\"')
-    .replaceAll("\r", "\\r")
-    .replaceAll("\n", "\\n");
-}
-
 function getLocalDatabaseUrlIssues(env: Record<string, string>) {
   const databaseUrl = env.DATABASE_URL?.trim();
   if (!databaseUrl) {
@@ -390,31 +280,6 @@ function getLocalDatabaseUrlIssues(env: Record<string, string>) {
   }
 
   return issues;
-}
-
-function normalizeLocalDatabaseUrl(databaseUrl: string | undefined) {
-  const defaultDatabaseUrl =
-    "postgresql://postgres:donotuseinprod@localhost:5432/cmumaps";
-
-  if (!databaseUrl?.trim() || databaseUrl.includes("${{")) {
-    return defaultDatabaseUrl;
-  }
-
-  let parsed: URL;
-  try {
-    parsed = new URL(databaseUrl);
-  } catch {
-    return defaultDatabaseUrl;
-  }
-
-  parsed.hostname = "localhost";
-  parsed.port = "5432";
-
-  if (parsed.pathname === "" || parsed.pathname === "/") {
-    parsed.pathname = "/cmumaps";
-  }
-
-  return parsed.toString();
 }
 
 function normalizeEnvValue(rawValue: string) {
