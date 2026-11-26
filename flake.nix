@@ -72,6 +72,11 @@
               web.run = "exec secretspec run -- deno task dev:web";
               visualizer.run = "exec secretspec run -- deno task dev:visualizer";
             };
+
+            shell = {
+              packages = [ pkgs.zensical ];
+              scripts.docs = "cd docs && zensical serve";
+            };
           };
 
           treefmt.settings.global.excludes = [
@@ -96,6 +101,10 @@
             };
           };
 
+          sites.docs.package = helpers.buildZensical {
+            src = ./docs;
+            name = "cmumaps-docs";
+          };
         };
     };
 }

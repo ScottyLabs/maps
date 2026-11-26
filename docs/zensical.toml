@@ -1,0 +1,65 @@
+[project]
+site_name = "CMU Maps"
+site_url = "https://maps-docs-main.scottylabs.net"
+repo_url = "https://git.cmu.dev/ScottyLabs/maps"
+docs_dir = "src"
+edit_uri = "_edit/main/docs/src/"
+nav = [
+  { "Introduction" = "index.md" },
+  { "Setup" = "Setup.md" },
+  { "Environments" = "Environments.md" },
+  { "Data Flow" = "Data-Flow.md" },
+  { "Data Storage" = "Data-Storage.md" },
+  { "Data Visualizer" = "Data-Visualizer-Wiki.md" },
+  { "Style Guide" = "Style-Guide.md" },
+  { "Manual Integration Tests" = "Manual-Integration-Tests.md" },
+  { "Troubleshooting" = "Troubleshooting.md" },
+  { "Project Board" = "Project-Board.md" },
+  { "Communication" = "Communication.md" },
+  { "Team" = "Team.md" },
+  { "Resources" = "Resources.md" },
+  { "Miscellaneous" = "Miscellaneous.md" },
+]
+
+[project.theme]
+features = ["content.action.edit"]
+
+[[project.theme.palette]]
+scheme = "slate"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to light mode"
+
+[[project.theme.palette]]
+scheme = "default"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to dark mode"
+
+[project.markdown_extensions]
+abbr = {}
+admonition = {}
+attr_list = {}
+def_list = {}
+footnotes = {}
+md_in_html = {}
+toc.permalink = true
+pymdownx.arithmatex.generic = true
+pymdownx.betterem = {}
+pymdownx.caret = {}
+pymdownx.details = {}
+pymdownx.emoji.emoji_generator = "zensical.extensions.emoji.to_svg"
+pymdownx.emoji.emoji_index = "zensical.extensions.emoji.twemoji"
+pymdownx.highlight.anchor_linenums = true
+pymdownx.highlight.line_spans = "__span"
+pymdownx.highlight.pygments_lang_class = true
+pymdownx.inlinehilite = {}
+pymdownx.keys = {}
+pymdownx.magiclink = {}
+pymdownx.mark = {}
+pymdownx.smartsymbols = {}
+pymdownx.superfences.custom_fences = [
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
+]
+pymdownx.tabbed.alternate_style = true
+pymdownx.tabbed.combine_header_slug = true
+pymdownx.tasklist.custom_checkbox = true
+pymdownx.tilde = {}
