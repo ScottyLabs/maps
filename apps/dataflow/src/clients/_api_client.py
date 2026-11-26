@@ -81,7 +81,7 @@ class ApiClient:
 
         return self._cached_token
 
-    def drop_tables(self, table_names: list[TableName]) -> bool:
+    def drop_tables(self, table_names: list[TableName]) -> None:
         """Drop specified tables."""
         response = requests.delete(
             f"{self.server_url}/api/drop-tables",
@@ -89,7 +89,9 @@ class ApiClient:
             headers={"Authorization": f"Bearer {self._get_token()}"},
             timeout=self.TIMEOUT,
         )
-        return response.status_code == self.SUCCESS_STATUS_CODE
+        if response.status_code != self.SUCCESS_STATUS_CODE:
+            msg = f"Failed to drop tables: {response.json()}"
+            raise RuntimeError(msg)
 
     def populate_table(self, table_name: TableName, data: list[dict[str, Any]]) -> bool:
         """Populate a table with the given data."""
