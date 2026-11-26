@@ -3,6 +3,7 @@ import { prisma } from "../../prisma/index.ts";
 
 export const SESSION_COOKIE_NAME = "session_id";
 export const OAUTH_STATE_COOKIE_NAME = "oauth_state";
+export const OAUTH_PKCE_COOKIE_NAME = "oauth_pkce";
 
 const SESSION_DURATION_MS = 30 * 24 * 60 * 60 * 1000;
 const OAUTH_STATE_DURATION_S = 10 * 60;
@@ -42,6 +43,7 @@ export async function createSession(userId: number, groups: string[]): Promise<s
       userId,
     },
   });
+
   return id;
 }
 
@@ -50,12 +52,14 @@ export async function getSessionUser(sessionId: string): Promise<SessionUser | u
     include: { user: true },
     where: { id: sessionId },
   });
+
   if (!session) {
     return undefined;
   }
 
   if (session.expiresAt.getTime() < Date.now()) {
     await deleteSession(sessionId);
+
     return undefined;
   }
 

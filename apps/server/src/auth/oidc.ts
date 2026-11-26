@@ -33,8 +33,7 @@ export async function buildOidcConfig(settings: OidcSettings): Promise<client.Co
     settings.clientSecret,
   );
 
-  // Keycloak sees the relay as the redirect target, so the code exchange has to
-  // claim the same URI the authorization request used.
+  // Keycloak sees the relay as the redirect target, so the code exchange has to claim the same URI the authorization request used.
   config[client.customFetch] = (url, options) => {
     if (
       options.body instanceof URLSearchParams &&
@@ -42,6 +41,7 @@ export async function buildOidcConfig(settings: OidcSettings): Promise<client.Co
     ) {
       options.body.set("redirect_uri", settings.oauthRelayUrl);
     }
+
     return fetch(url, options as RequestInit);
   };
 
@@ -55,31 +55,41 @@ interface RelayState {
 
 export function createRelayState(returnTo: string): string {
   const payload: RelayState = { csrf: crypto.randomUUID(), return_to: returnTo };
+
   return btoa(JSON.stringify(payload))
     .replaceAll("+", "-")
     .replaceAll("/", "_")
     .replace(/=+$/u, "");
 }
 
-export function buildLoginUrl(
+export async function buildLoginUrl(
   config: client.Configuration,
   settings: OidcSettings,
   state: string,
-): URL {
-  return client.buildAuthorizationUrl(config, {
+): Promise<{ url: URL; codeVerifier: string }> {
+  const codeVerifier = client.randomPKCECodeVerifier();
+
+  const url = client.buildAuthorizationUrl(config, {
+    code_challenge: await client.calculatePKCECodeChallenge(codeVerifier),
+    code_challenge_method: "S256",
     redirect_uri: settings.oauthRelayUrl,
     scope: "openid email profile",
     state,
   });
+
+  return { codeVerifier, url };
 }
 
 export async function exchangeCodeForClaims(
   config: client.Configuration,
   currentUrl: URL | Request,
   expectedState: string,
+  pkceCodeVerifier: string,
 ) {
   const tokens = await client.authorizationCodeGrant(config, currentUrl, {
     expectedState,
+    pkceCodeVerifier,
   });
+
   return tokens.claims();
 }

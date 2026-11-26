@@ -12,6 +12,7 @@ import {
 import {
   createSession,
   deleteSession,
+  OAUTH_PKCE_COOKIE_NAME,
   OAUTH_STATE_COOKIE_NAME,
   oauthStateCookieOptions,
   SESSION_COOKIE_NAME,
@@ -27,6 +28,7 @@ import { configureLogger, logger } from "./utils/log.ts";
 await configureLogger();
 
 const port = Number.parseInt(Deno.env.get("PORT") ?? "", 10);
+
 if (!port) {
   logger.error("PORT is not set");
   Deno.exit(1);
@@ -38,6 +40,7 @@ const visualizerDir = Deno.env.get("VISUALIZER_DIR");
 
 const oidcSettings = appUrl ? loadOidcSettings() : undefined;
 const oidcConfig = oidcSettings ? await buildOidcConfig(oidcSettings) : undefined;
+
 if (oidcConfig) {
   logger.info("OIDC discovery completed");
 } else {
@@ -45,6 +48,7 @@ if (oidcConfig) {
     "OIDC is not configured (needs APP_URL, OIDC_CLIENT_ID, OIDC_CLIENT_SECRET, KEYCLOAK_URL, KEYCLOAK_REALM, OAUTH_RELAY_URL); /api/auth/login is disabled",
   );
 }
+
 function appRedirect(redirect: (url: string) => Response, path: string): Response {
   return appUrl
     ? redirect(new URL(path, appUrl).href)
@@ -58,18 +62,23 @@ const api = new Elysia({ prefix: "/api" })
   .use(meRoute)
   .use(apiRoutes)
   .use(wsRoutes)
-  .get("/auth/login", ({ cookie, redirect }) => {
+  .get("/auth/login", async ({ cookie, redirect }) => {
     if (!oidcConfig || !oidcSettings || !appUrl) {
       return appRedirect(redirect, "/");
     }
 
     const state = createRelayState(`${appUrl}/api/auth/callback`);
+    const { codeVerifier, url } = await buildLoginUrl(oidcConfig, oidcSettings, state);
     cookie[OAUTH_STATE_COOKIE_NAME].set({
       value: state,
       ...oauthStateCookieOptions,
     });
+    cookie[OAUTH_PKCE_COOKIE_NAME].set({
+      value: codeVerifier,
+      ...oauthStateCookieOptions,
+    });
 
-    return redirect(buildLoginUrl(oidcConfig, oidcSettings, state).href);
+    return redirect(url.href);
   })
   .get("/auth/callback", async ({ cookie, redirect, request }) => {
     if (!oidcConfig) {
@@ -77,16 +86,27 @@ const api = new Elysia({ prefix: "/api" })
     }
 
     const expectedState = cookie[OAUTH_STATE_COOKIE_NAME].value;
+    const codeVerifier = cookie[OAUTH_PKCE_COOKIE_NAME].value;
     cookie[OAUTH_STATE_COOKIE_NAME].remove();
-    if (typeof expectedState !== "string" || expectedState === "") {
-      logger.warn("OIDC callback without a matching oauth_state cookie");
+    cookie[OAUTH_PKCE_COOKIE_NAME].remove();
+
+    if (
+      typeof expectedState !== "string" ||
+      expectedState === "" ||
+      typeof codeVerifier !== "string" ||
+      codeVerifier === ""
+    ) {
+      logger.warn("OIDC callback without matching oauth_state/oauth_pkce cookies");
+
       return appRedirect(redirect, "/");
     }
 
     try {
-      const claims = await exchangeCodeForClaims(oidcConfig, request, expectedState);
+      const claims = await exchangeCodeForClaims(oidcConfig, request, expectedState, codeVerifier);
+
       if (!claims) {
         logger.error("OIDC callback: token response carried no ID token");
+
         return appRedirect(redirect, "/");
       }
 
@@ -106,10 +126,13 @@ const api = new Elysia({ prefix: "/api" })
   })
   .get("/auth/logout", async ({ cookie, redirect }) => {
     const sessionId = cookie[SESSION_COOKIE_NAME].value;
+
     if (typeof sessionId === "string" && sessionId !== "") {
       await deleteSession(sessionId);
     }
+
     cookie[SESSION_COOKIE_NAME].remove();
+
     return appRedirect(redirect, "/");
   });
 
@@ -129,6 +152,7 @@ if (staticDir) {
   app.use(staticPlugin({ assets: staticDir, indexHTML: true, prefix: "/" }));
 
   const webIndex = await Deno.readTextFile(`${staticDir}/index.html`);
+
   const visualizerIndex = visualizerDir
     ? await Deno.readTextFile(`${visualizerDir}/index.html`)
     : undefined;
@@ -137,7 +161,9 @@ if (staticDir) {
     if (code !== "NOT_FOUND" || path.startsWith("/api")) {
       return;
     }
+
     set.status = 200;
+
     return new Response(
       visualizerIndex && path.startsWith("/visualizer") ? visualizerIndex : webIndex,
       { headers: { "content-type": "text/html; charset=utf-8" }, status: 200 },
