@@ -30,8 +30,9 @@ const FloorSwitcherButton = ({
   });
 
   const distCurveValue = () => {
-    const val = Number.parseFloat(offsetDistance.get().replace("%", "")) / 100;
+    const val = Number.parseFloat(offsetDistance.get()) / 100;
     const dist = 2 - 20 * Math.abs(val - 0.5);
+
     return Math.max(0, Math.min(1, dist));
   };
 
@@ -45,6 +46,7 @@ const FloorSwitcherButton = ({
       const r = (bigint >> 16) & 255;
       const g = (bigint >> 8) & 255;
       const b = bigint & 255;
+
       return { r, g, b };
     };
 
@@ -64,9 +66,11 @@ const FloorSwitcherButton = ({
       ease: "easeInOut",
       bounce: 0,
     });
+
     controls.then(() => {
       focusFloor({ buildingCode: building.code, level: floor });
     });
+
     return controls.stop;
   };
 
