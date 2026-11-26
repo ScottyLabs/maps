@@ -24,10 +24,6 @@ uv run --env-file <ENV_FILE> <SCRIPT_NAME>
 
 `deserializer/` is responsible for deserializing the JSON files from the S3 bucket and populating the database with the data.
 
-## Linter
-
-`linter/` exists to enable the `lint` script in `pyproject.toml`.
-
 ## Logger
 
 `logger/` contains the logging module for the dataflow application.

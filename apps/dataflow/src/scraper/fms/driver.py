@@ -56,10 +56,12 @@ def click_building_and_all_floors(
             (
                 By.XPATH,
                 # Find floors for this building in the nav tree
-                f"//a[contains(normalize-space(.), '{building_label}')]"
-                "/ancestor::div[1]/following-sibling::ul"
-                "//div[contains(@class,'fmi-nav-floorplan')]/a[contains(@class,'rtIn')]",
-            )
+                (
+                    f"//a[contains(normalize-space(.), '{building_label}')]"
+                    "/ancestor::div[1]/following-sibling::ul"
+                    "//div[contains(@class,'fmi-nav-floorplan')]/a[contains(@class,'rtIn')]"
+                ),
+            ),
         ),
     )
 

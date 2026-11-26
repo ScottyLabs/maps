@@ -101,7 +101,7 @@ def upload_generic_file(
         return False
 
 
-def save_upload_json_file(  # noqa: PLR0913
+def save_upload_json_file(  # noqa: PLR0913, PLR0917
     s3_object_name: str,
     json_data: dict[str, Any] | list[Any],
     local_file_path: str | None = None,
@@ -124,7 +124,7 @@ def save_upload_json_file(  # noqa: PLR0913
 
     """
     # Use s3_object_name as local path if not specified
-    local_path = local_file_path if local_file_path else s3_object_name
+    local_path = local_file_path or s3_object_name
 
     try:
         # Save JSON data to local file with proper formatting

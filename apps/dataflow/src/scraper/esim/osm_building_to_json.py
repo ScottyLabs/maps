@@ -208,7 +208,7 @@ def _match_building_by_name(
     return None
 
 
-def _point_segment_distance(  # noqa: PLR0913
+def _point_segment_distance(  # noqa: PLR0913, PLR0917
     x: float,
     y: float,
     x1: float,
@@ -377,7 +377,7 @@ def _shape_from_way(
     return shape, ring, node_ids
 
 
-def _assemble_entry(  # noqa: PLR0913
+def _assemble_entry(  # noqa: PLR0913, PLR0917
     osm_id: str,
     info: BuildingInfo,
     tags: dict[str, str],

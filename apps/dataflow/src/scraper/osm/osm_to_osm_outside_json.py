@@ -101,7 +101,7 @@ def query_osm(max_attempt_count: int) -> str | None:
             counter += 1
 
     if counter == max_attempt_count:
-        logger.exception("Unable to get data from OSM. Please try again later.")
+        logger.error("Unable to get data from OSM. Please try again later.")
         return None
     logger.print("\nRecieved OSM Data\n")
     return response

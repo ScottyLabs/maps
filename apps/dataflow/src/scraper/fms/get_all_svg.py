@@ -70,7 +70,7 @@ def read_buildings(path: str) -> list[dict[str, Any]]:
     return data
 
 
-def fetch_svg(  # noqa: PLR0913
+def fetch_svg(  # noqa: PLR0913, PLR0917
     floor_id: str,
     svg_filename_param: str,
     out_file: Path,
