@@ -2,7 +2,6 @@
   "version": "5",
   "specifiers": {
     "npm:@datastructures-js/priority-queue@^6.3.3": "6.3.5",
-    "npm:@deno/vite-plugin@^2.0.2": "2.0.2_vite@7.3.6_yaml@2.9.0",
     "npm:@elysia/static@^1.4.11": "1.4.11_elysia@1.4.30_@sinclair+typebox@0.34.49_exact-mirror@0.2.7_file-type@22.1.1_openapi-types@12.1.3_typescript@5.9.3",
     "npm:@elysiajs/openapi@^1.4.15": "1.4.16_@sinclair+typebox@0.34.49_elysia@1.4.30_typescript@5.9.3_exact-mirror@0.2.7_file-type@22.1.1_openapi-types@12.1.3",
     "npm:@logtape/elysia@^2.2.1": "2.3.7_@logtape+logtape@2.3.7_elysia@1.4.30_@sinclair+typebox@0.34.49_exact-mirror@0.2.7_file-type@22.1.1_openapi-types@12.1.3_typescript@5.9.3",
@@ -245,14 +244,6 @@
       "integrity": "sha512-NmdmvLnkUyG67W6Iy8tP+865ILq5VDyZh90c8lHMOkYYydUNzOV0QNPCRAuj4AoHSm/V2DeuYvDKnvALaCwLvA==",
       "dependencies": [
         "@datastructures-js/heap"
-      ]
-    },
-    "@deno/vite-plugin@2.0.2_vite@7.3.6_yaml@2.9.0": {
-      "integrity": "sha512-bzuKApn9Jr2x1jSrbuJEJzy++8LUwjFVOAopAbepcE3RgYzdcPEWd36PSp7P5dNMQlNnQlgtm3MeNbcKZ/Eh/Q==",
-      "dependencies": [
-        "@deno/loader@npm:@jsr/deno__loader@0.5.0",
-        "@std/jsonc@npm:@jsr/std__jsonc@1.0.2",
-        "vite"
       ]
     },
     "@elysia/static@1.4.11_elysia@1.4.30_@sinclair+typebox@0.34.49_exact-mirror@0.2.7_file-type@22.1.1_openapi-types@12.1.3_typescript@5.9.3": {
@@ -523,35 +514,6 @@
         "@jridgewell/resolve-uri",
         "@jridgewell/sourcemap-codec"
       ]
-    },
-    "@jsr/deno__loader@0.5.0": {
-      "integrity": "sha512-sf/YBwnyAsbyeYYB71Zdj2Ca2Q9tt25EZpAiZdDA9W7Mm3GcpjA2WMeqj19xPIurZK12G3OAsa5yrtPB7E+gvA==",
-      "tarball": "https://npm.jsr.io/~/11/@jsr/deno__loader/0.5.0.tgz"
-    },
-    "@jsr/std__bytes@1.0.6": {
-      "integrity": "sha512-St6yKggjFGhxS52IFLJWvkchRFbAKg2Xh8UxA4S1EGz7GJ2Ui+ssDDldj/w2c8vCxvl6qgR0HaYbKeFJNqujmA==",
-      "tarball": "https://npm.jsr.io/~/11/@jsr/std__bytes/1.0.6.tgz"
-    },
-    "@jsr/std__json@1.1.0": {
-      "integrity": "sha512-a9Eylh7ox33tFn5RxhESnvI4akpefQP5Qn+ePz3Ih4IJ/EPA8p0SKq0aztRfN1sGDhfyWMPWwlUcwNxONt+Ncg==",
-      "dependencies": [
-        "@jsr/std__streams"
-      ],
-      "tarball": "https://npm.jsr.io/~/11/@jsr/std__json/1.1.0.tgz"
-    },
-    "@jsr/std__jsonc@1.0.2": {
-      "integrity": "sha512-Lva9lY0UPvvgmS8INUHU8Tqijq2SPfdlnSAvofOYUBiB6ALPxo0rTMznRlY5Wt30nMW+rhMTha1x5RGpMBKUoQ==",
-      "dependencies": [
-        "@jsr/std__json"
-      ],
-      "tarball": "https://npm.jsr.io/~/11/@jsr/std__jsonc/1.0.2.tgz"
-    },
-    "@jsr/std__streams@1.1.1": {
-      "integrity": "sha512-V9auR/i6gJz6SR1+h5wc4EN42IC5+ObBjXu/h7Buef7UOE0GtX4vRSx+3MJywEiBcJqQC+lCnf+wBAodvBL1SA==",
-      "dependencies": [
-        "@jsr/std__bytes"
-      ],
-      "tarball": "https://npm.jsr.io/~/11/@jsr/std__streams/1.1.1.tgz"
     },
     "@logtape/elysia@2.3.7_@logtape+logtape@2.3.7_elysia@1.4.30_@sinclair+typebox@0.34.49_exact-mirror@0.2.7_file-type@22.1.1_openapi-types@12.1.3_typescript@5.9.3": {
       "integrity": "sha512-bd3KAwhF+K+r0A7JIzh216OjnNePTvd/lYZt0DakGHykJLfHqRJGWNlyWamT+48GVZ4P+cFb5CS5yjHdryjDQQ==",
@@ -3945,7 +3907,6 @@
       "apps/visualizer": {
         "dependencies": [
           "npm:@datastructures-js/priority-queue@^6.3.3",
-          "npm:@deno/vite-plugin@^2.0.2",
           "npm:@reduxjs/toolkit@^2.8.2",
           "npm:@scottylabs/corgi@~0.2.11",
           "npm:@tailwindcss/vite@^4.1.11",
@@ -3983,7 +3944,6 @@
       },
       "apps/web": {
         "dependencies": [
-          "npm:@deno/vite-plugin@^2.0.2",
           "npm:@scottylabs/corgi@~0.2.11",
           "npm:@tailwindcss/vite@^4.1.11",
           "npm:@tanstack/react-query@^5.83.0",

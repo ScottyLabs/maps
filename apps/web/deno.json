@@ -1,7 +1,6 @@
 {
   "imports": {
     "@/": "./src/",
-    "@deno/vite-plugin": "npm:@deno/vite-plugin@^2.0.2",
     "@scottylabs/corgi": "npm:@scottylabs/corgi@^0.2.11",
     "@tailwindcss/vite": "npm:@tailwindcss/vite@^4.1.11",
     "@tanstack/react-query": "npm:@tanstack/react-query@^5.83.0",

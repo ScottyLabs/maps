@@ -1,4 +1,4 @@
-import deno from "@deno/vite-plugin";
+import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import viteReact from "@vitejs/plugin-react";
@@ -21,7 +21,6 @@ export default defineConfig({
     },
   },
   plugins: [
-    deno(),
     tanstackRouter({
       target: "react",
       autoCodeSplitting: true,
@@ -34,8 +33,12 @@ export default defineConfig({
     tailwindcss(),
   ],
   resolve: {
-    alias: {
-      "@": "/src",
-    },
+    alias: [
+      { find: "@", replacement: "/src" },
+      {
+        find: /^@cmumaps\/([^/]+)$/u,
+        replacement: fileURLToPath(new URL("../../packages/$1/src/index.ts", import.meta.url)),
+      },
+    ],
   },
 });

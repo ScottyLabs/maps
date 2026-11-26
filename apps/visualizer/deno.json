@@ -6,7 +6,6 @@
   "imports": {
     "@/": "./src/",
     "@datastructures-js/priority-queue": "npm:@datastructures-js/priority-queue@^6.3.3",
-    "@deno/vite-plugin": "npm:@deno/vite-plugin@^2.0.2",
     "@reduxjs/toolkit": "npm:@reduxjs/toolkit@^2.8.2",
     "@scottylabs/corgi": "npm:@scottylabs/corgi@^0.2.11",
     "@tailwindcss/vite": "npm:@tailwindcss/vite@^4.1.11",
