@@ -1,14 +1,10 @@
 #!/usr/bin/env -S deno run -A
+/// <reference lib="deno.window" />
 
 import { stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
-
-// Environment and Postgres are owned by devenv: secretspec resolves the
-// secrets declared in secretspec.toml into the shell, and the devenv postgres
-// module runs the database and exports DATABASE_URL. This script only covers
-// what remains: regenerating stale server artifacts and pushing the schema.
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const serverDir = path.join(repoRoot, "apps/server");
@@ -50,8 +46,10 @@ async function ensurePrismaClient() {
 
   const schemaMtime = (await getFileMtimeMs(schema)) ?? 0;
   const clientMtime = await getFileMtimeMs(client);
+
   if (clientMtime !== null && clientMtime >= schemaMtime) {
     log("Prisma client is up to date.");
+
     return;
   }
 
@@ -61,16 +59,18 @@ async function ensurePrismaClient() {
 
 async function pushDatabaseSchema() {
   const databaseUrl = Deno.env.get("DATABASE_URL");
+
   if (!databaseUrl) {
     throw new Error(
-      "DATABASE_URL is not set. Enter the devenv shell so the postgres module can provide it.",
+      "DATABASE_URL is not set. Enter the dev shell with `nix develop` so the postgres module can provide it.",
     );
   }
 
-  // devenv hands out postgresql:///maps?host=/run/... with no user; the Prisma
+  // the dev shell hands out postgresql:///maps?host=/run/... with no user; the Prisma
   // CLI does not fall back to the OS user the way libpq does, and fails P1010.
   const socketUrl = databaseUrl.match(/^postgresql:\/\/\/([^?]+)\?host=(.+)$/u);
   const user = Deno.env.get("PGUSER") ?? Deno.env.get("USER");
+
   const cliUrl =
     socketUrl && user
       ? `postgresql://${user}@localhost/${socketUrl[1]}?host=${socketUrl[2]}`
@@ -93,7 +93,7 @@ async function getFileMtimeMs(filePath: string) {
 }
 
 async function runCommand(
-  command: readonly string[],
+  command: readonly [string, ...string[]],
   cwd: string,
   envOverrides: Record<string, string> = {},
 ) {
@@ -107,6 +107,7 @@ async function runCommand(
     stdout: "inherit",
     stderr: "inherit",
   }).spawn();
+
   const { code } = await proc.status;
 
   if (code !== 0) {

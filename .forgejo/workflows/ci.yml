@@ -6,6 +6,5 @@ on:
   pull_request:
 
 jobs:
-  check:
-    uses: ScottyLabs/kennel/.forgejo/workflows/ci.yml@main
-    secrets: inherit
+  checks:
+    uses: ScottyLabs/kennel/.forgejo/workflows/checks.yml@main

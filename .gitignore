@@ -1,6 +1,4 @@
-# Nix / devenv
-.devenv/
-.direnv/
+# Nix
 .pre-commit-config.yaml
 
 # AI
@@ -10,12 +8,12 @@
 # JS / deno
 node_modules/
 apps/*/dist/
+.vite/
 
 # Python
 .venv/
 __pycache__/
 .ruff_cache/
-.mypy_cache/
 **/*.egg-info/
 
 # Generated
