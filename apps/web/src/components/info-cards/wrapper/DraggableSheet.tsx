@@ -113,8 +113,7 @@ const DraggableSheet = ({
       }
     }
 
-    // update the height of the card
-    // controls.set({ height: window.innerHeight });
+    // update the height of the card controls.set({ height: window.innerHeight });
     if (sheetRef.current) {
       sheetRef.current.style.height = `${window.innerHeight}px`;
     }

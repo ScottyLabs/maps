@@ -31,8 +31,7 @@ export const floorService = {
     // Get all nodes on the floor with their neighbors
     const dbNodes = await prisma.node.findMany({
       where: { buildingCode, floorLevel },
-      // include the out floor code of each neighbor
-      // include the element of each node (both in and out)
+      // include the out floor code of each neighbor include the element of each node (both in and out)
       include: {
         outEdges: {
           include: {
@@ -316,8 +315,7 @@ export const floorService = {
     // Get all nodes on the floor with their neighbors
     const dbNodes = await prisma.node.findMany({
       where: { buildingCode, floorLevel },
-      // include the out floor code of each neighbor
-      // include the element of each node (both in and out)
+      // include the out floor code of each neighbor include the element of each node (both in and out)
       include: {
         outEdges: {
           include: {

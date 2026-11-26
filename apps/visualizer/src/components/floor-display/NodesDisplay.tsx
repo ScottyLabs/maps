@@ -129,8 +129,7 @@ const NodesDisplay = ({
 
   const handleAddEdge = (nodeId: string) => {
     const validate = () => {
-      // this condition should never occur because we check that idSelected is
-      // selected before setting mode to ADD_EDGE
+      // this condition should never occur because we check that idSelected is selected before setting mode to ADD_EDGE
       if (!selectedNodeId) {
         return { error: "Please select a node first!" };
       }
@@ -162,8 +161,7 @@ const NodesDisplay = ({
   };
 
   const handleDeleteEdge = (nodeId: string) => {
-    // this condition should never occur because we check that idSelected is
-    // selected before setting mode to ADD_EDGE
+    // this condition should never occur because we check that idSelected is selected before setting mode to ADD_EDGE
     if (!selectedNodeId) {
       toast.error("Please select a node first!");
       return;

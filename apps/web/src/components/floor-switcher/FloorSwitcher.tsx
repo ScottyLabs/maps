@@ -23,14 +23,12 @@ const FloorSwitcher = () => {
   // Query data
   const { data: buildings } = $api.useQuery("get", "/buildings");
 
-  // Don't show the floor switcher in mobile
-  // if either the card is open or the search is open
+  // Don't show the floor switcher in mobile if either the card is open or the search is open
   if (isMobile && (isSearchOpen || cardStatus !== CardStates.COLLAPSED)) {
     return;
   }
 
-  // Don't show the floor switcher if the user is not signed in unless
-  // the floor is a public building floor
+  // Don't show the floor switcher if the user is not signed in unless the floor is a public building floor
   const canViewFloor = Boolean(user) || isPublicBuilding(floor?.buildingCode);
   if (!canViewFloor) {
     return;

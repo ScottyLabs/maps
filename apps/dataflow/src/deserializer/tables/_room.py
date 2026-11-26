@@ -21,8 +21,7 @@ def populate_room_table() -> None:
         logger.critical(msg)
         raise ValueError(msg)
 
-    # Iterate through all buildings and create a list of rooms data
-    # in the required format for the populate room table api endpoint
+    # Iterate through all buildings and create a list of rooms data in the required format for the populate room table api endpoint
     for building in floorplans:
         # skip empty buildings
         if not floorplans[building]:

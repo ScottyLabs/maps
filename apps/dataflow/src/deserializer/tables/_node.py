@@ -21,8 +21,7 @@ def populate_node_table() -> None:
         logger.critical(msg)
         raise ValueError(msg)
 
-    # Iterate through all nodes and create a list of nodes data
-    # in the required format for the populate node table api endpoint
+    # Iterate through all nodes and create a list of nodes data in the required format for the populate node table api endpoint
     node_data = []
     batch_count = 0  # Count of batches of nodes processed
     for node_id in graph:
@@ -44,8 +43,7 @@ def populate_node_table() -> None:
 
         node_data.append(node)
 
-        # If the number of nodes is greater than the limit, populate the Node table
-        # so we don't exceed the request payload limit
+        # If the number of nodes is greater than the limit, populate the Node table so we don't exceed the request payload limit
         if len(node_data) >= MAX_NODES_PER_REQUEST:
             # API call to populate the Node table
             if not api_client.populate_table("Node", node_data):

@@ -121,8 +121,7 @@ export const waypointToNodes = (
           (x) => x.buildingCode === waypoint.buildingCode,
         );
         if (building) {
-          // If a node with the building code as its ID already exists in the graph
-          // (e.g., from a previous dummy node creation), reuse it instead of creating a new one
+          // If a node with the building code as its ID already exists in the graph (e.g., from a previous dummy node creation), reuse it instead of creating a new one
           if (graph[building.buildingCode]) {
             nodes.push(building.buildingCode);
             return nodes;

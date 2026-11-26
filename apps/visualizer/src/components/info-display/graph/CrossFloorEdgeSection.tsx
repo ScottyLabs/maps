@@ -59,8 +59,7 @@ const CrossFloorEdgeSection = ({ floorCode, nodeId, graph }: Props) => {
     const validate = () => {
       const inNodeId = nodeId;
 
-      // This condition should never occur because graph info is only displayed
-      // when a node is selected
+      // This condition should never occur because graph info is only displayed when a node is selected
       if (!inNodeId) {
         return { error: "Please select a node first!" };
       }

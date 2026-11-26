@@ -10,12 +10,12 @@ interface RoomTypeDetails {
   primary: string;
 
   /**
-   * A CSS color used for the background of the room’s shape
+   * A CSS color used for the background of the room's shape
    */
   background: string;
 
   /**
-   * A CSS color used for the border of the room’s shape
+   * A CSS color used for the border of the room's shape
    */
   border: string;
 }

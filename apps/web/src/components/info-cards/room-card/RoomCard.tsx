@@ -32,8 +32,7 @@ const RoomCard = () => {
   const renderRoomImage = () => {
     // the default image is the building image
     const url = `/location_images/building_room_images/${buildingCode}/${buildingCode}.jpg`;
-    // TODO: but get the room image if it exists
-    // if (
+    // TODO: but get the room image if it exists if (
     //   availableRoomImages &&
     //   availableRoomImages[buildingCode].includes(room.name + ".jpg")
     // ) {

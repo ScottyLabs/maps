@@ -71,8 +71,7 @@ const useStageClickHandler = (
   };
 
   const handleAddVertex = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    // this condition should never occur since
-    // we check roomId is not null before setting to POLYGON_ADD_VERTEX mode
+    // this condition should never occur since we check roomId is not null before setting to POLYGON_ADD_VERTEX mode
     if (!roomId) {
       return;
     }

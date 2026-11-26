@@ -28,12 +28,10 @@ excluded_tags: list[str] = [
     "indoor",
     "landuse",
 ]
-# ways that have no tags and need to be cut
-# first (27591285) is the skibo gym
+# ways that have no tags and need to be cut first (27591285) is the skibo gym
 excluded_ways: list[str] = ["27591285"]
 
-# holds all of the nodes
-# will be converted to a JSON at the end
+# holds all of the nodes will be converted to a JSON at the end
 nodes: dict[str, Any] = {}
 
 # stores nodes that we will need to remove later
@@ -62,8 +60,7 @@ def main() -> None:
         # create a json node for each node in the export
         if child.tag == "node":
             create_node(child)
-        # all nodes are earlier in the file than the ways
-        # so treating ways like this is fine
+        # all nodes are earlier in the file than the ways so treating ways like this is fine
         elif child.tag == "way":
             process_way(child)
 
@@ -128,8 +125,7 @@ def create_node(child: Element) -> None:
         "tags": {},
         "way_tags": {},
     }
-    # adds all nodes, including ones that define bounds of buildings/parks
-    # these should be removed
+    # adds all nodes, including ones that define bounds of buildings/parks these should be removed
     nodes[node_attributes["id"]] = current_node
     for tag in child:
         current_node["tags"][tag.attrib["k"]] = tag.attrib["v"]

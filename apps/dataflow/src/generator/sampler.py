@@ -6,7 +6,7 @@ Utility module imported by generate_code_simplified.py.
 Provides two strategies for placing navigation nodes inside room polygons:
 
   Triangulator
-      Constrained Delaunay Triangulation (CDT) — subdivides the polygon into
+      Constrained Delaunay Triangulation (CDT) - subdivides the polygon into
       triangles and places one node at each triangle centroid.  Produces a
       denser, topology-aware mesh suitable for complex room shapes.
 

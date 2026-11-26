@@ -95,8 +95,7 @@ def main() -> None:
         )
         sys.exit(1)
 
-    # In dry-run mode, write parsed buildings to a temp file so we never
-    # overwrite the real output.
+    # In dry-run mode, write parsed buildings to a temp file so we never overwrite the real output.
     if args.dry_run:
         tmp_fd, tmp_path = tempfile.mkstemp(
             dir=work_dir, suffix=".json", prefix="buildings_dry_",

@@ -18,8 +18,7 @@ def populate_building_table() -> None:
         logger.critical(msg)
         raise ValueError(msg)
 
-    # Iterate through all buildings and create a list of buildings data
-    # in the required format for the populate building table api endpoint
+    # Iterate through all buildings and create a list of buildings data in the required format for the populate building table api endpoint
     buildings_data = []
     for building_code in data:
         name = data[building_code]["name"]

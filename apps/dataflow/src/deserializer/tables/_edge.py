@@ -1,7 +1,5 @@
-# Script to populate Edge table of the database using all_graph.json
-# excludes outside, neighbors who are missing in node or out node,
-# edges whose in node or out node are missing a roomId
-# python scripts/json-to-database/edge.py
+# Script to populate Edge table of the database using all_graph.json excludes outside, neighbors who are missing in node or out node,
+# edges whose in node or out node are missing a roomId python scripts/json-to-database/edge.py
 from clients import get_api_client_singleton, get_s3_client_singleton
 from logger import get_app_logger
 
@@ -25,8 +23,7 @@ def populate_edge_table() -> None:
         logger.critical(msg)
         raise ValueError(msg)
 
-    # Iterate through all nodes and create a list of edges data
-    # in the required format for the populate edge table api endpoint
+    # Iterate through all nodes and create a list of edges data in the required format for the populate edge table api endpoint
     edge_data = []
     batch_count = 0  # Count of batches of edges processed
     for node_id in graph:
@@ -45,8 +42,7 @@ def populate_edge_table() -> None:
 
             edge_data.append(edge_node)
 
-            # If the number of edges is greater than the limit, populate the Edge table
-            # so we don't exceed the request payload limit
+            # If the number of edges is greater than the limit, populate the Edge table so we don't exceed the request payload limit
             if len(edge_data) >= MAX_EDGES_PER_REQUEST:
                 # API call to populate the Edge table
                 if not api_client.populate_table("Edge", edge_data):

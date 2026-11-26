@@ -35,7 +35,7 @@ jobs:
       - name: Install Bun
         uses: oven-sh/setup-bun@v2
 
-      # To resolve: ✗ Node.js v22.6.0 or higher is needed for a TypeScript config file
+      # To resolve: x Node.js v22.6.0 or higher is needed for a TypeScript config file
       - name: Install Node
         uses: actions/setup-node@v6
         with:

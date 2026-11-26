@@ -1,15 +1,13 @@
 import { z } from "zod";
 
-// Define the schema as an object with all of the env
-// variables and their types
+// Define the schema as an object with all of the env variables and their types
 const envSchema = z.object({
   VITE_SERVER_URL: z.url(),
   VITE_CLERK_PUBLISHABLE_KEY: z.string(),
   VITE_MAPKIT_TOKEN: z.string().optional(),
 });
 
-// Validate `process.env` against our schema
-// and return the result
+// Validate `process.env` against our schema and return the result
 const parsed = envSchema.safeParse(import.meta.env);
 
 if (!parsed.success) {

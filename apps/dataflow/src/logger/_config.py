@@ -36,8 +36,7 @@ def get_logger_config() -> dict[str, Any]:
         "filters": {filter_name: {"()": "logger.LogStatusFilter"}},
     }
 
-    # If the project is running on Railway, use the Railway log formatter instead of
-    # the color formatter and log to stdout instead of stderr
+    # If the project is running on Railway, use the Railway log formatter instead of the color formatter and log to stdout instead of stderr
     if RUNNING_ON_RAILWAY:
         config["handlers"][handler_name]["formatter"] = railway_formatter_name
         config["handlers"][handler_name]["stream"] = "ext://sys.stdout"

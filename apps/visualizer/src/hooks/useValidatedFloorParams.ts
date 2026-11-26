@@ -28,8 +28,7 @@ const useValidatedFloorParams = (floorCode: string): FloorParamsResult => {
 
   const { nodeId, roomId, poiId } = useSearch({ from: "/floors/$floorCode" });
 
-  // set the active tab index based on the query params
-  // not for node id since it is how user change url param after the initial load
+  // set the active tab index based on the query params not for node id since it is how user change url param after the initial load
   useEffect(() => {
     if (roomId) {
       dispatch(setInfoDisplayActiveTabIndex(InfoDisplayTabIndex.ROOM));
@@ -76,9 +75,7 @@ const useValidatedFloorParams = (floorCode: string): FloorParamsResult => {
     }
 
     return {};
-    // pois should trigger param update to update if the node is a poi
-    // rooms should trigger param update to update if the node belongs to a room
-    // graph shouldn't trigger param update because of delete node
+    // pois should trigger param update to update if the node is a poi rooms should trigger param update to update if the node belongs to a room graph shouldn't trigger param update because of delete node
   }, [roomId, poiId, nodeId, pois, rooms]);
 
   return result;

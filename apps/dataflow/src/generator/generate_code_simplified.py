@@ -1,4 +1,4 @@
-"""generate_code_simplified.py — Navigation Graph Builder (OOP version).
+"""generate_code_simplified.py - Navigation Graph Builder (OOP version).
 
 WHAT IT DOES
 ------------
@@ -21,7 +21,7 @@ node density and merge behaviour.
 REQUIRED INPUT FILES
 --------------------
   - data_source/Ansys-1-map.json                       (floor plan polygon data)
-  - data_source/room_neighbor_analysis_with_names.json (room adjacency data —
+  - data_source/room_neighbor_analysis_with_names.json (room adjacency data -
                                                         produced by find_neighbors.py)
 
 OUTPUT

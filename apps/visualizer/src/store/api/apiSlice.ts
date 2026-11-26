@@ -4,8 +4,7 @@ import env from "../../env";
 export interface BaseMutationArg {
   floorCode: string;
   batchId: string | null;
-  // batchId is for undo/redo a group of edits
-  // if null, it won't be added to the history
+  // batchId is for undo/redo a group of edits if null, it won't be added to the history
 }
 
 export const getClerkToken = async () => {

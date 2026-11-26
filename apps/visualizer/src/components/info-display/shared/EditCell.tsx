@@ -17,8 +17,7 @@ const EditCell = ({ property, value, handleSave }: Props) => {
 
   const [editedValue, setEditedValue] = useState<string | undefined>(value);
 
-  // the component doesn't unmount when directly clicking between rooms
-  // thus we need this useEffect to have the correct default editedValue
+  // the component doesn't unmount when directly clicking between rooms thus we need this useEffect to have the correct default editedValue
   useEffect(() => {
     setEditedValue(value);
   }, [value]);

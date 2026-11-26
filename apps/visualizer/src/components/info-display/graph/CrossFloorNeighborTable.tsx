@@ -21,8 +21,7 @@ const DifferentFloorNeighborTable = ({
 
   const handleDeleteAcrossFloors = (neighborId: string) => () => {
     const outFloorCode = neighbors[neighborId].outFloorCode;
-    // this condition should never occur because all nodes
-    // in differentFloorNeighbors should have outFloorCode
+    // this condition should never occur because all nodes in differentFloorNeighbors should have outFloorCode
     if (!outFloorCode) {
       return;
     }

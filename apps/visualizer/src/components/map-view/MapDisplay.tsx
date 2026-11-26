@@ -29,8 +29,7 @@ const MapDisplay = ({
   const mapRef = useRef<mapkit.Map | null>(null);
   const [usedPanning, setUsedPanning] = useState(false);
 
-  // Need to keep track of usedPanning because the end of panning is a click
-  // and we don't want to trigger a click when the user is panning
+  // Need to keep track of usedPanning because the end of panning is a click and we don't want to trigger a click when the user is panning
   const handleLoad = () => {
     zoomOnBuilding(mapRef.current, building);
     if (mapRef.current) {

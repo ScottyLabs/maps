@@ -36,7 +36,7 @@ The development environment is used for verifying a PR before merging to staging
 
 **Vercel**: preview
 
-- CMU Maps: ^https:\/\/cmumaps-[0-9a-zA-Z]{9}-scottylabs\.vercel\.app$
+- CMU Maps: ^https://cmumaps-[0-9a-zA-Z]{9}-scottylabs.vercel.app$
 - Visualizer: none since staging is more than enough testing for this internal tool.
 
 **Railway**: development (default connected to the staging branch, but can be changed to a specific branch as needed for api testing)
@@ -47,5 +47,4 @@ The development environment is used for verifying a PR before merging to staging
 
 ### Note:
 
-Using Railway PR environment probably could achieve automation of the development environment for every PR,
-but would be unnecessarily costly since most PRs won't affect the server. Might be worth it to revisit in the future.
+Using Railway PR environment probably could achieve automation of the development environment for every PR, but would be unnecessarily costly since most PRs won't affect the server. Might be worth it to revisit in the future.

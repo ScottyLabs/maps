@@ -112,8 +112,7 @@ export const pathService = {
     // Calculate the fastest route (no outside penalty)
     const fastestRoute = getRoute(startNodes, endNodes, graph, 1);
 
-    // Calculate the inside route with a higher outside cost multiplier
-    // to incentivize finding indoor paths
+    // Calculate the inside route with a higher outside cost multiplier to incentivize finding indoor paths
     const insideRoute = getRoute(
       startNodes,
       endNodes,

@@ -2,19 +2,15 @@
 
 ## Overview
 
-This directory is responsible for handling data flow for CMU Maps. Check the
-scripts section in `pyproject.toml` for the available commands. You can run a
-script using the following command:
+This directory is responsible for handling data flow for CMU Maps. Check the scripts section in `pyproject.toml` for the available commands. You can run a script using the following command:
 
 ```zsh
 uv run --env-file <ENV_FILE> <SCRIPT_NAME>
 ```
 
-## _25live
+## \_25live
 
-`_25live/` directory contains the code for processing data from the 25live data
-from the [event-scraper](https://github.com/ScottyLabs/event-scraper) s3 bucket
-and populating the database with the data.
+`_25live/` directory contains the code for processing data from the 25live data from the [event-scraper](https://github.com/ScottyLabs/event-scraper) s3 bucket and populating the database with the data.
 
 ## Cleaner
 
@@ -26,8 +22,7 @@ and populating the database with the data.
 
 ## Deserializer
 
-`deserializer/` is responsible for deserializing the JSON files from the S3 bucket
-and populating the database with the data.
+`deserializer/` is responsible for deserializing the JSON files from the S3 bucket and populating the database with the data.
 
 ## Linter
 
@@ -43,18 +38,15 @@ and populating the database with the data.
 
 ### Generator
 
-`processor/generator/` is responsible for generating the floorplan data from the
-scraped data.
+`processor/generator/` is responsible for generating the floorplan data from the scraped data.
 
 ### Merger
 
-`processor/merger/` is responsible for merging the scraped data into the
-existing floorplan data.
+`processor/merger/` is responsible for merging the scraped data into the existing floorplan data.
 
 ## Scraper
 
-`scraper/` is responsible for scraping floorplan data from various sources and
-uploading it to the S3 bucket
+`scraper/` is responsible for scraping floorplan data from various sources and uploading it to the S3 bucket
 
 ### ESIM
 
@@ -74,5 +66,4 @@ uploading it to the S3 bucket
 
 ## Additional Information
 
-See the [Dataflow wiki page](https://github.com/ScottyLabs/cmumaps/wiki/Data-Flow)
-for more information.
+See the [Dataflow wiki page](https://github.com/ScottyLabs/cmumaps/wiki/Data-Flow) for more information.

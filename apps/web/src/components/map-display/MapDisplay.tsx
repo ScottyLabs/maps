@@ -98,8 +98,7 @@ const MapDisplay = ({ mapRef }: Props) => {
     zoomOnObject(mapRef.current, room.points.flat(), setIsZooming);
   }, [mapRef.current, rooms, roomName, setIsZooming]);
 
-  // Need to keep track of usedPanning because the end of panning is a click
-  // and we don't want to trigger a click when the user is panning
+  // Need to keep track of usedPanning because the end of panning is a click and we don't want to trigger a click when the user is panning
   const handleLoad = () => {
     if (mapRef.current) {
       mapRef.current.addEventListener("scroll-end", () => setUsedPanning(true));

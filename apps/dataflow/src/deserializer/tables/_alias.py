@@ -21,8 +21,7 @@ def populate_alias_table() -> None:
         logger.critical(msg)
         raise ValueError(msg)
 
-    # Iterate through all buildings and create a list of alias data
-    # in the required format for the populate alias table api endpoint
+    # Iterate through all buildings and create a list of alias data in the required format for the populate alias table api endpoint
     alias_data = []
     for building in data:
         # skip empty buildings

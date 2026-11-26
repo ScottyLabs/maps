@@ -36,8 +36,7 @@ const EdgesDisplay = ({ floorCode, graph }: Props) => {
         return false;
       }
 
-      // logic for displaying room specific edges
-      // if (showRoomSpecific && nodes[curId].roomId !== roomIdSelected) {
+      // logic for displaying room specific edges if (showRoomSpecific && nodes[curId].roomId !== roomIdSelected) {
       //   return false;
       // }
 

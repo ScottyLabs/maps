@@ -40,8 +40,7 @@ const InfoDisplay = ({ floorCode, graph, rooms, pois }: Props) => {
   }
 
   const renderRoomInfoDisplay = () => {
-    // One of these conditions should always occur since we checked that one of the ids is available
-    // and we can retrieve nodeId from poiId
+    // One of these conditions should always occur since we checked that one of the ids is available and we can retrieve nodeId from poiId
     if (roomId) {
       return (
         <RoomInfoDisplay floorCode={floorCode} roomId={roomId} rooms={rooms} />

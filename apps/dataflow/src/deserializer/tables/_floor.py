@@ -26,8 +26,7 @@ def populate_floor_table() -> None:
         logger.critical(msg)
         raise ValueError(msg)
 
-    # Iterate through all buildings and create a list of floors data
-    # in the required format for the populate floor table api endpoint
+    # Iterate through all buildings and create a list of floors data in the required format for the populate floor table api endpoint
     floors_data = []
     for building_code in placements:
         # skip outside

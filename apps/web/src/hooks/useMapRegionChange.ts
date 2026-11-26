@@ -62,11 +62,9 @@ const useMapRegionChange = (mapRef: RefObject<mapkit.Map | null>) => {
       return null;
     }
 
-    // If no floor is currently focused or the focused floor is not in the center
-    // building we need to find a new floor to focus on.
+    // If no floor is currently focused or the focused floor is not in the center building we need to find a new floor to focus on.
     if (!focusedFloor || focusedFloor.buildingCode !== centerBuilding.code) {
-      // If actively navigating, focus on the floor corresponding to the current instruction
-      // if it is in the focused building
+      // If actively navigating, focus on the floor corresponding to the current instruction if it is in the focused building
       if (isNavigating) {
         const node =
           instructionIndex === 0
@@ -105,8 +103,7 @@ const useMapRegionChange = (mapRef: RefObject<mapkit.Map | null>) => {
     }
 
     // if we are focusing on a different building,
-    // then focus on the floor of the center building
-    // that is the same ordinal as the currently focused floor
+    // then focus on the floor of the center building that is the same ordinal as the currently focused floor
     const focusedBuilding = buildings[focusedFloor.buildingCode];
     if (focusedBuilding && focusedBuilding.code !== centerBuilding.code) {
       const newFocusedFloor = getFloorByOrdinal(

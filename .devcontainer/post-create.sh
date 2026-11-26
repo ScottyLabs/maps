@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 set -e
 
 # Install UV for Python package management:
@@ -9,6 +9,8 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 # https://bun.com/get
 curl -fsSL https://bun.sh/install | bash
 export PATH="$HOME/.bun/bin:$PATH"
+# Expand these variables when the shell starts.
+# shellcheck disable=SC2016
 echo 'export PATH="$HOME/.bun/bin:$PATH"' >>~/.zshrc
 
 # Install shfmt for shell script formatting

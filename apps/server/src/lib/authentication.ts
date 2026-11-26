@@ -46,8 +46,7 @@ export function expressAuthentication(
   securityName: string,
   scopes?: string[],
 ) {
-  // Store all authentication errors in the request object
-  // so we can return the most relevant error to the client in errorHandler
+  // Store all authentication errors in the request object so we can return the most relevant error to the client in errorHandler
   request.authErrors = request.authErrors ?? [];
 
   // biome-ignore lint/nursery/noMisusedPromises: Weird TSOA quirks

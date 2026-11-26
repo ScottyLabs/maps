@@ -1,8 +1,7 @@
 /** biome-ignore-all lint/style/useNamingConvention: Environment variables are in all caps */
 import { z } from "zod";
 
-// Define the schema as an object with all of the env
-// variables and their types
+// Define the schema as an object with all of the env variables and their types
 const envSchema = z.object({
   VITE_IGNORE_LOGIN: z
     .string()
@@ -16,8 +15,7 @@ const envSchema = z.object({
   VITE_SERVER_URL: z.url(),
 });
 
-// Validate `process.env` against our schema
-// and return the result
+// Validate `process.env` against our schema and return the result
 const parsed = envSchema.safeParse(import.meta.env);
 
 if (!parsed.success) {
