@@ -1,0 +1,10 @@
+name: CI
+
+on:
+  push:
+    branches: [main, staging, dev]
+  pull_request:
+
+jobs:
+  checks:
+    uses: ScottyLabs/kennel/.forgejo/workflows/checks.yml@main
