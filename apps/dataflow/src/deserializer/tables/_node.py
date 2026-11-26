@@ -38,7 +38,7 @@ def populate_node_table() -> None:
             "longitude": longitude,
             "buildingCode": building_code if building_code != "outside" else None,
             "floorLevel": floor_level if building_code != "outside" else None,
-            "roomId": room_id if room_id else None,
+            "roomId": room_id or None,
         }
 
         node_data.append(node)

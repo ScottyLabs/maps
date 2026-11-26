@@ -87,7 +87,7 @@ def main() -> None:
     # Step 1: Fetch from ArcGIS
     if not args.skip_arcgis:
         _run(
-            [python, str(script_dir / "arc_gis_query.py"), "--output", str(query_json)]
+            [python, str(script_dir / "arc_gis_query.py"), "--output", str(query_json)],
         )
     elif not query_json.is_file():
         logger.error(
@@ -138,7 +138,7 @@ def main() -> None:
                 str(query_json),
                 "--output",
                 str(sign_mapping_json),
-            ]
+            ],
         )
 
         # Step 6: Add FMS IDs

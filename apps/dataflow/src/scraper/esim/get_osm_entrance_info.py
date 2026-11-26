@@ -93,7 +93,7 @@ def main() -> None:
                         "osmNodeId": node_id_str,
                         "latitude": lat,
                         "longitude": lon,
-                    }
+                    },
                 )
             else:
                 logger.warning(
