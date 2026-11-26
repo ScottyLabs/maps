@@ -3,6 +3,7 @@ import os
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, cast
+from urllib.parse import urlparse
 
 from minio import Minio
 from pydantic import BaseModel, ValidationError
@@ -20,8 +21,6 @@ SCHEMA_VALIDATORS: dict[str, type[BaseModel]] = {
 
 
 class S3Client:
-    BUCKET_NAME = "cmumaps"
-
     def __init__(self) -> None:
         """Initialize the S3 client.
 
@@ -32,16 +31,24 @@ class S3Client:
         self.access_key = os.getenv("S3_ACCESS_KEY")
         self.secret_key = os.getenv("S3_SECRET_KEY")
         self.s3_endpoint = os.getenv("S3_ENDPOINT")
+        self.bucket_name = os.getenv("S3_BUCKET", "cmumaps")
 
         if not self.s3_endpoint:
             msg = "S3_ENDPOINT must be set"
             self.logger.critical(msg)
             raise ValueError(msg)
 
+        endpoint = urlparse(
+            self.s3_endpoint
+            if "://" in self.s3_endpoint
+            else f"https://{self.s3_endpoint}",
+        )
         self._client = Minio(
-            self.s3_endpoint,
+            endpoint.netloc,
             access_key=self.access_key,
             secret_key=self.secret_key,
+            secure=endpoint.scheme == "https",
+            region=os.getenv("S3_REGION"),
         )
 
     def _get_validator(self, s3_object_name: str) -> type[BaseModel] | None:
@@ -90,7 +97,7 @@ class S3Client:
 
         try:
             self._client.fput_object(
-                self.BUCKET_NAME,
+                self.bucket_name,
                 s3_object_name,
                 local_file_path,
                 content_type="application/json",
@@ -109,7 +116,7 @@ class S3Client:
         """Get JSON data from S3 bucket."""
         try:
             # Get the object
-            response = self._client.get_object(self.BUCKET_NAME, s3_object_name)
+            response = self._client.get_object(self.bucket_name, s3_object_name)
 
             # Read and parse JSON data
             json_data = json.loads(response.read().decode("utf-8"))
@@ -118,7 +125,7 @@ class S3Client:
             self.logger.exception(
                 "Error getting %s from %s",
                 s3_object_name,
-                self.BUCKET_NAME,
+                self.bucket_name,
             )
             return None
 
