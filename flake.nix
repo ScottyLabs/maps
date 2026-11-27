@@ -1,5 +1,5 @@
 {
-  description = "CMU Maps placeholder deployment";
+  description = "CMU Maps";
 
   nixConfig = {
     extra-substituters = [ "https://cache.scottylabs.org" ];
@@ -20,15 +20,8 @@
       imports = [ inputs.scottylabs.flakeModules.default ];
       systems = [ "x86_64-linux" ];
 
-      perSystem =
-        { pkgs, ... }:
-        {
-          scottylabs.project.name = "maps";
-
-          sites.web = {
-            package = pkgs.writeTextDir "index.html" "";
-            customDomain = "cmumaps.com";
-          };
-        };
+      perSystem = {
+        scottylabs.project.name = "maps";
+      };
     };
 }
